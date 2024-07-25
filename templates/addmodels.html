@@ -1,0 +1,124 @@
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="addcustomer"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalLongTitle"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Add New Customer</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="customerForm"
+          action="{{ url_for('add_customer') }}"
+          method="POST"
+        >
+          <input type="hidden" id="customerId" name="customerId" value="" />
+          <div class="form-group">
+            <label for="customerName">Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="customerName"
+              name="customerName"
+              placeholder="Enter customer's name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="customerTel">Tel</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="customerTel"
+              name="customerTel"
+              placeholder="Enter customer's telephone number"
+            />
+          </div>
+          <div class="form-group">
+            <label for="customerGender">Gender</label>
+            <select
+              class="form-control"
+              id="customerGender"
+              name="customerGender"
+            >
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="customerEmail">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="customerEmail"
+              name="customerEmail"
+              placeholder="Enter customer's email address"
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+        <button type="button" class="btn btn-primary" onclick="submitForm()">
+          Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JavaScript -->
+<script>
+  function submitForm() {
+    document.getElementById("customerForm").submit();
+  }
+
+  function openModalForEdit(button) {
+    // Extract data attributes from the button
+    const customerId = button.getAttribute("data-id");
+    const customerName = button.getAttribute("data-name");
+    const customerTel = button.getAttribute("data-tel");
+    const customerEmail = button.getAttribute("data-email");
+    const customerGender = button.getAttribute("data-gender");
+
+    // Populate the form fields
+    document.getElementById("customerName").value = customerName;
+    document.getElementById("customerTel").value = customerTel;
+    document.getElementById("customerEmail").value = customerEmail;
+    document.getElementById("customerGender").value = customerGender;
+    document.getElementById("customerId").value = customerId;
+
+    // Show the modal
+    $("#addcustomer").modal("show");
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("addcustomer");
+    modal.addEventListener("hidden.bs.modal", function () {
+      document.getElementById("customerForm").reset();
+      document.getElementById("customerId").value = ""; // Clear customerId
+    });
+  });
+</script>
