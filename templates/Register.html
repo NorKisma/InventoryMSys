@@ -2,7 +2,7 @@
 
 <div class="card border-0">
   <div class="card-header">
-    <h6 class="card-title">Customer Information</h6>
+    <h6 class="card-title">User Information</h6>
 
     <!-- Button trigger modal -->
     <div class="d-flex justify-content-end">
@@ -14,7 +14,7 @@
           id="searchInput"
           type="text"
           class="form-control"
-          placeholder="Searchable..."
+          placeholder="Search..."
         />
       </div>
 
@@ -22,9 +22,9 @@
         type="button"
         class="btn btn-primary"
         data-toggle="modal"
-        data-target="#addcustomer"
+        data-target="#registerUser"
       >
-        <i class="fa fa-plus-circle"></i> Add Customer
+        <i class="fa fa-plus-circle"></i> Add New User
       </button>
     </div>
     <div class="card-body">
@@ -34,12 +34,14 @@
             <th>#</th>
             <th>Name</th>
             <th>Tel</th>
-            <th>Gender</th>
+
             <th>Email</th>
+            <th>password</th>
+            <th>role</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody id="customerTableBody">
+        <tbody id="userTableBody">
           {% for row in data %}
           <tr>
             <td>{{ row[0] }}</td>
@@ -47,22 +49,24 @@
             <td>{{ row[2] }}</td>
             <td>{{ row[3] }}</td>
             <td>{{ row[4] }}</td>
+            <td>{{ row[5] }}</td>
             <td>
               <button
                 class="btn edit-btn"
                 data-id="{{ row[0] }}"
                 data-name="{{ row[1] }}"
                 data-tel="{{ row[2] }}"
-                data-email="{{ row[4] }}"
-                data-gender="{{ row[3] }}"
-                onclick="openModalForEdit(this)"
+                data-email="{{ row[3] }}"
+                data-password="{{ row[4] }}"
+                data-role="{{ row[5] }}"
+                onclick="openUserEditModal(this)"
               >
                 <i class="fas fa-edit"></i>
               </button>
 
               <form
                 id="deleteForm{{ row[0] }}"
-                action="{{ url_for('delete_customer', id=row[0]) }}"
+                action="{{ url_for('delete_user', id=row[0]) }}"
                 method="POST"
                 style="display: inline"
               >
@@ -85,7 +89,6 @@
   {% include 'addmodels.html' %}
 
   <!-- Edit Customer Modal -->
-  <script></script>
 
   {% endblock %}
 </div>

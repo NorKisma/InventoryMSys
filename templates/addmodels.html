@@ -67,7 +67,7 @@
               class="form-control"
               id="customerEmail"
               name="customerEmail"
-              placeholder="Enter customer's email address"
+              placeholder="Enter customer's email "
             />
           </div>
         </form>
@@ -83,42 +83,181 @@
     </div>
   </div>
 </div>
+<!-- Modal for Registering/Editing Users -->
+<div
+  class="modal fade"
+  id="registerUser"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="registerUserModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="registerUserModalLabel">
+          Register New User
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="userForm"
+          action="{{ url_for('register_user') }}"
+          method="POST"
+        >
+          <input type="hidden" id="userId" name="userId" value="" />
+          <div class="form-group">
+            <label for="userName">Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="userName"
+              name="userName"
+              placeholder="Enter user's name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="userTel">Tel</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="userTel"
+              name="userTel"
+              placeholder="Enter user telephone"
+            />
+          </div>
+          <div class="form-group">
+            <label for="userRole">Role</label>
+            <select class="form-control" id="userRole" name="userRole">
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="userEmail">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="userEmail"
+              name="userEmail"
+              placeholder="Enter user's email address"
+            />
+          </div>
+          <div class="form-group">
+            <label for="userPassword">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="userPassword"
+              name="userPassword"
+              placeholder="Enter user's password"
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="submitUserForm()"
+        >
+          Save changes
+        </button>
+      </div>
+    </div>
+  </div>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Custom JavaScript -->
-<script>
-  function submitForm() {
-    document.getElementById("customerForm").submit();
-  }
+  <!-- Custom JavaScript -->
+  <script>
+    function submitForm() {
+      document.getElementById("customerForm").submit();
+    }
 
-  function openModalForEdit(button) {
-    // Extract data attributes from the button
-    const customerId = button.getAttribute("data-id");
-    const customerName = button.getAttribute("data-name");
-    const customerTel = button.getAttribute("data-tel");
-    const customerEmail = button.getAttribute("data-email");
-    const customerGender = button.getAttribute("data-gender");
+    function openModalForEdit(button) {
+      // Extract data attributes from the button
+      const customerId = button.getAttribute("data-id");
+      const customerName = button.getAttribute("data-name");
+      const customerTel = button.getAttribute("data-tel");
+      const customerEmail = button.getAttribute("data-email");
+      const customerGender = button.getAttribute("data-gender");
 
-    // Populate the form fields
-    document.getElementById("customerName").value = customerName;
-    document.getElementById("customerTel").value = customerTel;
-    document.getElementById("customerEmail").value = customerEmail;
-    document.getElementById("customerGender").value = customerGender;
-    document.getElementById("customerId").value = customerId;
+      // Populate the form fields
+      document.getElementById("customerName").value = customerName;
+      document.getElementById("customerTel").value = customerTel;
+      document.getElementById("customerEmail").value = customerEmail;
+      document.getElementById("customerGender").value = customerGender;
+      document.getElementById("customerId").value = customerId;
 
-    // Show the modal
-    $("#addcustomer").modal("show");
-  }
+      // Show the modal
+      $("#addcustomer").modal("show");
+    }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const modal = document.getElementById("addcustomer");
-    modal.addEventListener("hidden.bs.modal", function () {
-      document.getElementById("customerForm").reset();
-      document.getElementById("customerId").value = ""; // Clear customerId
+    document.addEventListener("DOMContentLoaded", function () {
+      const modal = document.getElementById("addcustomer");
+      modal.addEventListener("hidden.bs.modal", function () {
+        document.getElementById("customerForm").reset();
+        document.getElementById("customerId").value = ""; // Clear customerId
+      });
     });
-  });
-</script>
+
+    function confirmDelete(customerId) {
+      if (confirm("Are you sure you want to delete this customer?")) {
+        const form = document.getElementById(`deleteForm${customerId}`);
+        if (form) {
+          form.submit();
+        } else {
+          console.error(`Form with ID deleteForm${customerId} not found.`);
+        }
+      }
+    }
+
+    // Submit user form
+    function submitUserForm() {
+      document.getElementById("userForm").submit();
+    }
+
+    // Open modal for editing user
+    function openUserEditModal(button) {
+      const userId = button.getAttribute("data-id");
+      const userName = button.getAttribute("data-name");
+      const userTel = button.getAttribute("data-tel");
+      const userEmail = button.getAttribute("data-email");
+      const userPassword = button.getAttribute("data-password");
+      const userRole = button.getAttribute("data-role");
+
+      document.getElementById("userName").value = userName;
+      document.getElementById("userTel").value = userTel;
+      document.getElementById("userEmail").value = userEmail;
+      document.getElementById("userPassword").value = userPassword;
+      document.getElementById("userRole").value = userRole;
+      document.getElementById("userId").value = userId;
+      $("#registerUser").modal("show");
+    }
+
+    // Reset user form when modal is closed
+    document.addEventListener("DOMContentLoaded", function () {
+      const modal = document.getElementById("registerUser");
+      modal.addEventListener("hidden.bs.modal", function () {
+        document.getElementById("userForm").reset();
+        document.getElementById("userId").value = ""; // Clear userId
+      });
+    });
+  </script>
+</div>

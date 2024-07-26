@@ -41,7 +41,7 @@ h4 {
 #sidebar {
     max-width: 264px;
     min-width: 264px;
-    background: var(--bs-dark);
+    background: #09090c;
     transition: all 0.35s ease-in-out;
 }
 
@@ -77,7 +77,7 @@ h4 {
 }
 
 .sidebar-header {
-    color: #e9ecef;
+    color: #e9e9ef;
     font-size: .75rem;
     padding: 1.5rem 1.5rem .375rem;
 }
@@ -130,7 +130,7 @@ a.sidebar-link {
     }
 }
 .card {
-    box-shadow: 0 0 .875rem 0 rgba(217, 221, 224, 0.05);
+    box-shadow: 0 0 .875rem 0 rgba(7, 7, 7, 0.05);
     margin-bottom: 24px;
     transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
@@ -193,6 +193,7 @@ a.sidebar-link {
 }
 
 html[data-bs-theme="dark"] .theme-toggle .fa-sun,
+
 html[data-bs-theme="light"] .theme-toggle .fa-moon {
     cursor: pointer;
     padding: 10px;

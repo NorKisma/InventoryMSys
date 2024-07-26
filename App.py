@@ -18,40 +18,35 @@ mycursor = mydb.cursor()
 def index():
     return render_template('index.html')
 
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
+@app.route('/Register', methods=['GET', 'POST'])
+def register_user():
     if request.method == 'POST':
-        if 'id' in request.form:
+        user_id = request.form.get('userId')
+        full_name = request.form.get('userName')
+        tel = request.form.get('userTel')
+        email = request.form.get('userEmail')
+        role = request.form.get('userRole')
+
+        if user_id:
             # Handle user edit
-            user_id = request.form['id']
-            ful_name = request.form['name']
-            tel = request.form['tel']
-            email = request.form['email']
-            gender = request.form['gender']
             sql = """UPDATE users 
-                     SET ful_name = %s, tel = %s, email = %s, gender = %s 
+                     SET ful_name = %s, tel = %s, email = %s, role = %s 
                      WHERE id = %s"""
-            val = (ful_name, tel, email, gender, user_id)
-            mycursor.execute(sql, val)
+            val = (full_name, tel, email, role, user_id)
         else:
             # Handle user registration
-            ful_name = request.form['name']
-            tel = request.form['tel']
-            email = request.form['email']
-            password = generate_password_hash(request.form['password'])
-            role = request.form['role']
+            password = generate_password_hash(request.form.get('userPassword'))
             sql = "INSERT INTO users (ful_name, tel, email, password, role) VALUES (%s, %s, %s, %s, %s)"
-            val = (ful_name, tel, email, password, role)
-            mycursor.execute(sql, val)
-        
+            val = (full_name, tel, email, password, role)
+
+        mycursor.execute(sql, val)
         mydb.commit()
-        return redirect(url_for('signup'))
-    
+        return redirect(url_for('register_user'))
+
     # Fetch all users
     mycursor.execute("SELECT * FROM users")
     data = mycursor.fetchall()
-    return render_template('signup.html', data=data)
+    return render_template('Register.html', data=data)
 
 @app.route('/delete_user/<int:id>', methods=['POST'])
 def delete_user(id):
@@ -59,13 +54,12 @@ def delete_user(id):
     sql = "DELETE FROM users WHERE id = %s"
     mycursor.execute(sql, (id,))
     mydb.commit()
-    return redirect(url_for('signup'))
+    return redirect(url_for('register_user'))
 
 @app.route('/customers', methods=['GET', 'POST'])
 def add_customer():
     if request.method == 'POST':
-
-    # Retrieve form data
+        # Retrieve form data
         name = request.form.get('customerName')
         tel = request.form.get('customerTel')
         gender = request.form.get('customerGender')
@@ -80,9 +74,11 @@ def add_customer():
             # Add new customer
             sql = "INSERT INTO customers (name, tel, email, gender) VALUES (%s, %s, %s, %s)"
             val = (name, tel, email, gender)
-        
+
         mycursor.execute(sql, val)
         mydb.commit()
+        return redirect(url_for('add_customer'))
+
     # Fetch all customers
     data = fetch_customers()
     return render_template('customers.html', data=data)
@@ -92,7 +88,7 @@ def delete_customer(id):
     sql = "DELETE FROM customers WHERE id = %s"
     mycursor.execute(sql, (id,))
     mydb.commit()
-    return redirect(url_for('customers'))
+    return redirect(url_for('add_customer'))
 
 def fetch_customers():
     mycursor.execute("SELECT * FROM customers")
