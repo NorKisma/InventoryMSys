@@ -1,5 +1,5 @@
 #virtual Enviroment
-.venv/
+#.venv/
 
 
 #Flask
@@ -9,7 +9,7 @@ instance/*
 
 #Flask.Python Stack
 #Byte-compiled / optimized / DLL files
-_pycache_/
+#_pycache_/
 *.py[cod]
 *$py.class
 
