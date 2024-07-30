@@ -1,4 +1,3 @@
-# app.py (Example Flask application)
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.security import generate_password_hash
 import mysql.connector
@@ -26,18 +25,19 @@ def register_user():
         tel = request.form.get('userTel')
         email = request.form.get('userEmail')
         role = request.form.get('userRole')
+        DateT = request.form.get('userDate')
 
         if user_id:
             # Handle user edit
             sql = """UPDATE users 
-                     SET ful_name = %s, tel = %s, email = %s, role = %s 
+                     SET ful_name = %s, tel = %s, email = %s, role = %s, DateT = %s
                      WHERE id = %s"""
-            val = (full_name, tel, email, role, user_id)
+            val = (full_name, tel, email, role, DateT, user_id)
         else:
             # Handle user registration
             password = generate_password_hash(request.form.get('userPassword'))
-            sql = "INSERT INTO users (ful_name, tel, email, password, role) VALUES (%s, %s, %s, %s, %s)"
-            val = (full_name, tel, email, password, role)
+            sql = "INSERT INTO users (ful_name, tel, email, password, role,DateT) VALUES (%s, %s, %s, %s, %s, %s)"
+            val = (full_name, tel, email, password, role,DateT)
 
         mycursor.execute(sql, val)
         mydb.commit()
@@ -64,16 +64,17 @@ def add_customer():
         tel = request.form.get('customerTel')
         gender = request.form.get('customerGender')
         email = request.form.get('customerEmail')
+        DateT = request.form.get('customerDate')
         customer_id = request.form.get('customerId')
 
         if customer_id:
             # Edit customer
-            sql = "UPDATE customers SET name = %s, tel = %s, email = %s, gender = %s WHERE id = %s"
-            val = (name, tel, email, gender, customer_id)
+            sql = "UPDATE customers SET name = %s, tel = %s, email = %s, gender = %s, DateT = %s WHERE id = %s"
+            val = (name, tel, email, gender, DateT, customer_id)
         else:
             # Add new customer
-            sql = "INSERT INTO customers (name, tel, email, gender) VALUES (%s, %s, %s, %s)"
-            val = (name, tel, email, gender)
+            sql = "INSERT INTO customers (name, tel, email, gender, DateT) VALUES (%s, %s, %s, %s, %s)"
+            val = (name, tel, email, gender, DateT)
 
         mycursor.execute(sql, val)
         mydb.commit()
