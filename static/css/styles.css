@@ -20,6 +20,7 @@ a {
     font-family: 'Poppins', sans-serif;
 }
 
+
 li {
     list-style: none;
 }
@@ -208,4 +209,23 @@ html[data-bs-theme="dark"] .theme-toggle .fa-moon {
 
 html[data-bs-theme="light"] .theme-toggle .fa-sun {
     display: none;
+  
+}
+
+html[data-bs-theme="dark"] .navbar {
+    background: var(--bs-dark-bg-subtle);
+}
+
+html[data-bs-theme="light"] .navbar {
+    background: #9480f1; 
+    color: #FFF; 
+}
+html[data-bs-theme="dark"] #sidebar {
+    background: var(--bs-dark-bg-subtle);
+}
+
+html[data-bs-theme="light"] #sidebar {
+    background: #0b3d1f; 
+    color: #FFF;
+    
 }

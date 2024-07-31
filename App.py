@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
-from werkzeug.security import generate_password_hash
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
+import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)  # Ensure you use a secure key in production
 
 # Database connection
 mydb = mysql.connector.connect(
@@ -13,9 +15,41 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
-@app.route('/')
+@app.route('/index')
 def index():
-    return render_template('index.html')
+    if 'user_id' in session:
+        return render_template('index.html')
+    else:
+        flash('You need to login first', 'danger')
+        return redirect(url_for('login'))
+
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email', '')
+        password = request.form.get('password', '')
+
+        # Fetch user
+        mycursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = mycursor.fetchone()
+
+        # Check if user exists and the password is correct
+        if user and check_password_hash(user[4], password):  # Assuming password is in the 5th column
+            session['user_id'] = user[0]  # Assuming ID is in the 1st column
+            session['email'] = user[3]  # Assuming email is in the 4th column
+            flash('Login successful!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid email or password', 'danger')
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    session.pop('email', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))
 
 @app.route('/Register', methods=['GET', 'POST'])
 def register_user():
@@ -36,11 +70,14 @@ def register_user():
         else:
             # Handle user registration
             password = generate_password_hash(request.form.get('userPassword'))
-            sql = "INSERT INTO users (ful_name, tel, email, password, role,DateT) VALUES (%s, %s, %s, %s, %s, %s)"
-            val = (full_name, tel, email, password, role,DateT)
+            sql = "INSERT INTO users (ful_name, tel, email, password, role, DateT) VALUES (%s, %s, %s, %s, %s, %s)"
+            val = (full_name, tel, email, password, role, DateT)
 
-        mycursor.execute(sql, val)
-        mydb.commit()
+        try:
+            mycursor.execute(sql, val)
+            mydb.commit()
+        except mysql.connector.Error as err:
+            flash(f"Error: {err}", 'danger')
         return redirect(url_for('register_user'))
 
     # Fetch all users
@@ -50,10 +87,12 @@ def register_user():
 
 @app.route('/delete_user/<int:id>', methods=['POST'])
 def delete_user(id):
-    # Handle user deletion
-    sql = "DELETE FROM users WHERE id = %s"
-    mycursor.execute(sql, (id,))
-    mydb.commit()
+    try:
+        sql = "DELETE FROM users WHERE id = %s"
+        mycursor.execute(sql, (id,))
+        mydb.commit()
+    except mysql.connector.Error as err:
+        flash(f"Error: {err}", 'danger')
     return redirect(url_for('register_user'))
 
 @app.route('/customers', methods=['GET', 'POST'])
@@ -76,8 +115,11 @@ def add_customer():
             sql = "INSERT INTO customers (name, tel, email, gender, DateT) VALUES (%s, %s, %s, %s, %s)"
             val = (name, tel, email, gender, DateT)
 
-        mycursor.execute(sql, val)
-        mydb.commit()
+        try:
+            mycursor.execute(sql, val)
+            mydb.commit()
+        except mysql.connector.Error as err:
+            flash(f"Error: {err}", 'danger')
         return redirect(url_for('add_customer'))
 
     # Fetch all customers
@@ -86,11 +128,17 @@ def add_customer():
 
 @app.route('/delete_customer/<int:id>', methods=['POST'])
 def delete_customer(id):
-    sql = "DELETE FROM customers WHERE id = %s"
-    mycursor.execute(sql, (id,))
-    mydb.commit()
+    try:
+        sql = "DELETE FROM customers WHERE id = %s"
+        mycursor.execute(sql, (id,))
+        mydb.commit()
+    except mysql.connector.Error as err:
+        flash(f"Error: {err}", 'danger')
     return redirect(url_for('add_customer'))
 
 def fetch_customers():
     mycursor.execute("SELECT * FROM customers")
     return mycursor.fetchall()
+
+if __name__ == "__main__":
+    app.run(debug=True)
