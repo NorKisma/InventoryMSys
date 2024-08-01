@@ -21,11 +21,10 @@
         </button>
       </div>
       <div class="modal-body">
-        <form
-          id="customerForm"
-          action="{{ url_for('add_customer') }}"
-          method="POST"
-        >
+        <form action="{{ url_for('customers_bp.add_customer') }}" method="post">
+          <!-- Form content -->
+      </form>
+      
           <input type="hidden" id="customerId" name="customerId" value="" />
           <div class="form-group">
             <label for="customerName">Name</label>
@@ -118,11 +117,11 @@
         </button>
       </div>
       <div class="modal-body">
+        <form action="{{ url_for('users_bp.add_user') }}" method="POST">
         <form
           id="userForm"
-          action="{{ url_for('register_user') }}"
-          method="POST"
-        >
+      
+          action="{{ url_for('add_user') }}"method="POST">
           <input type="hidden" id="userId" name="userId" value="" />
           <div class="form-group">
             <label for="userName">Name</label>

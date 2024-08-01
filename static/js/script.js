@@ -57,3 +57,11 @@ if(isLight()){
           }
         });
       });
+
+
+      function confirmDelete(userId) {
+        if (confirm('Are you sure you want to delete this user?')) {
+          document.getElementById('deleteForm' + userId).submit();
+        }
+      }
+      

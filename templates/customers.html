@@ -61,13 +61,9 @@
               >
                 <i class="fas fa-edit"></i>
               </button>
-
-              <form
-                id="deleteForm{{ row[0] }}"
-                action="{{ url_for('delete_customer', id=row[0]) }}"
-                method="POST"
-                style="display: inline"
-              >
+              <form action="{{ url_for('customers_bp.delete_customer', id=row[0]) }}" method="post"style="display: inline">
+                <!-- Form content -->
+            </form>
                 <button
                   type="button"
                   class="btn btn-danger btn-sm"

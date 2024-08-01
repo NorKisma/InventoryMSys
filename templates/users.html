@@ -1,0 +1,86 @@
+{% extends 'base.html' %} {% block content %}
+<div class="card border-0">
+  <div class="card-header">
+    <h6 class="card-title">User Information</h6>
+
+    <!-- Button trigger modal -->
+    <div class="d-flex justify-content-end">
+      <input
+        id="searchInput"
+        type="text"
+        class="form-control"
+        placeholder="Search..."
+      />
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#registerUser"
+      >
+        <i class="fa fa-plus-circle"></i> Add New User
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <table class="table" id="searchTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Tel</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        {% for row in data %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td>{{ row[2] }}</td>
+          <td>{{ row[3] }}</td>
+          <td>{{ row[4] }}</td>
+          <td>{{ row[5] }}</td>
+          <td>{{ row[6] }}</td>
+          <td>
+            <button
+              class="btn edit-btn"
+              data-id="{{ row[0] }}"
+              data-name="{{ row[1] }}"
+              data-tel="{{ row[2] }}"
+              data-email="{{ row[3] }}"
+              data-role="{{ row[4] }}"
+              data-status="{{ row[5] }}"
+              onclick="openUserEditModal(this)"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+
+            <form
+              id="deleteForm{{ row[0] }}"
+              action="{{ url_for('users_bp.delete_user', id=row[0]) }}"
+              method="POST"
+              style="display: inline"
+            >
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                onclick="confirmDelete('{{ row[0] }}')"
+              >
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include 'addmodels.html' %}
+</div>
+{% endblock %}
