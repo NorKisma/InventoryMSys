@@ -172,7 +172,13 @@
               placeholder="Enter user's password"
             />
           </div>
-
+          <div class="form-group">
+            <label for="userStatus">Status</label>
+            <select class="form-control" id="userStatus" name="userStatus">
+              <option value="Active">Active</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
           <div class="form-group">
             <label for="usreDate">Date</label>
             <input
@@ -264,6 +270,7 @@
       const userEmail = button.getAttribute("data-email");
       const userPassword = button.getAttribute("data-password");
       const userRole = button.getAttribute("data-role");
+      const userStatus = button.getAttribute("data-status");
       const userdate = button.getAttribute("data-date");
 
       document.getElementById("userName").value = userName;
@@ -271,6 +278,7 @@
       document.getElementById("userEmail").value = userEmail;
       document.getElementById("userPassword").value = userPassword;
       document.getElementById("userRole").value = userRole;
+      document.getElementById("userStatus").value = userStatus;
       document.getElementById("userDate").value = userDate;
       document.getElementById("userId").value = userId;
       $("#registerUser").modal("show");

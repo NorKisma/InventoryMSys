@@ -38,6 +38,7 @@
             <th>Email</th>
             <th>password</th>
             <th>role</th>
+            <th>Status</th>
             <th>Date</th>
             <th>Actions</th>
           </tr>
@@ -52,6 +53,8 @@
             <td>{{ row[4] }}</td>
             <td>{{ row[5] }}</td>
             <td>{{ row[6] }}</td>
+            <td>{{ row[7] }}</td>
+
             <td>
               <button
                 class="btn edit-btn"
@@ -61,6 +64,7 @@
                 data-email="{{ row[3] }}"
                 data-password="{{ row[4] }}"
                 data-role="{{ row[5] }}"
+                data-status="{{ row[6] }}"
                 onclick="openUserEditModal(this)"
               >
                 <i class="fas fa-edit"></i>

@@ -125,9 +125,13 @@
     <div id="wrapper">
       <div class="main-content">
         <div class="header">
-          <img src="https://i.imgur.com/zqpwkLQ.png" alt="Logo" />
+          <h2>User Login</h2>
         </div>
-        <form class="l-part" method="POST" action="/">
+        <form class="a-part1" action="{{ url_for('login') }}" method="post">
+          {% for message in messages %}
+          <div class="alert alert-info">{{ message }}</div>
+          <!-- Ensure this closes the div if it was opened -->
+          {% endfor %}
           <input
             type="email"
             name="email"
@@ -150,6 +154,14 @@
           </div>
           <input type="submit" value="Log in" class="btn" />
         </form>
+
+        {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
       </div>
       <div class="sub-content">
         <div class="s-part">Don't have an account?<a href="#">Sign up</a></div>
