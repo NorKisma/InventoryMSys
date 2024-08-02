@@ -15,7 +15,7 @@
         type="button"
         class="btn btn-primary"
         data-toggle="modal"
-        data-target="#registerUser"
+        data-target="#addUser"
       >
         <i class="fa fa-plus-circle"></i> Add New User
       </button>
@@ -62,7 +62,7 @@
 
             <form
               id="deleteForm{{ row[0] }}"
-              action="{{ url_for('users_bp.delete_user', id=row[0]) }}"
+              action="{{ url_for('delete_user', id=row[0]) }}"
               method="POST"
               style="display: inline"
             >

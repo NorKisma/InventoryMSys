@@ -21,7 +21,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form action="{{ url_for('customers_bp.add_customer') }}" method="post">
+        <form action="{{ url_for('add_customer') }}" method="post">
           <!-- Form content -->
       </form>
       
@@ -95,7 +95,7 @@
 <!-- Modal for Registering/Editing Users -->
 <div
   class="modal fade"
-  id="registerUser"
+  id="addUser"
   tabindex="-1"
   role="dialog"
   aria-labelledby="registerUserModalLabel"
@@ -117,11 +117,11 @@
         </button>
       </div>
       <div class="modal-body">
-        <form action="{{ url_for('users_bp.add_user') }}" method="POST">
+       
         <form
           id="userForm"
       
-          action="{{ url_for('add_user') }}"method="POST">
+          action="{{ url_for('add_user') }}"  method="POST">
           <input type="hidden" id="userId" name="userId" value="" />
           <div class="form-group">
             <label for="userName">Name</label>
@@ -280,12 +280,12 @@
       document.getElementById("userStatus").value = userStatus;
       document.getElementById("userDate").value = userDate;
       document.getElementById("userId").value = userId;
-      $("#registerUser").modal("show");
+      $("#addUser").modal("show");
     }
 
     // Reset user form when modal is closed
     document.addEventListener("DOMContentLoaded", function () {
-      const modal = document.getElementById("registerUser");
+      const modal = document.getElementById("addUser");
       modal.addEventListener("hidden.bs.modal", function () {
         document.getElementById("userForm").reset();
         document.getElementById("userId").value = ""; // Clear userId
