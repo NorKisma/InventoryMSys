@@ -4,7 +4,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login!</title>
+    <title>Login</title>
     <style>
       * {
         margin: 0px;
@@ -17,7 +17,6 @@
         width: 500px;
         height: 100%;
         overflow: hidden;
-        border: 0px solid #000;
         margin: 50px auto;
         padding: 10px;
       }
@@ -30,7 +29,6 @@
         padding: 40px 50px;
       }
       .header {
-        border: 0px solid #000;
         margin-bottom: 5px;
       }
       .header img {
@@ -115,6 +113,19 @@
         text-transform: capitalize;
         letter-spacing: 1px;
       }
+      .alert {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+      }
+      .alert-info {
+        background-color: #d9edf7;
+        color: #31708f;
+      }
+      .alert-danger {
+        background-color: #f2dede;
+        color: #a94442;
+      }
     </style>
     <link
       href="https://fonts.googleapis.com/css?family=Indie+Flower|Overpass+Mono"
@@ -128,10 +139,10 @@
           <h2>User Login</h2>
         </div>
         <form class="a-part1" action="{{ url_for('login') }}" method="post">
-          {% for message in messages %}
-          <div class="alert alert-info">{{ message }}</div>
-          <!-- Ensure this closes the div if it was opened -->
-          {% endfor %}
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %} {% endif %} {% endwith %}
           <input
             type="email"
             name="email"
@@ -148,23 +159,11 @@
               required
             />
           </div>
-
-          <div>
-            <a href="#">Forgot?</a>
-          </div>
           <input type="submit" value="Log in" class="btn" />
         </form>
-
-        {% if messages %}
-        <ul class="flashes">
-          {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-        {% endif %}
       </div>
       <div class="sub-content">
-        <div class="s-part">Don't have an account?<a href="#">Sign up</a></div>
+        <div class="s-part"><a href="#">Forgot?</a></div>
       </div>
     </div>
     <div class="youtube">
