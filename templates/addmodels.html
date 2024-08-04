@@ -117,11 +117,12 @@
         </button>
       </div>
       <div class="modal-body">
-       
         <form
           id="userForm"
-      
-          action="{{ url_for('add_user') }}"  method="POST">
+          action="{{ url_for('add_user') }}"
+          method="POST"
+          enctype="multipart/form-data"
+        >
           <input type="hidden" id="userId" name="userId" value="" />
           <div class="form-group">
             <label for="userName">Name</label>
@@ -179,13 +180,23 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="usreDate">Date</label>
+            <label for="userDate">Date</label>
             <input
               type="Date"
               class="form-control"
               id="userDate"
               name="userDate"
               placeholder="Enter Date "
+            />
+          </div>
+          <div class="form-group">
+            <label for="userImage">Profile Image</label>
+            <input
+              type="file"
+              class="form-control"
+              id="userImage"
+              name="userImage"
+              accept="image/*"
             />
           </div>
         </form>
@@ -204,6 +215,8 @@
       </div>
     </div>
   </div>
+</div>
+
 
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>

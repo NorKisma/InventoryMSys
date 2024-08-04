@@ -27,6 +27,7 @@
       <thead>
         <tr>
           <th>#</th>
+          <th>Image</th>
           <th>Name</th>
           <th>Tel</th>
           <th>Email</th>
@@ -41,13 +42,14 @@
         {% for row in data %}
         <tr>
           <td>{{ row[0] }}</td>
+          <td>{{ row[7] }}</td>
           <td>{{ row[1] }}</td>
           <td>{{ row[2] }}</td>
           <td>{{ row[3] }}</td>
           <td>{{ row[4] }}</td>
           <td>{{ row[5] }}</td>
           <td>{{ row[6] }}</td>
-          <td>{{ row[7] }}</td>
+          <td>{{ row[8] }}</td>
           <td>
             <button
               class="btn edit-btn"
@@ -57,6 +59,7 @@
               data-email="{{ row[3] }}"
               data-role="{{ row[4] }}"
               data-status="{{ row[5] }}"
+              data-status="{{ row[7] }}"
               onclick="openUserEditModal(this)"
             >
               <i class="fas fa-edit"></i>

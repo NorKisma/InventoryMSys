@@ -1,13 +1,15 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from werkzeug.security import check_password_hash, generate_password_hash
-import mysql.connector  # Make sure to import mysql.connector
+from werkzeug.utils import secure_filename
+import os
+import mysql.connector  
 
-# Create Flask application instance
+
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Set a secret key for sessions
+app.secret_key = 'your_secret_key'  
 
 # Database connection
-from db_con.db import mydb  # Ensure you have the correct path for db connection
+from db_con.db import mydb 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -43,15 +45,26 @@ def login():
 def logout():
     session.clear()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('login'))  # Directly refer to 'login'
+    return redirect(url_for('login')) 
 
-# Define the index route or any other routes here
+
 @app.route('/')
 def index():
      return render_template('index.html') 
  
- 
- 
+ # Configuration for file upload
+UPLOAD_FOLDER = 'static/uploads/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure the upload folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Function to check allowed file extensions
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/users', methods=['GET', 'POST'])
 def add_user():
     if request.method == 'POST':
@@ -61,17 +74,24 @@ def add_user():
         email = request.form.get('userEmail')
         role = request.form.get('userRole')
         status = request.form.get('userStatus')
-        DateT = request.form.get('userDate')
+        date_t = request.form.get('userDate')
+
+        # Handle image upload
+        image_file = request.files.get('userImage')
+        image_filename = None
+        if image_file and allowed_file(image_file.filename):
+            image_filename = secure_filename(image_file.filename)
+            image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
 
         if user_id:
             sql = """UPDATE users 
-                     SET ful_name = %s, tel = %s, email = %s, role = %s, status = %s, DateT = %s
+                     SET ful_name = %s, tel = %s, email = %s, role = %s, status = %s, DateT = %s, image = %s
                      WHERE id = %s"""
-            val = (full_name, tel, email, role, status, DateT, user_id)
+            val = (full_name, tel, email, role, status, date_t, image_filename, user_id)
         else:
             password = generate_password_hash(request.form.get('userPassword'))
-            sql = "INSERT INTO users (ful_name, tel, email, password, role, status, DateT) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-            val = (full_name, tel, email, password, role, status, DateT)
+            sql = "INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            val = (full_name, tel, email, password, role, status, date_t, image_filename)
 
         try:
             with mydb.cursor() as mycursor:
@@ -91,7 +111,6 @@ def add_user():
         data = []
 
     return render_template('users.html', data=data)
-
 @app.route('/delete_user/<int:id>', methods=['POST'])
 def delete_user(id):
     try:
