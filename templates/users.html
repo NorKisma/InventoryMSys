@@ -42,7 +42,15 @@
         {% for row in data %}
         <tr>
           <td>{{ row[0] }}</td>
-          <td>{{ row[7] }}</td>
+          <td>
+            {% if row[7] %}
+            <img
+              src="{{ url_for('static', filename='uploads/' + row[7]) }}"
+              alt="No Image"
+              style="width: 50px; height: 50px"
+            />
+            {% else %} {% endif %}
+          </td>
           <td>{{ row[1] }}</td>
           <td>{{ row[2] }}</td>
           <td>{{ row[3] }}</td>

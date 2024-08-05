@@ -5,6 +5,13 @@
   <div class="navbar-collapse navbar">
     <ul class="navbar-nav">
       <li class="nav-item dropdown">
+        {% if session['image_path'] %}
+        <img
+          src="{{ url_for('static', filename=session['image']) }}"
+          alt="User Image"
+          class="avatar img-fluid rounded-circle"
+        />
+        {% else %}
         <a
           href="#"
           data-bs-toggle="dropdown"
@@ -16,6 +23,8 @@
             alt=""
           />
         </a>
+        {% endif %}
+
         <div class="dropdown-menu dropdown-menu-end">
           <a href="#" class="dropdown-item">Profile</a>
           <a href="#" class="dropdown-item">Settings</a>
