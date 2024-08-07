@@ -1,0 +1,106 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="card border-0">
+  <div class="card-header">
+    <h6 class="card-title">Order Information</h6>
+
+    <!-- Button trigger modal -->
+    <div class="d-flex justify-content-end">
+      <br />
+      <br />
+      <br />
+      <div class="card-header">
+        <input
+          id="searchInput"
+          type="text"
+          class="form-control"
+          placeholder="Search..."
+        />
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#addOrder"
+      >
+        <i class="fa fa-plus-circle"></i> Add Order
+      </button>
+    </div>
+    <div class="card-body">
+      <table class="table" id="searchTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Pur_code</th>
+            <th>Pur_Description</th>
+            <th>Inventory Name</th>
+            <th>Supplier</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+            <th>DateOrder</th>
+
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="orderTableBody">
+          {% for row in data %}
+          <tr>
+            <td>{{ row.pur_id }}</td>
+            <td>{{ row.pur_code }}</td>
+
+            <td>{{ row.pur_description }}</td>
+            <td>{{ row.supplier }}</td>
+            <td>{{ row.inventory_name }}</td>
+            <td>{{ row.quantity }}</td>
+            <td>{{ row.price }}</td>
+            <td>{{ row.subtotal }}</td>
+            <td>{{ row.date_order }}</td>
+
+            <td>
+              <button
+                class="btn edit-btn"
+                data-id="{{ row.pur_id }}"
+                data-pur_code="{{ row.pur_code }}"
+                data-pur_description="{{ row.pur_description }}"
+                data-supplier="{{ row.supplier }}"
+                data-quantity="{{ row.quantity }}"
+                data-price="{{ row.price }}"
+                data-subtotal="{{ row.subtotal }}"
+                data-date_order="{{ row.date_order }}"
+                data-inventory_name="{{ row.inventory_name }}"
+                onclick="openModalForEdit(this)"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+
+              <form
+                id="deleteForm{{ row.pur_id }}"
+                action="{{ url_for('delete_order', id=row.pur_id) }}"
+                method="POST"
+                style="display: inline"
+              >
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  onclick="confirmDelete('{{ row.pur_id }}')"
+                >
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% include 'addmodels.html' %}
+
+  <!-- Edit Order Modal -->
+  <script></script>
+
+  {% endblock %}
+</div>

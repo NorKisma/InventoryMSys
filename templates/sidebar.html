@@ -25,17 +25,73 @@
           Suppliers
         </a>
       </li>
+
       <li class="sidebar-item">
-        <a href="#" class="sidebar-link">
-          <i class="fa-solid fa-boxes-stacked pe-2"></i>
+        <a
+          href="#"
+          class="sidebar-link collapsed"
+          data-bs-target="#purchase"
+          data-bs-toggle="collapse"
+          aria-expanded="false"
+        >
+          <i class="fa-solid fa-shopping-cart pe-2"></i>
+          Purchase
+        </a>
+        <ul
+          id="purchase"
+          class="sidebar-dropdown list-unstyled collapse"
+          data-bs-parent="#sidebar"
+        >
+          <li class="sidebar-item">
+            <a href="/add-order" class="sidebar-link">
+              <i class="fa-solid fa-file-alt pe-2"></i>
+              Purchase Form
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="/pur_lists" class="sidebar-link">
+              <i class="fa-solid fa-list pe-2"></i>
+              Purchase List
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="sidebar-item">
+        <a
+          href="#"
+          class="sidebar-link collapsed"
+          data-bs-target="#inventory"
+          data-bs-toggle="collapse"
+          aria-expanded="false"
+        >
+          <i class="fa-solid fa-box pe-2"></i>
           Inventory
         </a>
-      </li>
-      <li class="sidebar-item">
-        <a href="#" class="sidebar-link">
-          <i class="fa-solid fa-folder pe-2"></i>
-          Category
-        </a>
+        <ul
+          id="inventory"
+          class="sidebar-dropdown list-unstyled collapse"
+          data-bs-parent="#sidebar"
+        >
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i class="fa-solid fa-list pe-2"></i>
+              Inventory List
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i class="fa-solid fa-tags pe-2"></i>
+              Inventory Category
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i class="fa-solid fa-boxes-stacked pe-2"></i>
+              Inventory Unit
+            </a>
+          </li>
+        </ul>
       </li>
 
       <li class="sidebar-item">
@@ -55,13 +111,22 @@
           data-bs-parent="#sidebar"
         >
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link"> Daily</a>
+            <a href="#" class="sidebar-link">
+              <i class="fa-solid fa-calendar-day pe-2"></i>
+              Daily
+            </a>
           </li>
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link"> Monthly</a>
+            <a href="#" class="sidebar-link">
+              <i class="fa-solid fa-calendar-alt pe-2"></i>
+              Monthly
+            </a>
           </li>
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link"> Yearly</a>
+            <a href="#" class="sidebar-link">
+              <i class="fa-solid fa-calendar pe-2"></i>
+              Yearly
+            </a>
           </li>
         </ul>
       </li>
@@ -83,11 +148,16 @@
           data-bs-parent="#sidebar"
         >
           <li class="sidebar-item">
-            <a href="/users" class="sidebar-link">User Register</a>
+            <a href="/users" class="sidebar-link">
+              <i class="fa-solid fa-user-plus pe-2"></i>
+              User Register
+            </a>
           </li>
-
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link"> Forgot Password</a>
+            <a href="#" class="sidebar-link">
+              <i class="fa-solid fa-key pe-2"></i>
+              Forgot Password
+            </a>
           </li>
         </ul>
       </li>

@@ -138,11 +138,10 @@ a.sidebar-link {
 
 /* Hover effects */
 .card:hover {
-    box-shadow: 0 0 1.25rem 0 rgba(0, 0, 0, 0.1); /* Increased shadow */
-    
-    background-color: var(--bs-primary-bg-subtle);
-    color: var(--bs-emphasis-color);
+    box-shadow: 0 0 2.5rem 0 rgba(0, 0, 0, 0.2); /* Darker shadow */
+ 
 }
+
 
 
 .illustration {

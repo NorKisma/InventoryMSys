@@ -51,8 +51,13 @@ def logout():
 @app.route('/')
 def index():
      return render_template('index.html') 
- 
- # Configuration for file upload
+@app.route('/pur_lists')
+def pur_lists():
+     return render_template('pur_lists.html') 
+@app.route('/add-order')
+def addOrder():
+     return render_template('purOrder.html') 
+ # Configuration for file upload pur_lists
 UPLOAD_FOLDER = 'static/uploads/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
