@@ -50,13 +50,15 @@ def logout():
 
 @app.route('/')
 def index():
-     return render_template('index.html') 
+    return render_template('index.html')
+
 @app.route('/pur_lists')
 def pur_lists():
-     return render_template('pur_lists.html') 
-@app.route('/add-order')
-def addOrder():
-     return render_template('purOrder.html') 
+    return render_template('pur_lists.html')
+
+@app.route('/add_order', methods=['GET', 'POST'])
+def add_order():
+    return render_template('purOrder.html')
  # Configuration for file upload pur_lists
 UPLOAD_FOLDER = 'static/uploads/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -69,6 +71,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 # Function to check allowed file extensions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/users', methods=['GET', 'POST'])
 def add_user():
@@ -95,7 +98,8 @@ def add_user():
             val = (full_name, tel, email, role, status, date_t, image_filename, user_id)
         else:
             password = generate_password_hash(request.form.get('userPassword'))
-            sql = "INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            sql = """INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) 
+                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
             val = (full_name, tel, email, password, role, status, date_t, image_filename)
 
         try:
@@ -116,6 +120,10 @@ def add_user():
         data = []
 
     return render_template('users.html', data=data)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
 @app.route('/delete_user/<int:id>', methods=['POST'])
 def delete_user(id):
     try:
@@ -140,10 +148,10 @@ def add_customer():
         customer_id = request.form.get('customerId')
 
         if customer_id:
-            sql = "UPDATE customers SET name = %s, tel = %s, email = %s, gender = %s, DateT = %s WHERE id = %s"
+            sql = "UPDATE customers SET Customer_Name = %s, tel = %s, email = %s, gender = %s, DateT = %s WHERE id = %s"
             val = (name, tel, email, gender, DateT, customer_id)
         else:
-            sql = "INSERT INTO customers (name, tel, email, gender, DateT) VALUES (%s, %s, %s, %s, %s)"
+            sql = "INSERT INTO customers (Customer_Name, tel, email, gender, DateT) VALUES (%s, %s, %s, %s, %s)"
             val = (name, tel, email, gender, DateT)
 
         try:
