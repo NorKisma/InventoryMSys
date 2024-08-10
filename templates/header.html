@@ -5,12 +5,23 @@
   <div class="navbar-collapse navbar">
     <ul class="navbar-nav">
       <li class="nav-item dropdown">
-        {% if session['image_path'] %}
-        <img
-          src="{{ url_for('static', filename=session['image']) }}"
-          alt="User Image"
-          class="avatar img-fluid rounded-circle"
-        />
+        {% if session.get('image') %}
+        <a
+          href="#"
+          data-bs-toggle="dropdown"
+          class="nav-link dropdown-toggle pe-md-0"
+        >
+          <img
+            src="{{ url_for('static', filename='uploads/' ~ session['image']) }}"
+            alt="User Image"
+            class="avatar img-fluid rounded-circle"
+          />
+        </a>
+        <div class="dropdown-menu dropdown-menu-end">
+          <a href="#" class="dropdown-item">Profile</a>
+          <a href="#" class="dropdown-item">Settings</a>
+          <a href="{{ url_for('logout') }}" class="dropdown-item">Logout</a>
+        </div>
         {% else %}
         <a
           href="#"
@@ -18,18 +29,17 @@
           class="nav-link dropdown-toggle pe-md-0"
         >
           <img
-            src="{{ url_for('static', filename='imgs/profile.jpg') }}"
+            src="{{ url_for('static', filename='default-avatar.png') }}"
+            alt="Default Avatar"
             class="avatar img-fluid rounded-circle"
-            alt=""
           />
         </a>
-        {% endif %}
-
         <div class="dropdown-menu dropdown-menu-end">
           <a href="#" class="dropdown-item">Profile</a>
           <a href="#" class="dropdown-item">Settings</a>
-          <a href="#" class="dropdown-item">Logout</a>
+          <a href="{{ url_for('logout') }}" class="dropdown-item">Logout</a>
         </div>
+        {% endif %}
       </li>
     </ul>
   </div>

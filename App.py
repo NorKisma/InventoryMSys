@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+import hashlib
+from functools import wraps
 import os
 import mysql.connector  
 
@@ -10,6 +12,15 @@ app.secret_key = 'your_secret_key'
 # Database connection
 from db_con.db import mydb 
 
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'role' not in session or session['role'] != 'admin':
+            flash('Admin access required.', 'warning')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 # Ensure the upload folder exists
 UPLOAD_FOLDER = 'static/uploads/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -21,8 +32,9 @@ if not os.path.exists(UPLOAD_FOLDER):
 # Function to check allowed file extensions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
+def md5_hash(password):
+    return hashlib.md5(password.encode()).hexdigest()
+@app.route('/', methods=['GET'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -34,28 +46,35 @@ def login():
         user = mycursor.fetchone()
         mycursor.close()
 
-        # Check if the user exists and the password matches
-        if user and user[4] == password: 
-            session['user_id'] = user[0]  # user[0] is the ID
-            session['ful_name'] = user[1]    # user[1] is the full name
-            session['tel'] = user[2] 
-            session['email'] = user[3]    
-            session['role'] = user[5]  
-            session['status'] = user[6] 
-            session['image'] = user[7]   
+        if user:
+            # Check if password matches
+            if hashlib.md5(password.encode()).hexdigest() == user[4]:
+                # Check if the account is active
+                if user[6] == 'Active':
+                    session['user_id'] = user[0]
+                    session['ful_name'] = user[1]
+                    session['tel'] = user[2]
+                    session['email'] = user[3]
+                    session['role'] = user[5]
+                    session['status'] = user[6]
+                    session['image'] = user[7]
 
-            flash('Login successful!', 'success')
-            return redirect(url_for('index'))
-        else:
-            flash('Invalid email or password', 'danger')
+                    flash('Login successful!', 'success')
+                    return redirect(url_for('index'))
+                else:
+                    flash('Account is inactive', 'danger')
+            else:
+                flash('Invalid email or password', 'danger')
+        
 
     return render_template('login.html')
+
+
 @app.route('/logout')
 def logout():
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
-
 
 @app.route('/index')
 def index():
@@ -71,6 +90,7 @@ def add_order():
 
 
 @app.route('/users', methods=['GET', 'POST'])
+
 def add_user():
     if request.method == 'POST':
         user_id = request.form.get('userId')
@@ -90,9 +110,11 @@ def add_user():
 
         # Hash the password if it's being set
         password = request.form.get('userPassword')
-        #hashed_password = generate_password_hash(password) if password else None
+        if password:
+            password = hashlib.md5(password.encode()).hexdigest()
 
         if user_id:
+         
             sql = """UPDATE users 
                      SET ful_name = %s, tel = %s, email = %s,  role = %s, status = %s, DateT = %s, image = %s
                      WHERE id = %s"""
@@ -123,6 +145,7 @@ def add_user():
 
 
 @app.route('/delete_user/<int:id>', methods=['POST'])
+@admin_required
 def delete_user(id):
     try:
         with mydb.cursor() as mycursor:
@@ -134,6 +157,7 @@ def delete_user(id):
     return redirect(url_for('add_user'))
 
 @app.route('/customers', methods=['GET', 'POST'])
+@admin_required
 def add_customer():
     if request.method == 'POST':
         name = request.form.get('customerName')
@@ -165,6 +189,7 @@ def add_customer():
     return render_template('customers.html', data=data)
 
 @app.route('/delete_customer/<int:id>', methods=['POST'])
+@admin_required
 def delete_customer(id):
     try:
         with mydb.cursor() as mycursor:
@@ -218,6 +243,7 @@ def add_supplier():
     return render_template('suppliers.html', data=data)
 
 @app.route('/delete_supplier/<int:id>', methods=['POST'])
+@admin_required
 def delete_supplier(id):
     try:
         with mydb.cursor() as mycursor:
