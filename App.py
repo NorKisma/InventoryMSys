@@ -4,51 +4,60 @@ from werkzeug.utils import secure_filename
 import os
 import mysql.connector  
 
-
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  
 
 # Database connection
 from db_con.db import mydb 
 
+# Ensure the upload folder exists
+UPLOAD_FOLDER = 'static/uploads/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Function to check allowed file extensions
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = request.form['email']
+        password = request.form['password']
 
-        try:
-            with mydb.cursor() as mycursor:
-                mycursor.execute('SELECT id, ful_name, email, password, status, role FROM users WHERE status="active" AND email = %s', (email,))
-                user = mycursor.fetchone()
-                
-                if user:
-                    if check_password_hash(user[3], password):
-                        session['loggedin'] = True
-                        session['user_id'] = user[0]
-                        session['ful_name'] = user[1]
-                        session['email'] = user[2]
-                        session['role'] = user[5]
-                        flash('Login successful!', 'success')
-                        return redirect(url_for('index'))  # Update 'index' to your actual route
-                    else:
-                        flash('Invalid email or password', 'danger')
-                else:
-                    flash('Invalid email or password', 'danger')
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT id, ful_name, tel, email, password, role, status, image FROM users WHERE email = %s", (email,))
+        user = mycursor.fetchone()
+        mycursor.close()
 
-        except mysql.connector.Error as err:
-            flash(f'An error occurred: {err}', 'danger')
+        # Check if the user exists and the password matches
+        if user and user[4] == password: 
+            session['user_id'] = user[0]  # user[0] is the ID
+            session['ful_name'] = user[1]    # user[1] is the full name
+            session['tel'] = user[2] 
+            session['email'] = user[3]    
+            session['role'] = user[5]  
+            session['status'] = user[6] 
+            session['image'] = user[7]   
+
+            flash('Login successful!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid email or password', 'danger')
 
     return render_template('login.html')
-
 @app.route('/logout')
 def logout():
     session.clear()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('login')) 
+    return redirect(url_for('login'))
 
 
-@app.route('/')
+@app.route('/index')
 def index():
     return render_template('index.html')
 
@@ -59,18 +68,6 @@ def pur_lists():
 @app.route('/add_order', methods=['GET', 'POST'])
 def add_order():
     return render_template('purOrder.html')
- # Configuration for file upload pur_lists
-UPLOAD_FOLDER = 'static/uploads/'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Ensure the upload folder exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
-# Function to check allowed file extensions
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/users', methods=['GET', 'POST'])
@@ -91,13 +88,16 @@ def add_user():
             image_filename = secure_filename(image_file.filename)
             image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
 
+        # Hash the password if it's being set
+        password = request.form.get('userPassword')
+        #hashed_password = generate_password_hash(password) if password else None
+
         if user_id:
             sql = """UPDATE users 
-                     SET ful_name = %s, tel = %s, email = %s, role = %s, status = %s, DateT = %s, image = %s
+                     SET ful_name = %s, tel = %s, email = %s,  role = %s, status = %s, DateT = %s, image = %s
                      WHERE id = %s"""
             val = (full_name, tel, email, role, status, date_t, image_filename, user_id)
         else:
-            password = generate_password_hash(request.form.get('userPassword'))
             sql = """INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) 
                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
             val = (full_name, tel, email, password, role, status, date_t, image_filename)
@@ -121,8 +121,6 @@ def add_user():
 
     return render_template('users.html', data=data)
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
 
 @app.route('/delete_user/<int:id>', methods=['POST'])
 def delete_user(id):
@@ -134,9 +132,7 @@ def delete_user(id):
     except mysql.connector.Error as err:
         flash(f'An error occurred: {err}', 'danger')
     return redirect(url_for('add_user'))
- 
- 
- 
+
 @app.route('/customers', methods=['GET', 'POST'])
 def add_customer():
     if request.method == 'POST':
@@ -158,11 +154,11 @@ def add_customer():
             with mydb.cursor() as mycursor:
                 mycursor.execute(sql, val)
                 mydb.commit()
+            flash('Customer saved successfully.', 'success')
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return redirect(url_for('add_customer'))
 
-        flash('Customer saved successfully.', 'success')
         return redirect(url_for('add_customer'))
 
     data = fetch_customers()
@@ -187,9 +183,7 @@ def fetch_customers():
     except mysql.connector.Error as err:
         flash(f'An error occurred: {err}', 'danger')
         return []
- 
- 
- 
+
 @app.route('/suppliers', methods=['GET', 'POST'])
 def add_supplier():
     if request.method == 'POST':
@@ -224,10 +218,10 @@ def add_supplier():
     return render_template('suppliers.html', data=data)
 
 @app.route('/delete_supplier/<int:id>', methods=['POST'])
-def delete_supplier(supplier_id):
+def delete_supplier(id):
     try:
         with mydb.cursor() as mycursor:
-            mycursor.execute("DELETE FROM suppliers WHERE supp_id = %s", (supplier_id,))
+            mycursor.execute("DELETE FROM suppliers WHERE supp_id = %s", (id,))
             mydb.commit()
         flash('Supplier deleted successfully.', 'success')
     except mysql.connector.Error as err:
@@ -242,9 +236,6 @@ def fetch_suppliers():
     except mysql.connector.Error as err:
         flash(f'An error occurred: {err}', 'danger')
         return []
- 
- 
- 
- 
+
 if __name__ == '__main__':
     app.run(debug=True)
