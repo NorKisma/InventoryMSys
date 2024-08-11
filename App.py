@@ -34,6 +34,8 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 def md5_hash(password):
     return hashlib.md5(password.encode()).hexdigest()
+
+
 @app.route('/', methods=['GET'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -80,6 +82,24 @@ def logout():
 def index():
     return render_template('index.html')
 
+
+@app.route('/profile/<int:id>')
+def profile(id):
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM users WHERE id = %s', (id,))
+    user = cursor.fetchone()
+    connection.close()
+    if user:
+       user = get_user_by_id(id)
+    return render_template('profile.html', user=user)
+  
+
+
+
+
+
+
 @app.route('/pur_lists')
 def pur_lists():
     return render_template('pur_lists.html')
@@ -89,8 +109,63 @@ def add_order():
     return render_template('purOrder.html')
 
 
-@app.route('/users', methods=['GET', 'POST'])
+#Start  change_password
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
 
+        if new_password != confirm_password:
+            flash('New passwords do not match.', 'danger')
+            return redirect(url_for('change_password'))
+
+        # Fetch user details from session
+        user_id = session.get('user_id')
+
+        if not user_id:
+            flash('User not logged in.', 'danger')
+            return redirect(url_for('login'))
+
+        # Get user data
+        try:
+            with mydb.cursor() as cursor:
+                cursor.execute('SELECT password FROM users WHERE id = %s', (user_id,))
+                user = cursor.fetchone()
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return redirect(url_for('change_password'))
+
+        if user:
+            stored_password = user[4]  # Access the password from the tuple
+            if check_password_hash(stored_password, current_password):
+                hashed_new_password = generate_password_hash(new_password)
+                # Update user password
+                try:
+                    with mydb.cursor() as cursor:
+                        cursor.execute('UPDATE users SET password = %s WHERE id = %s', (hashed_new_password, user_id))
+                        mydb.commit()
+                    flash('Password updated successfully.', 'success')
+                except mysql.connector.Error as err:
+                    flash(f'An error occurred: {err}', 'danger')
+            else:
+                flash('Current password is incorrect.', 'danger')
+        else:
+            flash('User not found.', 'danger')
+
+        return redirect(url_for('change_password'))
+
+    return render_template('change_password.html')
+#End   change_password
+
+
+
+
+
+
+
+@app.route('/users', methods=['GET', 'POST'])
 def add_user():
     if request.method == 'POST':
         user_id = request.form.get('userId')

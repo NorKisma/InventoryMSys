@@ -1,0 +1,108 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">User Profile</h4>
+    </div>
+    <div class="card-body">
+      <form
+        id="userProfileForm"
+        method="POST"
+        action="{{ url_for('update_user') }}"
+        enctype="multipart/form-data"
+      >
+        <input type="hidden" id="userId" name="id" value="{{ user[0] }}" />
+
+        <div class="mb-3">
+          <label for="userImage" class="form-label">Image</label>
+          <input type="file" class="form-control" id="userImage" name="image" />
+          {% if user[7] %}
+          <div class="mt-2">
+            <img
+              src="{{ url_for('static', filename='uploads/' + user[7]) }}"
+              alt="User Image"
+              style="width: 100px; height: 100px"
+            />
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label for="userName" class="form-label">Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="userName"
+            name="name"
+            value="{{ user[1] }}"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="userTel" class="form-label">Tel</label>
+          <input
+            type="text"
+            class="form-control"
+            id="userTel"
+            name="tel"
+            value="{{ user[2] }}"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="userEmail" class="form-label">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            id="userEmail"
+            name="email"
+            value="{{ user[3] }}"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="userRole" class="form-label">Role</label>
+          <input
+            type="text"
+            class="form-control"
+            id="userRole"
+            name="role"
+            value="{{ user[4] }}"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="userStatus" class="form-label">Status</label>
+          <input
+            type="text"
+            class="form-control"
+            id="userStatus"
+            name="status"
+            value="{{ user[5] }}"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="userDate" class="form-label">Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="userDate"
+            name="date"
+            value="{{ user[8] }}"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
