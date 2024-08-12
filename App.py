@@ -12,7 +12,7 @@ app.secret_key = 'your_secret_key'
 # Database connection
 from db_con.db import mydb 
 
-
+#admin_required
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -32,10 +32,11 @@ if not os.path.exists(UPLOAD_FOLDER):
 # Function to check allowed file extensions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 def md5_hash(password):
     return hashlib.md5(password.encode()).hexdigest()
 
-
+#end login and logout System
 @app.route('/', methods=['GET'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -71,30 +72,106 @@ def login():
 
     return render_template('login.html')
 
-
 @app.route('/logout')
 def logout():
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
-
+#end login and logout System
 @app.route('/index')
 def index():
     return render_template('index.html')
 
-
+#Start profile Update
 @app.route('/profile/<int:id>')
 def profile(id):
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute('SELECT * FROM users WHERE id = %s', (id,))
-    user = cursor.fetchone()
-    connection.close()
-    if user:
-       user = get_user_by_id(id)
-    return render_template('profile.html', user=user)
-  
+    mycursor = mydb.cursor()
+    mycursor.execute('SELECT * FROM users WHERE id = %s', (id,))
+    user = mycursor.fetchone()
+    mycursor.close()
 
+    if user:
+        return render_template('profile.html', user=user)
+    else:
+        flash('User not found.', 'danger')
+        return redirect(url_for('index'))
+@app.route('/update_user/<int:id>', methods=['POST'])
+def update_user(id):
+    name = request.form['name']
+    tel = request.form['tel']
+    email = request.form['email']
+    mycursor = mydb.cursor()
+    
+    image_file = request.files.get('image')
+    image_filename = None
+    if image_file and allowed_file(image_file.filename):
+        image_filename = secure_filename(image_file.filename)
+        image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+    if image_filename:
+        sql = "UPDATE users SET ful_name = %s, tel = %s, email  = %s, image = %s WHERE id = %s"
+        values = (name, tel, email, image_filename, id)
+    else:
+        sql = "UPDATE users SET ful_name = %s, tel = %s, email  = %s WHERE id = %s"
+        values = (name, tel, email, id)
+    mycursor.execute(sql, values)
+    mydb.commit()
+    mycursor.close()
+    flash('User details updated successfully.', 'success')
+    return redirect(url_for('profile', id=id))
+#End profile Update
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if request.method == 'POST':
+        company_name = request.form['company_name']
+        short_name = request.form['short_name']
+        address = request.form['address']
+        email = request.form['email']
+        tel = request.form['tel']
+        website = request.form['website']
+        logo = request.files.get('logo')
+        
+        if logo and logo.filename:
+            filename = secure_filename(logo.filename)
+            logo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            logo.save(logo_path)
+        else:
+            logo_path = request.form.get('existing_logo')
+
+        try:
+            cursor = mydb.cursor()
+            cursor.execute('''
+                INSERT INTO company_settings (Company_name, ShortName, Logo, Address, Email, Tel, Website)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                Company_name = VALUES(Company_name),
+                ShortName = VALUES(ShortName),
+                Logo = VALUES(Logo),
+                Address = VALUES(Address),
+                Email = VALUES(Email),
+                Tel = VALUES(Tel),
+                Website = VALUES(Website)
+            ''', (company_name, short_name, logo_path, address, email, tel, website))
+            mydb.commit()
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+        finally:
+            cursor.close()
+
+        flash('Settings updated successfully.', 'success')
+        return redirect(url_for('settings'))
+
+    # Fetch existing settings
+    cursor = mydb.cursor()
+    cursor.execute('SELECT * FROM company_settings LIMIT 1')
+    settings = cursor.fetchone()
+    cursor.close()
+
+    # Handle case where no settings are present
+    if settings is None:
+        settings = ['', '', '', '', '', '', '', '']
+
+    return render_template('settings.html', settings=settings)
 
 
 
@@ -108,10 +185,9 @@ def pur_lists():
 def add_order():
     return render_template('purOrder.html')
 
-
-#Start  change_password
-@app.route('/change_password', methods=['GET', 'POST'])
-def change_password():
+# Start change_password
+@app.route('/change_password/<int:id>', methods=['GET', 'POST'])
+def change_password(id):
     if request.method == 'POST':
         current_password = request.form['current_password']
         new_password = request.form['new_password']
@@ -119,32 +195,32 @@ def change_password():
 
         if new_password != confirm_password:
             flash('New passwords do not match.', 'danger')
-            return redirect(url_for('change_password'))
+            return redirect(url_for('change_password', id=id))
 
-        # Fetch user details from session
         user_id = session.get('user_id')
-
         if not user_id:
             flash('User not logged in.', 'danger')
             return redirect(url_for('login'))
 
+        if user_id != id:
+            flash('Unauthorized action.', 'danger')
+            return redirect(url_for('change_password', id=id))
         # Get user data
         try:
             with mydb.cursor() as cursor:
-                cursor.execute('SELECT password FROM users WHERE id = %s', (user_id,))
+                cursor.execute('SELECT password FROM users WHERE id = %s', (id,))
                 user = cursor.fetchone()
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
-            return redirect(url_for('change_password'))
+            return redirect(url_for('change_password', id=id))
 
         if user:
-            stored_password = user[4]  # Access the password from the tuple
+            stored_password = user[0]
             if check_password_hash(stored_password, current_password):
                 hashed_new_password = generate_password_hash(new_password)
-                # Update user password
                 try:
                     with mydb.cursor() as cursor:
-                        cursor.execute('UPDATE users SET password = %s WHERE id = %s', (hashed_new_password, user_id))
+                        cursor.execute('UPDATE users SET password = %s WHERE id = %s', (hashed_new_password, id))
                         mydb.commit()
                     flash('Password updated successfully.', 'success')
                 except mysql.connector.Error as err:
@@ -154,15 +230,10 @@ def change_password():
         else:
             flash('User not found.', 'danger')
 
-        return redirect(url_for('change_password'))
+        return redirect(url_for('change_password', id=id))
 
-    return render_template('change_password.html')
-#End   change_password
-
-
-
-
-
+    return render_template('change_password.html', id=id)
+# End change_password
 
 
 @app.route('/users', methods=['GET', 'POST'])
@@ -283,6 +354,7 @@ def fetch_customers():
     except mysql.connector.Error as err:
         flash(f'An error occurred: {err}', 'danger')
         return []
+
 
 @app.route('/suppliers', methods=['GET', 'POST'])
 def add_supplier():

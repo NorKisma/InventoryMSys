@@ -23,7 +23,13 @@
             class="dropdown-item"
             >Profile</a
           >
-          <a href="#" class="dropdown-item">Settings</a>
+          <a href="/settings" class="dropdown-item">Settings</a>
+
+          <a
+            href="{{ url_for('change_password', id=session['user_id']) }}"
+            class="dropdown-item"
+            >Change password</a
+          >
           <a href="{{ url_for('logout') }}" class="dropdown-item">Logout</a>
         </div>
         {% else %}

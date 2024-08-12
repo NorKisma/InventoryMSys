@@ -1,5 +1,4 @@
 {% extends 'base.html' %} {% block content %}
-
 <div class="container mt-5">
   <div class="card">
     <div class="card-header">
@@ -9,7 +8,7 @@
       <form
         id="userProfileForm"
         method="POST"
-        action="{{ url_for('update_user') }}"
+        action="{{ url_for('update_user', id=user[0]) }}"
         enctype="multipart/form-data"
       >
         <input type="hidden" id="userId" name="id" value="{{ user[0] }}" />
@@ -70,7 +69,8 @@
             class="form-control"
             id="userRole"
             name="role"
-            value="{{ user[4] }}"
+            value="{{ user[5] }}"
+            readonly
             required
           />
         </div>
@@ -82,7 +82,8 @@
             class="form-control"
             id="userStatus"
             name="status"
-            value="{{ user[5] }}"
+            value="{{ user[6] }}"
+            readonly
             required
           />
         </div>
@@ -95,6 +96,7 @@
             id="userDate"
             name="date"
             value="{{ user[8] }}"
+            readonly
             required
           />
         </div>
@@ -104,5 +106,4 @@
     </div>
   </div>
 </div>
-
 {% endblock %}

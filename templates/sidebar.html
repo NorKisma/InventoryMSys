@@ -154,9 +154,11 @@
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="/change_password" class="sidebar-link">
-              <i class="fa-solid fa-key pe-2"></i>
-              Forgot Password
+            <a
+              href="{{ url_for('change_password', id=session['user_id']) }}"
+              class="sidebar-link"
+            >
+              <i class="fa-solid fa-key pe-2"></i> Change Password
             </a>
           </li>
         </ul>
