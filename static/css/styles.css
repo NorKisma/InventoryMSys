@@ -39,6 +39,15 @@ h4 {
     width: 100%;
 }
 
+
+/* Company name styling */
+.navbar p {
+    margin: 0;
+    font-size: 1rem; /* Adjust font size */
+    font-weight: bold;
+    text-align: center;
+    margin-left: 4%;
+  }
 #sidebar {
     max-width: 264px;
     min-width: 264px;

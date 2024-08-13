@@ -120,6 +120,14 @@ def update_user(id):
     return redirect(url_for('profile', id=id))
 #End profile Update
 
+
+# Example of storing settings in the session
+def store_settings_in_session(settings):
+    print("Settings tuple:", settings)  # Debugging line
+    session['company_name'] = settings[1]
+    session['short_name'] = settings[2]
+    session['logo'] = settings[3] if len(settings) > 3 else None
+
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'POST':
@@ -129,34 +137,41 @@ def settings():
         email = request.form['email']
         tel = request.form['tel']
         website = request.form['website']
+       
+
         logo = request.files.get('logo')
-        
-        if logo and logo.filename:
-            filename = secure_filename(logo.filename)
-            logo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            logo.save(logo_path)
+        logo_path = None  # Initialize logo_path
+        if logo and allowed_file(logo.filename):
+         filename = secure_filename(logo.filename)
+         logo_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+         logo.save(logo_path)
         else:
             logo_path = request.form.get('existing_logo')
-
+           
         try:
+            company_name = request.form.get('company_name')
+            short_name = request.form.get('short_name')
             cursor = mydb.cursor()
             cursor.execute('''
-                INSERT INTO company_settings (Company_name, ShortName, Logo, Address, Email, Tel, Website)
+                INSERT INTO company_settings (company_name, shortName, logo, address, email, tel, website)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
-                Company_name = VALUES(Company_name),
-                ShortName = VALUES(ShortName),
-                Logo = VALUES(Logo),
-                Address = VALUES(Address),
-                Email = VALUES(Email),
-                Tel = VALUES(Tel),
-                Website = VALUES(Website)
+                company_name = VALUES(company_name),
+                shortName = VALUES(shortName),
+                logo = VALUES(logo),
+                address = VALUES(address),
+                email = VALUES(email),
+                tel = VALUES(tel),
+                website = VALUES(website)
             ''', (company_name, short_name, logo_path, address, email, tel, website))
             mydb.commit()
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
         finally:
             cursor.close()
+
+        # Store updated settings in session
+        store_settings_in_session((company_name, short_name,logo_path))
 
         flash('Settings updated successfully.', 'success')
         return redirect(url_for('settings'))
@@ -171,8 +186,10 @@ def settings():
     if settings is None:
         settings = ['', '', '', '', '', '', '', '']
 
-    return render_template('settings.html', settings=settings)
+    # Store fetched settings in session
+    store_settings_in_session(settings)
 
+    return render_template('settings.html', settings=settings)
 
 
 

@@ -5,32 +5,27 @@
       <h4 class="card-title">Company Settings</h4>
     </div>
     <div class="card-body">
-      <form
-        id="companySettingsForm"
-        method="POST"
-        action="{{ url_for('settings') }}"
-        enctype="multipart/form-data"
-      >
+      <form method="POST" enctype="multipart/form-data">
         <div class="mb-3">
-          <label for="companyName" class="form-label">Company Name</label>
+          <label for="company_name" class="form-label">Company Name</label>
           <input
             type="text"
             class="form-control"
-            id="companyName"
+            id="company_name"
             name="company_name"
-            value="{{Company_name[1] }}"
+            value="{{ settings[1] }}"
             required
           />
         </div>
 
         <div class="mb-3">
-          <label for="shortName" class="form-label">Short Name</label>
+          <label for="short_name" class="form-label">Short Name</label>
           <input
             type="text"
             class="form-control"
-            id="shortName"
-            name="shortName"
-            value="{{ ShortName[2] }}"
+            id="short_name"
+            name="short_name"
+            value="{{ settings[2] }}"
             required
           />
         </div>
@@ -42,7 +37,8 @@
             class="form-control"
             id="address"
             name="address"
-            value="{{ Address[4] }}"
+            value="{{ settings[4] }}"
+            required
           />
         </div>
 
@@ -53,7 +49,7 @@
             class="form-control"
             id="email"
             name="email"
-            value="{{ Email[5] }}"
+            value="{{ settings[5] }}"
             required
           />
         </div>
@@ -65,7 +61,7 @@
             class="form-control"
             id="tel"
             name="tel"
-            value="{{ Tel[6] }}"
+            value="{{ settings[6] }}"
           />
         </div>
 
@@ -76,22 +72,27 @@
             class="form-control"
             id="website"
             name="website"
-            value="{{ Website[7] }}"
+            value="{{ settings[7] }}"
           />
         </div>
 
         <div class="mb-3">
           <label for="logo" class="form-label">Logo</label>
           <input type="file" class="form-control" id="logo" name="logo" />
-          {% if Logo[3] %}
+          {% if settings[3] %}
           <div class="mt-2">
             <img
-              src="{{ url_for('static', filename='uploads/' + Logo[3]) }}"
+              src="{{ url_for('static', filename='uploads/' + settings[3]) }}"
               alt="Company Logo"
-              style="max-width: 200px"
+              style="width: 100px; height: 100px"
+            />
+
+            <input
+              type="hidden"
+              name="existing_logo"
+              value="{{ settings[3] }}"
             />
           </div>
-          <input type="hidden" name="existing_logo" value="{{ Logo[3] }}" />
           {% endif %}
         </div>
 

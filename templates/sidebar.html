@@ -2,7 +2,11 @@
   <!-- Content For Sidebar -->
   <div class="h-100">
     <div class="sidebar-logo">
-      <a href="#">Inventory Mangement System</a>
+      {% if 'user_id' in session %}
+      <p>{{ session['logo'] }}</p>
+      {% else %}
+      <p>company name.</p>
+      {% endif %}
     </div>
     <ul class="sidebar-nav">
       <li class="sidebar-header">Admin Elements</li>
