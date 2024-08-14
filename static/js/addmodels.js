@@ -10,9 +10,6 @@ function submitUserForm() {
 }
 
 // Handle form submission for suppliers
-function submitSupplierForm() {
-  document.getElementById('supplierForm').submit();
-}
 
 // Open User Edit Modal with pre-filled data
 function openUserEditModal(button) {
@@ -49,3 +46,24 @@ function confirmDelete(customerId) {
     document.getElementById(`deleteForm${customerId}`).submit();
   }
 }
+
+
+
+function submitSupplierForm() {
+  document.getElementById('supplierForm').submit();
+}
+
+function openSupplierEditModal(button) {
+  const modal = new bootstrap.Modal(document.getElementById('editSupplierModal'));
+  
+  
+  document.getElementById('editSupplierId').value = button.getAttribute('data-id');
+  document.getElementById('editSupplierName').value = button.getAttribute('data-name');
+  document.getElementById('editSupplierContact').value = button.getAttribute('data-contact');
+  document.getElementById('editSupplierEmail').value = button.getAttribute('data-email');
+  document.getElementById('editSupplierCompany').value = button.getAttribute('data-company');
+  document.getElementById('editSupplierAddress').value = button.getAttribute('data-address');
+  document.getElementById('editSupplierDateAdded').value = button.getAttribute('data-date-added');
+  modal.show();
+}
+

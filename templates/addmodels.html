@@ -227,108 +227,118 @@
 </div>
 
 <!-- Supplier Modal -->
+<!-- Edit Supplier Modal -->
 <div
   class="modal fade"
-  id="addSupplier"
+  id="editSupplierModal"
   tabindex="-1"
-  role="dialog"
-  aria-labelledby="supplierModalTitle"
+  aria-labelledby="editSupplierModalLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="supplierModalTitle">Add New Supplier</h5>
+        <h5 class="modal-title" id="add_supplier">Edit Supplier</h5>
         <button
           type="button"
-          class="close"
-          data-dismiss="modal"
+          class="btn-close"
+          data-bs-dismiss="modal"
           aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
+        ></button>
       </div>
-      <div class="modal-body">
-        <form action="{{ url_for('add_supplier') }}" method="post">
-          <input type="hidden" id="supplierId" name="supplierId" value="" />
-          <div class="form-group">
-            <label for="supplierName">Name</label>
+      <form
+        id="supplierForm"
+        method="post"
+        action="{{ url_for('add_supplier') }}"
+      >
+        <div class="modal-body">
+          <input type="hidden" id="editSupplierId" name="id" />
+
+          <div class="mb-3">
+            <label for="editSupplierName" class="form-label">Name</label>
             <input
               type="text"
               class="form-control"
-              id="supplierName"
-              name="supplierName"
-              placeholder="Enter supplier's name"
+              id="editSupplierName"
+              name="name"
               required
             />
           </div>
-          <div class="form-group">
-            <label for="supplierContact">Contact</label>
+
+          <div class="mb-3">
+            <label for="editSupplierContact" class="form-label">Contact</label>
             <input
-              type="tel"
+              type="text"
               class="form-control"
-              id="supplierContact"
-              name="supplierContact"
-              placeholder="Enter supplier's contact number"
+              id="editSupplierContact"
+              name="contact"
+              required
             />
           </div>
-          <div class="form-group">
-            <label for="supplierEmail">Email</label>
+
+          <div class="mb-3">
+            <label for="editSupplierEmail" class="form-label">Email</label>
             <input
               type="email"
               class="form-control"
-              id="supplierEmail"
-              name="supplierEmail"
-              placeholder="Enter supplier's email"
+              id="editSupplierEmail"
+              name="email"
+              required
             />
           </div>
-          <div class="form-group">
-            <label for="supplierCompany">Company</label>
+
+          <div class="mb-3">
+            <label for="editSupplierCompany" class="form-label">Company</label>
             <input
               type="text"
               class="form-control"
-              id="supplierCompany"
-              name="supplierCompany"
-              placeholder="Enter supplier's company name"
+              id="editSupplierCompany"
+              name="company"
+              required
             />
           </div>
-          <div class="form-group">
-            <label for="supplierAddress">Address</label>
+
+          <div class="mb-3">
+            <label for="editSupplierAddress" class="form-label">Address</label>
             <input
               type="text"
               class="form-control"
-              id="supplierAddress"
-              name="supplierAddress"
-              placeholder="Enter supplier's address"
+              id="editSupplierAddress"
+              name="address"
+              required
             />
           </div>
-          <div class="form-group">
-            <label for="supplierDate">Date Added</label>
+
+          <div class="mb-3">
+            <label for="editSupplierDateAdded" class="form-label"
+              >Date Added</label
+            >
             <input
               type="date"
               class="form-control"
-              id="supplierDate"
-              name="supplierDate"
+              id="editSupplierDateAdded"
+              name="date_added"
+              required
             />
           </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              onclick="submitSupplierForm()"
-            >
-              Save changes
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="submitSupplierForm()"
+          >
+            Save
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

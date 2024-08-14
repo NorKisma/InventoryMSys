@@ -4,6 +4,8 @@ from werkzeug.utils import secure_filename
 import hashlib
 from functools import wraps
 import os
+from Crud_M import Supplier
+from Crud_M import CustomerCRUD
 import mysql.connector  
 
 app = Flask(__name__)
@@ -319,113 +321,30 @@ def delete_user(id):
         flash(f'An error occurred: {err}', 'danger')
     return redirect(url_for('add_user'))
 
+customer_crud = CustomerCRUD(mydb)
+
 @app.route('/customers', methods=['GET', 'POST'])
 @admin_required
 def add_customer():
-    if request.method == 'POST':
-        name = request.form.get('customerName')
-        tel = request.form.get('customerTel')
-        gender = request.form.get('customerGender')
-        email = request.form.get('customerEmail')
-        DateT = request.form.get('customerDate')
-        customer_id = request.form.get('customerId')
-
-        if customer_id:
-            sql = "UPDATE customers SET Customer_Name = %s, tel = %s, email = %s, gender = %s, DateT = %s WHERE id = %s"
-            val = (name, tel, email, gender, DateT, customer_id)
-        else:
-            sql = "INSERT INTO customers (Customer_Name, tel, email, gender, DateT) VALUES (%s, %s, %s, %s, %s)"
-            val = (name, tel, email, gender, DateT)
-
-        try:
-            with mydb.cursor() as mycursor:
-                mycursor.execute(sql, val)
-                mydb.commit()
-            flash('Customer saved successfully.', 'success')
-        except mysql.connector.Error as err:
-            flash(f'An error occurred: {err}', 'danger')
-            return redirect(url_for('add_customer'))
-
-        return redirect(url_for('add_customer'))
-
-    data = fetch_customers()
-    return render_template('customers.html', data=data)
+    return customer_crud.add_customer()
 
 @app.route('/delete_customer/<int:id>', methods=['POST'])
 @admin_required
 def delete_customer(id):
-    try:
-        with mydb.cursor() as mycursor:
-            mycursor.execute("DELETE FROM customers WHERE id = %s", (id,))
-            mydb.commit()
-        flash('Customer deleted successfully.', 'success')
-    except mysql.connector.Error as err:
-        flash(f'An error occurred: {err}', 'danger')
-    return redirect(url_for('add_customer'))
+    return customer_crud.delete_customer(id)
 
-def fetch_customers():
-    try:
-        with mydb.cursor() as mycursor:
-            mycursor.execute("SELECT * FROM customers")
-            return mycursor.fetchall()
-    except mysql.connector.Error as err:
-        flash(f'An error occurred: {err}', 'danger')
-        return []
 
+supplier_crud = Supplier(mydb)
 
 @app.route('/suppliers', methods=['GET', 'POST'])
+@admin_required
 def add_supplier():
-    if request.method == 'POST':
-        supp_Name = request.form.get('supplierName')
-        supp_Contact = request.form.get('supplierContact')
-        supp_Email = request.form.get('supplierEmail')
-        supp_Company = request.form.get('supplierCompany')
-        supp_Address = request.form.get('supplierAddress')
-        date_added = request.form.get('supplierDate')
-        supplier_id = request.form.get('supplierId')
-
-        if supplier_id:
-            sql = """UPDATE suppliers 
-                     SET supp_Name = %s, supp_contact = %s, supp_email = %s, supp_company = %s, supp_address = %s, date_added = %s 
-                     WHERE supp_id = %s"""
-            val = (supp_Name, supp_Contact, supp_Email, supp_Company, supp_Address, date_added, supplier_id)
-        else:
-            sql = """INSERT INTO suppliers (supp_Name, supp_contact, supp_email, supp_company, supp_address, date_added) 
-                     VALUES (%s, %s, %s, %s, %s, %s)"""
-            val = (supp_Name, supp_Contact, supp_Email, supp_Company, supp_Address, date_added)
-
-        try:
-            with mydb.cursor() as mycursor:
-                mycursor.execute(sql, val)
-                mydb.commit()
-            flash('Supplier saved successfully.', 'success')
-        except mysql.connector.Error as err:
-            flash(f'An error occurred: {err}', 'danger')
-        return redirect(url_for('add_supplier'))
-
-    data = fetch_suppliers()
-    return render_template('suppliers.html', data=data)
+    return supplier_crud.add_supplier()
 
 @app.route('/delete_supplier/<int:id>', methods=['POST'])
 @admin_required
 def delete_supplier(id):
-    try:
-        with mydb.cursor() as mycursor:
-            mycursor.execute("DELETE FROM suppliers WHERE supp_id = %s", (id,))
-            mydb.commit()
-        flash('Supplier deleted successfully.', 'success')
-    except mysql.connector.Error as err:
-        flash(f'An error occurred: {err}', 'danger')
-    return redirect(url_for('add_supplier'))
-
-def fetch_suppliers():
-    try:
-        with mydb.cursor() as mycursor:
-            mycursor.execute("SELECT * FROM suppliers")
-            return mycursor.fetchall()
-    except mysql.connector.Error as err:
-        flash(f'An error occurred: {err}', 'danger')
-        return []
+    return supplier_crud.delete_supplier(id)
 
 if __name__ == '__main__':
     app.run(debug=True)
