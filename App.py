@@ -49,13 +49,18 @@ def login():
         mycursor = mydb.cursor()
         mycursor.execute("SELECT id, ful_name, tel, email, password, role, status, image FROM users WHERE email = %s", (email,))
         user = mycursor.fetchone()
+
+        # Fetch any remaining results to avoid the "Unread result found" error
+        mycursor.fetchall()  # This ensures all results are read, even if you only need one
+
         mycursor.close()
 
         if user:
-            # Check if password matches
+            # Check if the password matches
             if hashlib.md5(password.encode()).hexdigest() == user[4]:
                 # Check if the account is active
                 if user[6] == 'Active':
+                    # Store user details in session
                     session['user_id'] = user[0]
                     session['ful_name'] = user[1]
                     session['tel'] = user[2]
@@ -70,7 +75,6 @@ def login():
                     flash('Account is inactive', 'danger')
             else:
                 flash('Invalid email or password', 'danger')
-        
 
     return render_template('login.html')
 
