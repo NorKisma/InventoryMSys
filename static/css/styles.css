@@ -225,7 +225,7 @@ html[data-bs-theme="dark"] .navbar {
 }
 
 html[data-bs-theme="light"] .navbar {
-    background: #9480f1; 
+    background: #846ee6; 
     color: #FFF; 
 }
 html[data-bs-theme="dark"] #sidebar {

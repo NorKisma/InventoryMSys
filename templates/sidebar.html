@@ -3,7 +3,7 @@
   <div class="h-100">
     <div class="sidebar-logo">
       {% if 'user_id' in session %}
-      <p>{{ session['logo'] }}</p>
+      <p>{{ session['short_name']}}</p>
       {% else %}
       <p>company name.</p>
       {% endif %}
