@@ -8,6 +8,77 @@ import os
 import mysql.connector  
 
 
+
+
+
+class usersCRUD:
+    def __init__(self, mydb):
+        self.mydb = mydb
+
+    def add_user(self):
+        if request.method == 'POST':
+            user_id = request.form.get('userId')
+            full_name = request.form.get('userName')
+            tel = request.form.get('userTel')
+            email = request.form.get('userEmail')
+            role = request.form.get('userRole')
+            status = request.form.get('userStatus')
+            date_t = request.form.get('userDate')
+
+            # Handle image upload
+            image_file = request.files.get('userImage')
+            image_filename = None
+            if image_file and allowed_file(image_file.filename):
+                image_filename = secure_filename(image_file.filename)
+                image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+
+            # Hash the password if it's being set
+            password = request.form.get('userPassword')
+            if password:
+                password = hashlib.md5(password.encode()).hexdigest()
+
+            if user_id:
+                sql = """UPDATE users 
+                         SET ful_name = %s, tel = %s, email = %s, role = %s, status = %s, DateT = %s, image = %s
+                         WHERE id = %s"""
+                val = (full_name, tel, email, role, status, date_t, image_filename, user_id)
+            else:
+                sql = """INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) 
+                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+                val = (full_name, tel, email, password, role, status, date_t, image_filename)
+
+            try:
+                with self.mydb.cursor() as mycursor:
+                    mycursor.execute(sql, val)
+                    self.mydb.commit()
+                flash('User saved successfully.', 'success')
+            except mysql.connector.Error as err:
+                flash(f'An error occurred: {err}', 'danger')
+            return redirect(url_for('add_user'))
+
+        data = self.fetch_users()
+        return render_template('users.html', data=data)
+
+    def delete_user(self, id):
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute("DELETE FROM users WHERE id = %s", (id,))
+                self.mydb.commit()
+            flash('User deleted successfully.', 'success')
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('add_user'))
+
+    def fetch_users(self):
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute("SELECT * FROM users")
+                return mycursor.fetchall()
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []
+
+
 class Supplier:
     def __init__(self, mydb):
         self.mydb = mydb
@@ -129,3 +200,43 @@ class CustomerCRUD:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
+
+
+    def __init__(self, mydb):
+        self.mydb = mydb
+
+    def add_or_update_user(self, user_id, full_name, tel, email, role, status, date_t, image_filename, password=None):
+        if user_id:
+            sql = """UPDATE users 
+                     SET ful_name = %s, tel = %s, email = %s, role = %s, status = %s, DateT = %s, image = %s
+                     WHERE id = %s"""
+            val = (full_name, tel, email, role, status, date_t, image_filename, user_id)
+        else:
+            sql = """INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) 
+                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+            val = (full_name, tel, email, password, role, status, date_t, image_filename)
+
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute(sql, val)
+                self.mydb.commit()
+            return True, "User saved successfully."
+        except mysql.connector.Error as err:
+            return False, f"An error occurred: {err}"
+
+    def get_all_users(self):
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute("SELECT * FROM users")
+                return mycursor.fetchall()
+        except mysql.connector.Error as err:
+            return None, f"An error occurred: {err}"
+
+    def delete_user(self, user_id):
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+                self.mydb.commit()
+            return True, "User deleted successfully."
+        except mysql.connector.Error as err:
+            return False, f"An error occurred: {err}"

@@ -4,8 +4,8 @@ from werkzeug.utils import secure_filename
 import hashlib
 from functools import wraps
 import os
-from Crud_M import Supplier
-from Crud_M import CustomerCRUD
+from Crud_M import Supplier,CustomerCRUD,usersCRUD
+
 import mysql.connector  
 
 app = Flask(__name__)
@@ -13,7 +13,9 @@ app.secret_key = 'your_secret_key'
 
 # Database connection
 from db_con.db import mydb 
-
+crud_users = usersCRUD(mydb)
+customer_crud = CustomerCRUD(mydb)
+supplier_crud = Supplier(mydb)
 #admin_required
 def admin_required(f):
     @wraps(f)
@@ -258,74 +260,15 @@ def change_password(id):
     return render_template('change_password.html', id=id)
 # End change_password
 
-
 @app.route('/users', methods=['GET', 'POST'])
 def add_user():
-    if request.method == 'POST':
-        user_id = request.form.get('userId')
-        full_name = request.form.get('userName')
-        tel = request.form.get('userTel')
-        email = request.form.get('userEmail')
-        role = request.form.get('userRole')
-        status = request.form.get('userStatus')
-        date_t = request.form.get('userDate')
-
-        # Handle image upload
-        image_file = request.files.get('userImage')
-        image_filename = None
-        if image_file and allowed_file(image_file.filename):
-            image_filename = secure_filename(image_file.filename)
-            image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
-
-        # Hash the password if it's being set
-        password = request.form.get('userPassword')
-        if password:
-            password = hashlib.md5(password.encode()).hexdigest()
-
-        if user_id:
-         
-            sql = """UPDATE users 
-                     SET ful_name = %s, tel = %s, email = %s,  role = %s, status = %s, DateT = %s, image = %s
-                     WHERE id = %s"""
-            val = (full_name, tel, email, role, status, date_t, image_filename, user_id)
-        else:
-            sql = """INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) 
-                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
-            val = (full_name, tel, email, password, role, status, date_t, image_filename)
-
-        try:
-            with mydb.cursor() as mycursor:
-                mycursor.execute(sql, val)
-                mydb.commit()
-            flash('User saved successfully.', 'success')
-        except mysql.connector.Error as err:
-            flash(f'An error occurred: {err}', 'danger')
-        return redirect(url_for('add_user'))
-
-    try:
-        with mydb.cursor() as mycursor:
-            mycursor.execute("SELECT * FROM users")
-            data = mycursor.fetchall()
-    except mysql.connector.Error as err:
-        flash(f'An error occurred: {err}', 'danger')
-        data = []
-
-    return render_template('users.html', data=data)
-
+    return crud_users.add_user()
 
 @app.route('/delete_user/<int:id>', methods=['POST'])
 @admin_required
 def delete_user(id):
-    try:
-        with mydb.cursor() as mycursor:
-            mycursor.execute("DELETE FROM users WHERE id = %s", (id,))
-            mydb.commit()
-        flash('User deleted successfully.', 'success')
-    except mysql.connector.Error as err:
-        flash(f'An error occurred: {err}', 'danger')
-    return redirect(url_for('add_user'))
+    return crud_users.delete_user(id)
 
-customer_crud = CustomerCRUD(mydb)
 
 @app.route('/customers', methods=['GET', 'POST'])
 @admin_required
@@ -338,7 +281,7 @@ def delete_customer(id):
     return customer_crud.delete_customer(id)
 
 
-supplier_crud = Supplier(mydb)
+
 
 @app.route('/suppliers', methods=['GET', 'POST'])
 @admin_required
