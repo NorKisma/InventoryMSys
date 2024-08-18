@@ -1,19 +1,34 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import Flask, request, render_template, redirect, url_for, flash, session,current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 import hashlib
 from functools import wraps
+
 import os
 from Crud_M import Supplier,CustomerCRUD,usersCRUD
-
 import mysql.connector  
-
+from db_con.db import mydb 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  
 
-# Database connection
-from db_con.db import mydb 
-crud_users = usersCRUD(mydb)
+
+UPLOAD_FOLDER = 'static/uploads/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def md5_hash(password):
+    return hashlib.md5(password.encode()).hexdigest()
+
+
+
+
+crud_users = usersCRUD(mydb, allowed_file)
 customer_crud = CustomerCRUD(mydb)
 supplier_crud = Supplier(mydb)
 #admin_required
@@ -26,21 +41,17 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 # Ensure the upload folder exists
-UPLOAD_FOLDER = 'static/uploads/'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+@app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
+def index():
+    mycursor = mydb.cursor()
+    mycursor.execute("SELECT COUNT(*) FROM users")
+    user_count = mycursor.fetchone()[0]
+    mycursor.close()
 
-# Function to check allowed file extensions
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return render_template('index.html', user_count=user_count)
 
-def md5_hash(password):
-    return hashlib.md5(password.encode()).hexdigest()
-
-#end login and logout System
 @app.route('/', methods=['GET'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -86,9 +97,7 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 #end login and logout System
-@app.route('/index')
-def index():
-    return render_template('index.html')
+
 
 #Start profile Update
 @app.route('/profile/<int:id>')
@@ -260,15 +269,30 @@ def change_password(id):
     return render_template('change_password.html', id=id)
 # End change_password
 
-@app.route('/users', methods=['GET', 'POST'])
+
+
+@app.route('/add_user', methods=['GET', 'POST'])
 def add_user():
-    return crud_users.add_user()
+    if request.method == 'POST':
+        result = crud_users.add_user()
+        if isinstance(result, str):  
+            flash(result, 'danger')
+            return redirect(url_for('add_user'))
+        return result
+    return crud_users.add_user()  
 
 @app.route('/delete_user/<int:id>', methods=['POST'])
-@admin_required
 def delete_user(id):
-    return crud_users.delete_user(id)
+    result = crud_users.delete_user(id)
+    if isinstance(result, str):  
+        flash(result, 'danger')
+        return redirect(url_for('list_users'))
+    return result  # Assuming it returns a redirect response
 
+@app.route('/users')
+def list_users():
+    data = crud_users.fetch_users()
+    return render_template('users.html', data=data)
 
 @app.route('/customers', methods=['GET', 'POST'])
 @admin_required

@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import Flask, request, render_template, redirect, url_for, flash, session,current_app
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 import hashlib
@@ -6,14 +6,10 @@ from functools import wraps
 import os
 
 import mysql.connector  
-
-
-
-
-
 class usersCRUD:
-    def __init__(self, mydb):
-        self.mydb = mydb
+    def __init__(self, db, allowed_file_func):
+        self.db = db
+        self.allowed_file = allowed_file_func
 
     def add_user(self):
         if request.method == 'POST':
@@ -28,9 +24,9 @@ class usersCRUD:
             # Handle image upload
             image_file = request.files.get('userImage')
             image_filename = None
-            if image_file and allowed_file(image_file.filename):
+            if image_file and self.allowed_file(image_file.filename):
                 image_filename = secure_filename(image_file.filename)
-                image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
+                image_file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], image_filename))
 
             # Hash the password if it's being set
             password = request.form.get('userPassword')
@@ -48,9 +44,9 @@ class usersCRUD:
                 val = (full_name, tel, email, password, role, status, date_t, image_filename)
 
             try:
-                with self.mydb.cursor() as mycursor:
+                with self.db.cursor() as mycursor:
                     mycursor.execute(sql, val)
-                    self.mydb.commit()
+                    self.db.commit()
                 flash('User saved successfully.', 'success')
             except mysql.connector.Error as err:
                 flash(f'An error occurred: {err}', 'danger')
@@ -61,9 +57,9 @@ class usersCRUD:
 
     def delete_user(self, id):
         try:
-            with self.mydb.cursor() as mycursor:
+            with self.db.cursor() as mycursor:
                 mycursor.execute("DELETE FROM users WHERE id = %s", (id,))
-                self.mydb.commit()
+                self.db.commit()
             flash('User deleted successfully.', 'success')
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
@@ -71,13 +67,12 @@ class usersCRUD:
 
     def fetch_users(self):
         try:
-            with self.mydb.cursor() as mycursor:
+            with self.db.cursor() as mycursor:
                 mycursor.execute("SELECT * FROM users")
                 return mycursor.fetchall()
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
-
 
 class Supplier:
     def __init__(self, mydb):
