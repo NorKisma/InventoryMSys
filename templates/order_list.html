@@ -14,7 +14,8 @@
       <button
         type="button"
         class="btn btn-primary"
-        onclick="window.location.href='{{ url_for('add_order') }}'"
+        data-bs-toggle="modal"
+        data-bs-target="#add_order"
       >
         <i class="fa fa-plus-circle"></i> Add Order
       </button>
@@ -25,7 +26,7 @@
         <thead>
           <tr>
             <th>#</th>
-
+            <th>transactionID</th>
             <th>invoiceNumber</th>
             <th>Supplier</th>
             <th>productName</th>
