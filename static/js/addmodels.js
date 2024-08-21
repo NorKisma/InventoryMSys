@@ -67,47 +67,102 @@ function openSupplierEditModal(button) {
   modal.show();
 }
 
-
-
-
-
 document.addEventListener('DOMContentLoaded', function() {
-  const editButtons = document.querySelectorAll('.edit-btn');
+  const supplierSelect = document.getElementById('supplier');
+  const supplierTextbox = document.getElementById('supplierName'); // Ensure this ID matches your HTML
 
-  editButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const orderId = this.getAttribute('data-order_id');
-      const invoice_number = this.getAttribute('data-invoice_number');
-      const product_name = this.getAttribute('data-product_name');
-      const supplier = this.getAttribute('data-supplier');
-      const qty = this.getAttribute('data-qty');
-      const price = this.getAttribute('data-price');
-      const subtotal = this.getAttribute('data-subtotal');
-      const status = this.getAttribute('data-status');
-      const date_order = this.getAttribute('data-date_order');
-      // Populate the form fields in the modal
-      document.getElementById('orderId').value = orderId;
-      document.getElementById('invoice_number').value = invoice_number;
-      document.getElementById('product_name').value = product_name;
-      document.getElementById('supplier').value = supplier;
-      document.getElementById('qty').value = qty;
-      document.getElementById('price').value = price;
-      document.getElementById('subtotal').value = subtotal;
-      document.getElementById('status').value = status;
-      document.getElementById('date_order').value = date_order;
-      // Show the modal
-      const editOrderModal = new bootstrap.Modal(document.getElementById('editOrderModal'));
-      editOrderModal.show();
-    });
+  supplierSelect.addEventListener('change', function() {
+    const selectedOption = supplierSelect.options[supplierSelect.selectedIndex];
+    const supplierName = selectedOption.getAttribute('data-supplier-name');
+    supplierTextbox.value = supplierName; // Update the text box with the selected supplier's name
+  });
+
+  const orderForm = document.getElementById('orderForm');
+  orderForm.addEventListener('submit', function(event) {
+    const selectedSupplier = supplierSelect.value;
+    if (!selectedSupplier) {
+      alert('Please select a supplier.');
+      event.preventDefault(); // Prevent form submission if no supplier is selected
+    }
   });
 });
 
-function submitOrderForm() {
-  document.getElementById('orderForm').submit();
+
+
+
+
+
+
+
+
+
+
+function openOrderEditModal(button) {
+  const modal = new bootstrap.Modal(
+    document.getElementById("editOrderModal")
+  );
+
+  document.getElementById("orderId").value =
+    button.getAttribute("data-order_id");
+  document.getElementById("invoice_number").value = button.getAttribute(
+    "data-invoice_number"
+  );
+  document.getElementById("supplier").value =
+    button.getAttribute("data-supplier");
+  document.getElementById("product_name").value =
+    button.getAttribute("data-product_name");
+  document.getElementById("qty").value = button.getAttribute("data-qty");
+  document.getElementById("price").value =
+    button.getAttribute("data-price");
+  document.getElementById("subtotal").value =
+    button.getAttribute("data-subtotal");
+  document.getElementById("status").value =
+    button.getAttribute("data-status");
+  document.getElementById("date_order").value =
+    button.getAttribute("data-date_order");
+
+  // Update form action to the edit route
+  document.getElementById(
+    "editOrderForm"
+  ).action = `/edit_order/${button.getAttribute("data-order_id")}`;
+
+  modal.show();
 }
-document.getElementById("orderForm").addEventListener("input", function () {
+
+document.querySelectorAll(".edit-btn").forEach((button) => {
+  button.addEventListener("click", () => openOrderEditModal(button));
+});
+
+function calculateSubtotal() {
   const qty = parseFloat(document.getElementById("qty").value) || 0;
   const price = parseFloat(document.getElementById("price").value) || 0;
   const subtotal = qty * price;
   document.getElementById("subtotal").value = subtotal.toFixed(2);
-});
+}
+
+document.getElementById("qty").addEventListener("input", calculateSubtotal);
+document
+  .getElementById("price")
+  .addEventListener("input", calculateSubtotal);
+
+  // Show the modal CategoryEditModal
+function openCategoryEditModal(button) {
+  const modal = new bootstrap.Modal(document.getElementById("addCategory"));
+
+  document.getElementById("categoryId").value =
+    button.getAttribute("data-id");
+  document.getElementById("categoryName").value =
+    button.getAttribute("data-name");
+    document.getElementById("category_unit").value =
+    button.getAttribute("data-unit");
+  document.getElementById(
+    "editCategoryForm"
+  ).action = `/update_category/${button.getAttribute("data-id")}`;
+
+  modal.show();
+}
+
+
+
+
+

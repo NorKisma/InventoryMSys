@@ -5,7 +5,7 @@ import hashlib
 from functools import wraps
 
 import os
-from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD
+from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,CategoryCRUD,ProductCRUD
 import mysql.connector  
 from db_con.db import mydb 
 app = Flask(__name__)
@@ -28,10 +28,12 @@ def md5_hash(password):
 
 
 
-Order_crud = OrderCRUD(mydb)
+order_crud = OrderCRUD(mydb)
 crud_users = usersCRUD(mydb, allowed_file)
 customer_crud = CustomerCRUD(mydb)
 supplier_crud = Supplier(mydb)
+category_crud = CategoryCRUD(mydb)
+product_crud = ProductCRUD(mydb)
 #admin_required
 def admin_required(f):
     @wraps(f)
@@ -314,39 +316,89 @@ def delete_supplier(id):
 
 @app.route('/pur_lists')
 def pur_lists():
-    data = Order_crud.fetch_purchases() 
+    data = order_crud.fetch_purchases() 
     return render_template('pur_lists.html', data=data)  
 
 @app.route('/add_order', methods=['GET', 'POST'])
 def add_order():
     if request.method == 'POST':
-        result = Order_crud.add_order()  
+        result = order_crud.add_order()  
         if isinstance(result, str):
             flash(result, 'danger') 
-            return redirect(url_for('add_order'))
-        return result  
-
+            return redirect(url_for('pur_lists'))
+        return result 
+    
     return render_template('purOrder.html')
 
-@app.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
-def edit_order(order_id):
-    if request.method == 'POST':
-        result = Order_crud.edit_order(order_id) 
-        if isinstance(result, str):
-            flash(result, 'danger') 
-            return redirect(url_for('edit_order', order_id=order_id))
-        return result 
 
-    return Order_crud.edit_order(order_id)  
+@app.route('/edit_order/<int:purchase_id>', methods=['GET', 'POST'])
+def edit_order(purchase_id):
+    if request.method == 'POST':
+        return order_crud.edit_order(purchase_id)
+    purchases = order_crud.fetch_purchases()
+    order = next((o for o in purchases if o['order_id'] == purchase_id), None)
+    return render_template('pur_lists', order=order)
+
 
 @app.route('/delete_order/<int:order_id>', methods=['POST'])
 def delete_order(order_id):
-    result = Order_crud.delete_order(order_id)  
+    result = order_crud.delete_order(order_id)  
     if isinstance(result, str):
         flash(result, 'danger')  
     else:
         flash('Order deleted successfully.', 'success')
-    return redirect(url_for('edit_order')) 
+    return redirect(url_for('pur_lists')) 
+
+
+
+
+
+
+@app.route('/categories', methods=['GET', 'POST'])
+def categories():
+    data = category_crud.fetch_categories()
+    return render_template('categories.html', data=data)
+@app.route('/add_category', methods=['POST'])
+def add_category():
+    return category_crud.add_category()
+@app.route('/update_category/<int:id>', methods=['POST'])
+def update_category(id):
+    return category_crud.update_category(id)
+@app.route('/delete_category/<int:id>', methods=['POST'])
+def delete_category(id):
+    return category_crud.delete_category(id)
+
+
+
+
+@app.route('/products')
+def products():
+    
+    products = product_crud.fetch_products()  # Fetch all products
+    categories = category_crud.fetch_categories()  # Fetch all categories for dropdown
+    return render_template('products.html', data=products, categories=categories)
+
+@app.route('/add_product', methods=['POST'])
+def add_product():
+    return product_crud.add_product()
+
+@app.route('/update_product/<int:product_id>', methods=['POST'])
+def update_product(product_id):
+   
+    return product_crud.update_product(product_id)
+
+@app.route('/delete_product/<int:product_id>', methods=['POST'])
+def delete_product(product_id):
+    
+    return product_crud.delete_product(product_id)
+
+
+
+
+
+
+
+
 
 
 

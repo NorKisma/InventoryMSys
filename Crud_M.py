@@ -126,7 +126,7 @@ class Supplier:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
 
-        return redirect(url_for('add_supplier_route'))
+        return redirect(url_for('add_supplier'))
 
     def fetch_suppliers(self):
         try:
@@ -136,6 +136,8 @@ class Supplier:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
+
+     
 class CustomerCRUD:
     def __init__(self, mydb):
         self.mydb = mydb
@@ -198,14 +200,11 @@ class CustomerCRUD:
 
 
 
-
-
-
-
 class OrderCRUD:
     def __init__(self, mydb):
         self.mydb = mydb
 
+    # Function to add a new order
     def add_order(self):
         if request.method == 'POST':
             invoice_number = request.form.get('invoice_number')
@@ -216,50 +215,64 @@ class OrderCRUD:
             subtotal = request.form.get('subtotal')
             status = request.form.get('status')
             date_order = request.form.get('date_order')
-            purchase_id = request.form.get('order_id')
 
-            if purchase_id:
-                sql = """
-                    UPDATE purchase 
-                    SET invoice_number = %s, supplier = %s, product_name = %s, qty = %s, 
-                        price = %s, subtotal = %s, status = %s, date_order = %s, date_updated = NOW() 
-                    WHERE order_id = %s
-                """
-              
-
-                val = (invoice_number, supplier, product_name, qty, price, subtotal, status, date_order, purchase_id)
-          
-            else:
-                sql = """
-                    INSERT INTO purchase (invoice_number, supplier, product_name, qty, price, 
-                                          subtotal, status, date_order, date_updated) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
-                """
-                val = (invoice_number, supplier, product_name, qty, price, subtotal, status, date_order)
+            # Insert a new order
+            sql = """
+                INSERT INTO purchase (invoice_number, supplier, product_name, qty, price, 
+                                      subtotal, status, date_order, date_updated) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            """
+            val = (invoice_number, supplier, product_name, qty, price, subtotal, status, date_order)
 
             try:
                 with self.mydb.cursor() as mycursor:
                     mycursor.execute(sql, val)
                     self.mydb.commit()
-                flash('Purchase order saved successfully.', 'success')
             except mysql.connector.Error as err:
                 flash(f'An error occurred: {err}', 'danger')
-                return redirect(url_for('add_order'))
+                return redirect(url_for('pur_lists'))
 
         return redirect(url_for('add_order'))
 
-        data = self.fetch_purchases()
-        return render_template('Pur_Lists.html', data=data)
+    # Function to edit an existing order
+    def edit_order(self, purchase_id):
+        if request.method == 'POST':
+            invoice_number = request.form.get('invoice_number')
+            supplier = request.form.get('supplier')
+            product_name = request.form.get('product_name')
+            qty = request.form.get('qty')
+            price = request.form.get('price')
+            subtotal = request.form.get('subtotal')
+            status = request.form.get('status')
+            date_order = request.form.get('date_order')
 
+            # No need to check for invoice_number uniqueness since it’s an update
+            sql = """
+                UPDATE purchase 
+                SET invoice_number = %s, supplier = %s, product_name = %s, qty = %s, 
+                    price = %s, subtotal = %s, status = %s, date_order = %s, date_updated = NOW() 
+                WHERE order_id = %s
+            """
+            val = ( invoice_number ,supplier, product_name, qty, price, subtotal, status, date_order, purchase_id)
+
+            try:
+                with self.mydb.cursor() as mycursor:
+                    mycursor.execute(sql, val)
+                    self.mydb.commit()
+            except mysql.connector.Error as err:
+                flash(f'An error occurred: {err}', 'danger')
+                return redirect(url_for('pur_lists', purchase_id=purchase_id))
+        return redirect(url_for('pur_lists', purchase_id=purchase_id))
+
+   
     def delete_order(self, purchase_id):
         try:
             with self.mydb.cursor() as mycursor:
                 mycursor.execute("DELETE FROM purchase WHERE order_id = %s", (purchase_id,))
                 self.mydb.commit()
-            flash('Purchase order deleted successfully.', 'success')
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
-        return redirect(url_for('add_order'))
+        return redirect(url_for('pur_lists'))
 
     def fetch_purchases(self):
         try:
@@ -269,3 +282,119 @@ class OrderCRUD:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
+
+
+class CategoryCRUD:
+    def __init__(self, mydb):
+        self.mydb = mydb
+
+    def add_category(self):
+        if request.method == 'POST':
+            category_name = request.form.get('category_name')
+            category_unit = request.form.get('category_unit')
+           
+            # Insert a new category
+            sql = "INSERT INTO category (category_name,category_unit) VALUES (%s,%s)"
+            val = (category_name,category_unit,)
+            try:
+                with self.mydb.cursor() as mycursor:
+                    mycursor.execute(sql, val)
+                    self.mydb.commit()
+            except mysql.connector.Error as err:
+                flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('categories'))
+
+    def update_category(self, category_id):
+        if request.method == 'POST':
+            category_name = request.form.get('category_name')  # Get category name from the form
+            category_unit = request.form.get('category_unit')
+            # Update category SQL query
+            sql = "UPDATE category SET category_name = %s ,category_unit= %s WHERE category_id = %s"
+            val = (category_name,category_unit, category_id)
+            try:
+                with self.mydb.cursor() as mycursor:
+                    mycursor.execute(sql, val)
+                    self.mydb.commit()  # Commit the changes
+                flash('Category updated successfully.', 'success')
+            except mysql.connector.Error as err:
+                flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('categories'))
+    def delete_category(self, category_id):
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute("DELETE FROM category WHERE category_id = %s", (category_id,))
+                self.mydb.commit()
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('categories'))
+
+    def fetch_categories(self):
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute("SELECT * FROM category")
+                return mycursor.fetchall()
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []
+        
+class ProductCRUD:
+    def __init__(self, mydb):
+        self.mydb = mydb
+
+    def add_product(self):
+        if request.method == 'POST':
+            product_name = request.form.get('product_name')
+            category_id = request.form.get('category_id')
+            price = request.form.get('price')
+            description = request.form.get('description')
+            
+            # Insert a new product
+            sql = "INSERT INTO product_list (category_id, name, price, description) VALUES (%s, %s, %s, %s)"
+            val = (category_id, product_name, price, description)
+            try:
+                with self.mydb.cursor() as mycursor:
+                    mycursor.execute(sql, val)
+                    self.mydb.commit()
+                flash('Product added successfully.', 'success')
+            except mysql.connector.Error as err:
+                flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('products'))
+
+    def update_product(self, product_id):
+        if request.method == 'POST':
+            product_name = request.form.get('product_name')
+            category_id = request.form.get('category_id')
+            price = request.form.get('price')
+            description = request.form.get('description')
+            
+            # Update product SQL query
+            sql = "UPDATE product_list SET category_id = %s, name = %s, price = %s, description = %s WHERE id = %s"
+            val = (category_id, product_name, price, description, product_id)
+            try:
+                with self.mydb.cursor() as mycursor:
+                    mycursor.execute(sql, val)
+                    self.mydb.commit()  # Commit the changes
+                flash('Product updated successfully.', 'success')
+            except mysql.connector.Error as err:
+                flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('products'))
+
+    def delete_product(self, product_id):
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute("DELETE FROM product_list WHERE id = %s", (product_id,))
+                self.mydb.commit()
+            flash('Product deleted successfully.', 'success')
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('products'))
+
+    def fetch_products(self):
+        try:
+            with self.mydb.cursor() as mycursor:
+                mycursor.execute("SELECT * FROM product_list")
+                return mycursor.fetchall()
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []
+       
