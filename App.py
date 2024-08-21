@@ -5,7 +5,7 @@ import hashlib
 from functools import wraps
 
 import os
-from Crud_M import Supplier,CustomerCRUD,usersCRUD
+from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD
 import mysql.connector  
 from db_con.db import mydb 
 app = Flask(__name__)
@@ -28,6 +28,7 @@ def md5_hash(password):
 
 
 
+Order_crud = OrderCRUD(mydb)
 crud_users = usersCRUD(mydb, allowed_file)
 customer_crud = CustomerCRUD(mydb)
 supplier_crud = Supplier(mydb)
@@ -42,7 +43,7 @@ def admin_required(f):
     return decorated_function
 # Ensure the upload folder exists
 
-@app.route('/', methods=['GET'])
+
 @app.route('/index', methods=['GET'])
 def index():
     mycursor = mydb.cursor()
@@ -211,14 +212,6 @@ def settings():
 
 
 
-@app.route('/pur_lists')
-def pur_lists():
-    return render_template('pur_lists.html')
-
-@app.route('/add_order', methods=['GET', 'POST'])
-def add_order():
-    return render_template('purOrder.html')
-
 # Start change_password
 @app.route('/change_password/<int:id>', methods=['GET', 'POST'])
 def change_password(id):
@@ -306,8 +299,7 @@ def delete_customer(id):
 
 
 
-
-@app.route('/suppliers', methods=['GET', 'POST'])
+@app.route('/add_supplier', methods=['GET', 'POST'])
 @admin_required
 def add_supplier():
     return supplier_crud.add_supplier()
@@ -316,6 +308,47 @@ def add_supplier():
 @admin_required
 def delete_supplier(id):
     return supplier_crud.delete_supplier(id)
+
+
+
+
+@app.route('/pur_lists')
+def pur_lists():
+    data = Order_crud.fetch_purchases() 
+    return render_template('pur_lists.html', data=data)  
+
+@app.route('/add_order', methods=['GET', 'POST'])
+def add_order():
+    if request.method == 'POST':
+        result = Order_crud.add_order()  
+        if isinstance(result, str):
+            flash(result, 'danger') 
+            return redirect(url_for('add_order'))
+        return result  
+
+    return render_template('purOrder.html')
+
+@app.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
+def edit_order(order_id):
+    if request.method == 'POST':
+        result = Order_crud.edit_order(order_id) 
+        if isinstance(result, str):
+            flash(result, 'danger') 
+            return redirect(url_for('edit_order', order_id=order_id))
+        return result 
+
+    return Order_crud.edit_order(order_id)  
+
+@app.route('/delete_order/<int:order_id>', methods=['POST'])
+def delete_order(order_id):
+    result = Order_crud.delete_order(order_id)  
+    if isinstance(result, str):
+        flash(result, 'danger')  
+    else:
+        flash('Order deleted successfully.', 'success')
+    return redirect(url_for('edit_order')) 
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

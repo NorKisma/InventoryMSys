@@ -98,7 +98,7 @@ class Supplier:
                        supplier_data['supplierCompany'], supplier_data['supplierAddress'], supplier_data['supplierDate'],
                        supplier_data['supplierId'])
             else:
-                sql = """INSERT INTO suppliers (supp_Name, supp_contact, supp_email, supp_company, supp_address, date_added) 
+                sql = """INSERT INTO suppliers (supp_name, supp_contact, supp_email, supp_company, supp_address, date_added) 
                          VALUES (%s, %s, %s, %s, %s, %s)"""
                 val = (supplier_data['supplierName'], supplier_data['supplierContact'], supplier_data['supplierEmail'],
                        supplier_data['supplierCompany'], supplier_data['supplierAddress'], supplier_data['supplierDate'])
@@ -197,41 +197,75 @@ class CustomerCRUD:
             return []
 
 
+
+
+
+
+
+class OrderCRUD:
     def __init__(self, mydb):
         self.mydb = mydb
 
-    def add_or_update_user(self, user_id, full_name, tel, email, role, status, date_t, image_filename, password=None):
-        if user_id:
-            sql = """UPDATE users 
-                     SET ful_name = %s, tel = %s, email = %s, role = %s, status = %s, DateT = %s, image = %s
-                     WHERE id = %s"""
-            val = (full_name, tel, email, role, status, date_t, image_filename, user_id)
-        else:
-            sql = """INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) 
-                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
-            val = (full_name, tel, email, password, role, status, date_t, image_filename)
+    def add_order(self):
+        if request.method == 'POST':
+            invoice_number = request.form.get('invoice_number')
+            supplier = request.form.get('supplier')
+            product_name = request.form.get('product_name')
+            qty = request.form.get('qty')
+            price = request.form.get('price')
+            subtotal = request.form.get('subtotal')
+            status = request.form.get('status')
+            date_order = request.form.get('date_order')
+            purchase_id = request.form.get('order_id')
 
+            if purchase_id:
+                sql = """
+                    UPDATE purchase 
+                    SET invoice_number = %s, supplier = %s, product_name = %s, qty = %s, 
+                        price = %s, subtotal = %s, status = %s, date_order = %s, date_updated = NOW() 
+                    WHERE order_id = %s
+                """
+              
+
+                val = (invoice_number, supplier, product_name, qty, price, subtotal, status, date_order, purchase_id)
+          
+            else:
+                sql = """
+                    INSERT INTO purchase (invoice_number, supplier, product_name, qty, price, 
+                                          subtotal, status, date_order, date_updated) 
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                """
+                val = (invoice_number, supplier, product_name, qty, price, subtotal, status, date_order)
+
+            try:
+                with self.mydb.cursor() as mycursor:
+                    mycursor.execute(sql, val)
+                    self.mydb.commit()
+                flash('Purchase order saved successfully.', 'success')
+            except mysql.connector.Error as err:
+                flash(f'An error occurred: {err}', 'danger')
+                return redirect(url_for('add_order'))
+
+        return redirect(url_for('add_order'))
+
+        data = self.fetch_purchases()
+        return render_template('Pur_Lists.html', data=data)
+
+    def delete_order(self, purchase_id):
         try:
             with self.mydb.cursor() as mycursor:
-                mycursor.execute(sql, val)
+                mycursor.execute("DELETE FROM purchase WHERE order_id = %s", (purchase_id,))
                 self.mydb.commit()
-            return True, "User saved successfully."
+            flash('Purchase order deleted successfully.', 'success')
         except mysql.connector.Error as err:
-            return False, f"An error occurred: {err}"
+            flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('add_order'))
 
-    def get_all_users(self):
+    def fetch_purchases(self):
         try:
             with self.mydb.cursor() as mycursor:
-                mycursor.execute("SELECT * FROM users")
+                mycursor.execute("SELECT * FROM purchase")
                 return mycursor.fetchall()
         except mysql.connector.Error as err:
-            return None, f"An error occurred: {err}"
-
-    def delete_user(self, user_id):
-        try:
-            with self.mydb.cursor() as mycursor:
-                mycursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
-                self.mydb.commit()
-            return True, "User deleted successfully."
-        except mysql.connector.Error as err:
-            return False, f"An error occurred: {err}"
+            flash(f'An error occurred: {err}', 'danger')
+            return []

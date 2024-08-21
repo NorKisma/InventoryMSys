@@ -26,15 +26,14 @@
           <tr>
             <th>#</th>
 
-            <th>invoiceNumber</th>
-            <th>Supplier</th>
-            <th>productName</th>
-            <th>Quantity</th>
-
-            <th>Price</th>
-            <th>Subtotal</th>
-            <th>Status</th>
-            <th>DateOrder</th>
+            <th class="sortable">Invoice Number</th>
+            <th class="sortable">Supplier</th>
+            <th class="sortable">Product Name</th>
+            <th class="sortable">Quantity</th>
+            <th class="sortable">Price</th>
+            <th class="sortable">Subtotal</th>
+            <th class="sortable">Status</th>
+            <th class="sortable">Date Order</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -48,20 +47,21 @@
             <td>{{ row[5] }}</td>
             <td>{{ row[6] }}</td>
             <td>{{ row[7] }}</td>
+            <td>{{ row[9] }}</td>
             <td>{{ row[2] }}</td>
             <td>
               <button
-                class="btn edit-btn"
+                class="btn btn-primary btn-sm edit-btn"
                 data-order_id="{{ row[0] }}"
-                data-invoiceNumber="{{ row[1] }}"
-                data-productName="{{ row[4] }}"
+                data-invoice_number="{{ row[1] }}"
+                data-product_name="{{ row[4] }}"
                 data-supplier="{{ row[3] }}"
-                data-quantity="{{ row[5] }}"
+                data-qty="{{ row[5] }}"
                 data-price="{{ row[6] }}"
-                data-status="{{ row[7] }}"
                 data-subtotal="{{ row[8] }}"
-                data-dateorder="{{ row[2] }}"
-                onclick="openModalForEdit(this)"
+                data-status="{{ row[9] }}"
+                data-date_order="{{ row[2] }}"
+                data-bs-target="#editOrderModal"
               >
                 <i class="fas fa-edit"></i>
               </button>

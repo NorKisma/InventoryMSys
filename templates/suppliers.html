@@ -15,7 +15,7 @@
         type="button"
         class="btn btn-primary"
         data-bs-toggle="modal"
-        data-bs-target="#add_supplier"
+        data-bs-target="#editSupplierModal"
       >
         <i class="fa fa-plus-circle"></i> Add New Supplier
       </button>
@@ -48,7 +48,7 @@
           <td>{{ row[6] }}</td>
           <td>
             <button
-              class="btn edit-btn"
+              class="btn btn-primary btn-sm edit-btn"
               data-id="{{ row[0] }}"
               data-name="{{ row[1] }}"
               data-contact="{{ row[2] }}"
@@ -56,7 +56,7 @@
               data-company="{{ row[4] }}"
               data-address="{{ row[5] }}"
               data-date-added="{{ row[6] }}"
-              onclick="openSupplierEditModal(this)"
+              onclick="editSupplierModal(this)"
             >
               <i class="fas fa-edit"></i>
             </button>
