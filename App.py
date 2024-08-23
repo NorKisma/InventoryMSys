@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, session,current_app
+from flask import Flask, request, render_template, redirect, url_for, flash, session,current_app,jsonify  
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 import hashlib
@@ -311,46 +311,59 @@ def add_supplier():
 def delete_supplier(id):
     return supplier_crud.delete_supplier(id)
 
-
-
-
 @app.route('/pur_lists')
 def pur_lists():
     data = order_crud.fetch_purchases() 
     return render_template('pur_lists.html', data=data)  
 
+
 @app.route('/add_order', methods=['GET', 'POST'])
 def add_order():
+    order_crud = OrderCRUD(mydb)
     if request.method == 'POST':
-        result = order_crud.add_order()  
-        if isinstance(result, str):
-            flash(result, 'danger') 
-            return redirect(url_for('pur_lists'))
-        return result 
+        return order_crud.add_order(request)
+    # Fetch suppliers and products for the form
+    cursor = mydb.cursor()
+    cursor.execute("SELECT supp_id, supp_name FROM suppliers")
+    suppliers = cursor.fetchall()
+    cursor.execute("SELECT id, name FROM product_list")
+    products = cursor.fetchall()
+    return render_template('PurOrder.html', suppliers=suppliers, products=products)
+@app.route('/get_product_unit/<int:productId>', methods=['GET'])
+def get_product_unit(productId):
+    order_crud = OrderCRUD(mydb)
+    cursor = mydb.cursor()
+    query = "SELECT product_unit FROM product_list WHERE id = %s"
+    cursor.execute(query, (productId,))
+    product_unit = cursor.fetchone()
+    if product_unit:
+        return jsonify({'product_unit': product_unit[0]})
+    return jsonify({'error': 'Product unit not found'}), 404
+
+@app.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
+def edit_order(order_id):
+    if request.method == 'POST':
+        order_crud.edit_order(request, order_id)
+        return redirect(url_for('pur_lists'))
+    # Fetch the order to pre-fill the form
+    cursor = mydb.cursor()
+    cursor.execute("SELECT * FROM purchase WHERE order_id = %s", (order_id,))
+    order = cursor.fetchone()
+    # Fetch suppliers and products for the dropdowns
+    cursor.execute("SELECT supp_id, supp_name FROM suppliers")
+    suppliers = cursor.fetchall()
     
-    return render_template('purOrder.html')
-
-
-@app.route('/edit_order/<int:purchase_id>', methods=['GET', 'POST'])
-def edit_order(purchase_id):
-    if request.method == 'POST':
-        return order_crud.edit_order(purchase_id)
-    purchases = order_crud.fetch_purchases()
-    order = next((o for o in purchases if o['order_id'] == purchase_id), None)
-    return render_template('pur_lists', order=order)
-
+    cursor.execute("SELECT id, name FROM product_list")
+    products = cursor.fetchall()
+    return render_template('pur_lists.html', order=order, suppliers=suppliers, products=products)
 
 @app.route('/delete_order/<int:order_id>', methods=['POST'])
 def delete_order(order_id):
-    result = order_crud.delete_order(order_id)  
-    if isinstance(result, str):
-        flash(result, 'danger')  
-    else:
-        flash('Order deleted successfully.', 'success')
-    return redirect(url_for('pur_lists')) 
+    order_crud.delete_order(order_id)
+    return redirect(url_for('pur_lists'))
 
 
-
+ 
 
 
 
@@ -373,14 +386,18 @@ def delete_category(id):
 
 @app.route('/products')
 def products():
-    
     products = product_crud.fetch_products()  # Fetch all products
-    categories = category_crud.fetch_categories()  # Fetch all categories for dropdown
-    return render_template('products.html', data=products, categories=categories)
+    return render_template('products.html', data=products)  # Adjust template name as needed
 
-@app.route('/add_product', methods=['POST'])
+
+@app.route('/add_product', methods=['GET', 'POST'])
 def add_product():
-    return product_crud.add_product()
+    if request.method == 'POST':
+        return product_crud.add_product()
+    # Fetch categories for the dropdown
+    categories = category_crud.fetch_categories()
+    return render_template('products.html', categories=categories)
+   
 
 @app.route('/update_product/<int:product_id>', methods=['POST'])
 def update_product(product_id):

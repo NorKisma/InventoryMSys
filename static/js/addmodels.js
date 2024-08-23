@@ -91,12 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-
-
-
-
-
 function openOrderEditModal(button) {
   const modal = new bootstrap.Modal(
     document.getElementById("editOrderModal")

@@ -37,18 +37,33 @@
           </select>
         </div>
 
-        >
+        <div class="mb-3">
+          <label for="productId" class="form-label">Product Name</label>
+          <select
+            class="form-control"
+            id="productId"
+            name="product_name"
+            required
+          >
+            <option value="">Select Product</option>
+            {% for product in products %}
+            <option value="{{ product[0] }}">{{ product[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
         <div class="mb-3">
-          <label for="product_name">Product Name</label>
+          <label for="product_unit">Product Unit</label>
           <input
             type="text"
-            id="product_name"
-            name="product_name"
+            id="product_unit"
+            name="product_unit"
             class="form-control"
             required
+            readonly
           />
         </div>
+
         <div class="mb-3">
           <label for="quantity">Quantity</label>
           <input
@@ -57,6 +72,7 @@
             name="qty"
             class="form-control"
             required
+            oninput="calculateSubtotal()"
           />
         </div>
         <div class="mb-3">
@@ -68,6 +84,7 @@
             name="price"
             class="form-control"
             required
+            oninput="calculateSubtotal()"
           />
         </div>
         <div class="mb-3">
@@ -82,38 +99,51 @@
             readonly
           />
         </div>
-        <div class="mb-3">
+        </div>
+        <div class="mb-3 ">
           <label for="status">Status</label>
           <select class="form-control" id="status" name="status" required>
             <option value="Pending">Pending</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>
           </select>
-        </div>
 
-        <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+        <div class="mb-3">
+             <button type="submit" class="btn btn-primary">Submit</button></div>
       </form>
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const supplierSelect = document.getElementById("supplier");
-    const suppIdInput = document.getElementById("supp_id");
-    const suppNameInput = document.getElementById("supp_name");
+  document.getElementById("productId").addEventListener("change", function () {
+    var productId = this.value; // Get selected productId
 
-    supplierSelect.addEventListener("change", function () {
-      const selectedOption =
-        supplierSelect.options[supplierSelect.selectedIndex];
-      const supplierId = selectedOption.value;
-      const supplierName = selectedOption.getAttribute("data-supplier-name");
-
-      // Set the values in the textboxes
-      suppIdInput.value = supplierId;
-      suppNameInput.value = supplierName;
-    });
+    if (productId) {
+      // Fetch the product unit using AJAX
+      fetch("/get_product_unit/" + productId)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.product_unit) {
+            document.getElementById("product_unit").value = data.product_unit; // Update product_unit field
+          } else {
+            alert("Product unit not found");
+          }
+        })
+        .catch((error) => console.error("Error fetching product unit:", error));
+    } else {
+      document.getElementById("product_unit").value = ""; // Clear product_unit field if no product selected
+    }
   });
+
+  function calculateSubtotal() {
+    var quantity = parseFloat(document.getElementById("qty").value) || 0;
+    var price = parseFloat(document.getElementById("price").value) || 0;
+    var subtotal = quantity * price;
+
+    document.getElementById("subtotal").value = subtotal.toFixed(2);
+  }
 </script>
 
 {% endblock %}

@@ -29,11 +29,13 @@
           <th class="sortable">Invoice Number</th>
           <th class="sortable">Supplier</th>
           <th class="sortable">Product Name</th>
+          <th class="sortable">Product Unit</th>
           <th class="sortable">Quantity</th>
           <th class="sortable">Price</th>
           <th class="sortable">Subtotal</th>
-          <th class="sortable">Status</th>
           <th class="sortable">Date Order</th>
+          <th class="sortable">Status</th>
+
           <th>Actions</th>
         </tr>
       </thead>
@@ -42,34 +44,37 @@
         <tr>
           <td>{{ row[0] }}</td>
           <td>{{ row[1] }}</td>
+          <td>{{ row[2] }}</td>
           <td>{{ row[3] }}</td>
           <td>{{ row[4] }}</td>
           <td>{{ row[5] }}</td>
           <td>{{ row[6] }}</td>
           <td>{{ row[7] }}</td>
+          <td>{{ row[8] }}</td>
           <td>{{ row[9] }}</td>
-          <td>{{ row[2] }}</td>
           <td>
             <button
               class="btn btn-primary btn-sm edit-btn"
               data-order_id="{{ row[0] }}"
               data-invoice_number="{{ row[1] }}"
-              data-product_name="{{ row[4] }}"
-              data-supplier="{{ row[3] }}"
+              data-supplier="{{ row[2] }}"
+              data-product_name="{{ row[3] }}"
+              data-unit="{{ row[4] }}"
               data-qty="{{ row[5] }}"
               data-price="{{ row[6] }}"
-              data-subtotal="{{ row[8] }}"
+              data-subtotal="{{ row[7] }}"
+              data-date_order="{{ row[8] }}"
               data-status="{{ row[9] }}"
-              data-date_order="{{ row[2] }}"
               data-bs-toggle="modal"
-              data-bs-target="#editOrderModal"
+              data-bs-target="#orderModal"
+              onclick="populateForm(this)"
             >
               <i class="fas fa-edit"></i>
             </button>
 
             <form
               id="deleteForm{{ row[0] }}"
-              action="{{ url_for('delete_order', order_id=row[0]) }}"
+              action="{{ url_for('delete_order',order_id=row[0]) }}"
               method="POST"
               style="display: inline"
             >
