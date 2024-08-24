@@ -302,7 +302,7 @@ def delete_customer(id):
 
 
 @app.route('/add_supplier', methods=['GET', 'POST'])
-@admin_required
+
 def add_supplier():
     return supplier_crud.add_supplier()
 
@@ -341,6 +341,7 @@ def get_product_unit(productId):
     return jsonify({'error': 'Product unit not found'}), 404
 
 @app.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
+@admin_required
 def edit_order(order_id):
     if request.method == 'POST':
         order_crud.edit_order(request, order_id)
@@ -355,9 +356,11 @@ def edit_order(order_id):
     
     cursor.execute("SELECT id, name FROM product_list")
     products = cursor.fetchall()
+    
     return render_template('pur_lists.html', order=order, suppliers=suppliers, products=products)
 
 @app.route('/delete_order/<int:order_id>', methods=['POST'])
+@admin_required
 def delete_order(order_id):
     order_crud.delete_order(order_id)
     return redirect(url_for('pur_lists'))
@@ -394,10 +397,8 @@ def products():
 def add_product():
     if request.method == 'POST':
         return product_crud.add_product()
-    # Fetch categories for the dropdown
-    categories = category_crud.fetch_categories()
-    return render_template('products.html', categories=categories)
-   
+    return render_template('products.html')
+
 
 @app.route('/update_product/<int:product_id>', methods=['POST'])
 def update_product(product_id):

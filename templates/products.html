@@ -2,8 +2,6 @@
 <div class="card border-0">
   <div class="card-header">
     <h6 class="card-title">Product Information</h6>
-
-    <!-- Button trigger modal -->
     <div class="d-flex justify-content-end">
       <input
         id="searchInput"
@@ -21,14 +19,13 @@
       </button>
     </div>
   </div>
-
   <div class="card-body">
     <table class="table" id="searchTable">
       <thead>
         <tr>
           <th>#</th>
           <th>Product Name</th>
-          <th>Product unit</th>
+          <th>Product Unit</th>
           <th>Category</th>
           <th>Price</th>
           <th>Description</th>
@@ -39,29 +36,24 @@
         {% for row in data %}
         <tr>
           <td>{{ row[0] }}</td>
-
           <td>{{ row[1] }}</td>
           <td>{{ row[2] }}</td>
           <td>{{ row[3] }}</td>
-
           <td>{{ row[4] }}</td>
-
           <td>{{ row[5] }}</td>
-
           <td>
             <button
               class="btn btn-primary btn-sm edit-btn"
               data-id="{{ row[0] }}"
-              data-category-id="{{ row[2] }}"
+              data-category-id="{{ row[3] }}"
               data-name="{{ row[1] }}"
-              data-unit="{{ row[3] }}"
+              data-unit="{{ row[2] }}"
               data-price="{{ row[4] }}"
-              data-description="{{ row[4] }}"
+              data-description="{{ row[5] }}"
               onclick="openProductEditModal(this)"
             >
               <i class="fas fa-edit"></i>
             </button>
-
             <form
               id="deleteForm{{ row[0] }}"
               action="{{ url_for('delete_product', product_id=row[0]) }}"
@@ -82,8 +74,6 @@
       </tbody>
     </table>
   </div>
-
-  <!-- Modal for adding a new product -->
   <div
     class="modal fade"
     id="addProduct"
@@ -104,11 +94,10 @@
         </div>
         <div class="modal-body">
           <form
-            id="editProductForm"
+            id="addProductForm"
             method="POST"
             action="{{ url_for('add_product') }}"
           >
-            <input type="hidden" id="productId" name="id" />
             <div class="mb-3">
               <label for="productName" class="form-label">Product Name</label>
               <input
@@ -129,19 +118,18 @@
                 required
               />
             </div>
+
             <div class="mb-3">
-              <label for="categoryId" class="form-label">Category</label>
-              <select
+              <label for="category_name" class="form-label"
+                >category name
+              </label>
+              <input
+                type="text"
                 class="form-control"
-                id="categoryId"
-                name="category_id"
+                id="category_name"
+                name="category_name"
                 required
-              >
-                <option value="">Select Category</option>
-                {% for category in categories %}
-                <option value="{{ category[0] }}">{{ category[1] }}</option>
-                {% endfor %}
-              </select>
+              />
             </div>
 
             <div class="mb-3">
@@ -155,7 +143,6 @@
                 required
               />
             </div>
-
             <div class="mb-3">
               <label for="productDescription" class="form-label"
                 >Description</label
@@ -167,14 +154,12 @@
                 required
               ></textarea>
             </div>
-
             <button type="submit" class="btn btn-primary">Add Product</button>
           </form>
         </div>
       </div>
     </div>
   </div>
-
   <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
 </div>
 {% endblock %}

@@ -105,6 +105,8 @@ function openOrderEditModal(button) {
     button.getAttribute("data-supplier");
   document.getElementById("product_name").value =
     button.getAttribute("data-product_name");
+    document.getElementById("product_unit").value =
+    button.getAttribute("data-product_unit");
   document.getElementById("qty").value = button.getAttribute("data-qty");
   document.getElementById("price").value =
     button.getAttribute("data-price");
