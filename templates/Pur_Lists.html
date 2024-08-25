@@ -1,4 +1,5 @@
 {% extends 'base.html' %} {% block content %}
+
 <div class="card border-0">
   <div class="card-header">
     <h6 class="card-title">Order Information</h6>
@@ -35,7 +36,6 @@
           <th class="sortable">Subtotal</th>
           <th class="sortable">Date Order</th>
           <th class="sortable">Status</th>
-
           <th>Actions</th>
         </tr>
       </thead>
@@ -57,37 +57,37 @@
             {{ row[9] }}
           </td>
           <td>
-            <button
-              class="btn btn-primary btn-sm edit-btn"
-              data-order_id="{{ row[0] }}"
-              data-invoice_number="{{ row[1] }}"
-              data-supplier="{{ row[2] }}"
-              data-product_name="{{ row[3] }}"
-              data-unit="{{ row[4] }}"
-              data-qty="{{ row[5] }}"
-              data-price="{{ row[6] }}"
-              data-subtotal="{{ row[7] }}"
-              data-date_order="{{ row[8] }}"
-              data-status="{{ row[9] }}"
-              data-bs-toggle="modal"
-              data-bs-target="#orderModal"
-              onclick="populateForm(this)"
+            <form
+              action="{{ url_for('edit_order', order_id=row[0]) }}"
+              method="POST"
+              style="display: inline"
             >
-              <i class="fas fa-edit"></i>
-            </button>
+              <input type="hidden" name="order_id" value="{{ row[0] }}" />
+              <input type="hidden" name="invoice_number" value="{{ row[1] }}" />
+              <input type="hidden" name="supplier" value="{{ row[2] }}" />
+              <input type="hidden" name="product_name" value="{{ row[3] }}" />
+              <input type="hidden" name="product_unit" value="{{ row[4] }}" />
+              <input type="hidden" name="quantity" value="{{ row[5] }}" />
+              <input type="hidden" name="price" value="{{ row[6] }}" />
+              <input type="hidden" name="subtotal" value="{{ row[7] }}" />
+              <input type="hidden" name="date_order" value="{{ row[8] }}" />
+              <input type="hidden" name="status" value="{{ row[9] }}" />
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+            </form>
 
             <form
-              id="deleteForm{{ row[0] }}"
-              action="{{ url_for('delete_order',order_id=row[0]) }}"
+              action="{{ url_for('delete_order', order_id=row[0]) }}"
               method="POST"
               style="display: inline"
             >
               <button
-                type="button"
+                type="submit"
                 class="btn btn-danger btn-sm"
-                onclick="confirmDelete('{{ row[0] }}')"
+                onclick="return confirm('Are you sure you want to delete this order?');"
               >
-                <i class="fas fa-trash-alt"></i>
+                <i class="fas fa-trash-alt"></i> Delete
               </button>
             </form>
           </td>
@@ -95,149 +95,6 @@
         {% endfor %}
       </tbody>
     </table>
-  </div>
-
-  <!-- Modal for Edit Order -->
-  <div
-    class="modal fade"
-    id="editOrderModal"
-    tabindex="-1"
-    aria-labelledby="orderModalTitle"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="orderModalTitle">Edit Order</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <form id="editOrderForm" method="POST" enctype="multipart/form-data">
-            <input type="hidden" id="orderId" name="order_id" />
-            <div class="form-group">
-              <label for="invoiceNumber">Invoice Number</label>
-              <input
-                type="text"
-                class="form-control"
-                id="invoice_number"
-                name="invoice_number"
-                placeholder="Enter invoice number"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="supplier" class="form-label">Supplier</label>
-              <select
-                id="supplier"
-                name="supplier"
-                class="form-control"
-                required
-              >
-                <option value="" disabled selected>Select a supplier</option>
-                {% for supplier in suppliers %}
-                <option value="{{ supplier[0] }}">{{ supplier[1] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label for="productId" class="form-label">Product Name</label>
-              <select
-                class="form-control"
-                id="productId"
-                name="product_name"
-                required
-              >
-                <option value="">Select Product</option>
-                {% for product in products %}
-                <option value="{{ product[0] }}">{{ product[1] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="product_unit">Product Unit</label>
-              <input
-                type="text"
-                id="product_unit"
-                name="product_unit"
-                class="form-control"
-                required
-                readonly
-              />
-            </div>
-            <div class="form-group">
-              <label for="quantity">Quantity</label>
-              <input
-                type="number"
-                class="form-control"
-                id="qty"
-                name="qty"
-                placeholder="Enter quantity"
-              />
-            </div>
-            <div class="form-group">
-              <label for="price">Price</label>
-              <input
-                type="number"
-                step="0.01"
-                class="form-control"
-                id="price"
-                name="price"
-                placeholder="Enter price"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="subtotal">Subtotal</label>
-              <input
-                type="number"
-                step="0.01"
-                class="form-control"
-                id="subtotal"
-                name="subtotal"
-                placeholder="Enter subtotal"
-                required
-                readonly
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="status">Status</label>
-              <select class="form-control" id="status" name="status">
-                <option value="Pending">Pending</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="dateOrder">Order Date</label>
-              <input
-                type="date"
-                class="form-control"
-                id="date_order"
-                name="date_order"
-              />
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
-              <button type="submit" class="btn btn-primary">
-                Save changes
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>

@@ -6,6 +6,7 @@ from functools import wraps
 
 import os
 from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,CategoryCRUD,ProductCRUD
+
 import mysql.connector  
 from db_con.db import mydb 
 app = Flask(__name__)
@@ -311,11 +312,11 @@ def add_supplier():
 def delete_supplier(id):
     return supplier_crud.delete_supplier(id)
 
+
 @app.route('/pur_lists')
 def pur_lists():
     data = order_crud.fetch_purchases() 
     return render_template('pur_lists.html', data=data)  
-
 
 @app.route('/add_order', methods=['GET', 'POST'])
 def add_order():
@@ -340,24 +341,30 @@ def get_product_unit(productId):
         return jsonify({'product_unit': product_unit[0]})
     return jsonify({'error': 'Product unit not found'}), 404
 
+
 @app.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
-@admin_required
 def edit_order(order_id):
     if request.method == 'POST':
-        order_crud.edit_order(request, order_id)
+        # Extract data from request and update order
+        invoice_number = request.form.get('invoice_number')
+        supplier_id = request.form.get('supplier_id')
+        product_id = request.form.get('product_id')
+        product_unit = request.form.get('product_unit')
+        quantity = request.form.get('quantity')
+        price = request.form.get('price')
+        subtotal = request.form.get('subtotal')
+        date_order = request.form.get('date_order')
+        status = request.form.get('status')
+
+        order_crud.update_order(order_id, invoice_number, supplier_id, product_id, product_unit, quantity, price, subtotal, date_order, status)
         return redirect(url_for('pur_lists'))
-    # Fetch the order to pre-fill the form
-    cursor = mydb.cursor()
-    cursor.execute("SELECT * FROM purchase WHERE order_id = %s", (order_id,))
-    order = cursor.fetchone()
-    # Fetch suppliers and products for the dropdowns
-    cursor.execute("SELECT supp_id, supp_name FROM suppliers")
-    suppliers = cursor.fetchall()
-    
-    cursor.execute("SELECT id, name FROM product_list")
-    products = cursor.fetchall()
-    
-    return render_template('pur_lists.html', order=order, suppliers=suppliers, products=products)
+
+    order = order_crud.get_order(order_id)
+    suppliers = order_crud.get_suppliers()
+    products = order_crud.get_products()
+    return render_template('edit_order.html', order=order, suppliers=suppliers, products=products)
+
+
 
 @app.route('/delete_order/<int:order_id>', methods=['POST'])
 @admin_required
@@ -370,19 +377,6 @@ def delete_order(order_id):
 
 
 
-@app.route('/categories', methods=['GET', 'POST'])
-def categories():
-    data = category_crud.fetch_categories()
-    return render_template('categories.html', data=data)
-@app.route('/add_category', methods=['POST'])
-def add_category():
-    return category_crud.add_category()
-@app.route('/update_category/<int:id>', methods=['POST'])
-def update_category(id):
-    return category_crud.update_category(id)
-@app.route('/delete_category/<int:id>', methods=['POST'])
-def delete_category(id):
-    return category_crud.delete_category(id)
 
 
 

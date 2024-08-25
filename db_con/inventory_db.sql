@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 24, 2024 at 10:59 PM
+-- Generation Time: Aug 26, 2024 at 12:51 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -23,7 +23,6 @@ SET time_zone = "+00:00";
 
 -- --------------------------------------------------------
 --
-
 -- Table structure for table `company_settings`
 --
 
@@ -122,7 +121,7 @@ VALUES (
     '0617778899',
     'male',
     'Abdifitaax@gmail.com',
-    '2024-07-28'
+    '2024-07-31'
   ),
   (
     5,
@@ -155,6 +154,7 @@ VALUES (
 
 CREATE TABLE `inventory` (
   `id` int(11) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
   `product_id` int(11) DEFAULT NULL,
   `qty` int(11) NOT NULL,
   `type` tinyint(1) NOT NULL,
@@ -162,9 +162,6 @@ CREATE TABLE `inventory` (
   `form_id` int(11) NOT NULL,
   `date_updated` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
--- --------------------------------------------------------
---
-
 -- --------------------------------------------------------
 --
 -- Table structure for table `product_list`
@@ -190,7 +187,15 @@ INSERT INTO `product_list` (
     `price`,
     `description`
   )
-VALUES (2, 'Baasto', 'KG', '', 8.00, '8');
+VALUES (3, 'Baasto', 'PS', 'Electronic', 52.00, 'd'),
+  (
+    5,
+    'Laptop',
+    'PS',
+    'Computers',
+    52.00,
+    'xcvcxvxc'
+  );
 -- --------------------------------------------------------
 --
 -- Table structure for table `purchase`
@@ -198,47 +203,18 @@ VALUES (2, 'Baasto', 'KG', '', 8.00, '8');
 
 CREATE TABLE `purchase` (
   `order_id` int(11) NOT NULL,
-  `invoice_number` varchar(100) NOT NULL,
-  `supp_id` int(11) DEFAULT NULL,
-  `product_name` varchar(255) NOT NULL,
+  `invoice_number` varchar(100) DEFAULT NULL,
+  `supp_id` int(11) NOT NULL,
+  `product_id` int(20) NOT NULL,
   `product_unit` varchar(255) NOT NULL,
   `qty` int(11) NOT NULL,
   `price` decimal(10, 2) NOT NULL,
   `subtotal` decimal(10, 2) NOT NULL,
   `date_order` datetime NOT NULL,
   `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `status` enum('Pending', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending'
+  `status` enum('Pending', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending' FOREIGN KEY (supp_id) REFERENCES suppliers(id),
+  FOREIGN KEY (product_id) REFERENCES products(id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
---
--- Dumping data for table `purchase`
---
-
-INSERT INTO `purchase` (
-    `order_id`,
-    `invoice_number`,
-    `supp_id`,
-    `product_name`,
-    `product_unit`,
-    `qty`,
-    `price`,
-    `subtotal`,
-    `date_order`,
-    `date_updated`,
-    `status`
-  )
-VALUES (
-    53,
-    '112',
-    1,
-    '2',
-    '',
-    11,
-    6.00,
-    66.00,
-    '2024-08-16 00:00:00',
-    '2024-08-24 13:19:12',
-    'Pending'
-  );
 -- --------------------------------------------------------
 --
 -- Table structure for table `suppliers`
@@ -340,31 +316,18 @@ VALUES (
     '2024-08-14'
   ),
   (
-    50,
-    'Bashir',
-    '0617288888',
-    'nuur2nuur2@gmail.com',
-    '2d95666e2649fcfc6e3af75e09f5adb9',
-    'user',
-    'Active',
-    'NUUR.jpg',
-    '2024-08-13'
-  ),
-  (
-    51,
+    49,
     'Mohamed Hussein ',
     '0617220622',
     'moha@gmail.com',
-    'c20ad4d76fe97759aa27a0c99bff6710',
-    'admin',
+    '2d95666e2649fcfc6e3af75e09f5adb9',
+    'user',
     'Active',
-    'Capture.PNG',
-    '2024-08-20'
+    'nor_-_Copy.jpg',
+    '2024-07-31'
   );
 --
 -- Indexes for dumped tables
---
-
 --
 
 --
@@ -385,13 +348,10 @@ ADD PRIMARY KEY (`id`),
   ADD KEY `category_id` (`category_id`),
   ADD KEY `product_id` (`product_id`);
 --
-
---
 -- Indexes for table `product_list`
 --
 ALTER TABLE `product_list`
-ADD PRIMARY KEY (`id`),
-  ADD KEY `category_id` (`category_id`);
+ADD PRIMARY KEY (`id`);
 --
 -- Indexes for table `purchase`
 --
@@ -429,46 +389,29 @@ MODIFY `id` int(255) NOT NULL AUTO_INCREMENT,
 ALTER TABLE `inventory`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
-
---
 -- AUTO_INCREMENT for table `product_list`
 --
 ALTER TABLE `product_list`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,
-  AUTO_INCREMENT = 4;
+  AUTO_INCREMENT = 6;
 --
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
 MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT,
-  AUTO_INCREMENT = 54;
+  AUTO_INCREMENT = 63;
 --
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
 MODIFY `supp_id` int(255) NOT NULL AUTO_INCREMENT,
-  AUTO_INCREMENT = 3;
+  AUTO_INCREMENT = 2;
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,
-  AUTO_INCREMENT = 52;
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `inventory`
---
-ALTER TABLE `inventory`
-ADD CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_Id`),
-  ADD CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product_list` (`id`);
---
--- Constraints for table `product_list`
---
-ALTER TABLE `product_list`
-ADD CONSTRAINT `product_list_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_Id`);
+  AUTO_INCREMENT = 50;
 COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */
 ;

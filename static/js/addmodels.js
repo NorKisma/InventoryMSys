@@ -91,73 +91,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-function openOrderEditModal(button) {
-  const modal = new bootstrap.Modal(
-    document.getElementById("editOrderModal")
-  );
+document.addEventListener('DOMContentLoaded', function () {
+  // Populate the edit form in the modal with order details
+  window.populateForm = function(button) {
+    const orderId = button.getAttribute('data-order_id');
+    const invoiceNumber = button.getAttribute('data-invoice_number');
+    const supplier = button.getAttribute('data-supplier');
+    const productName = button.getAttribute('data-product_name');
+    const unit = button.getAttribute('data-unit');
+    const qty = button.getAttribute('data-qty');
+    const price = button.getAttribute('data-price');
+    const subtotal = button.getAttribute('data-subtotal');
+    const dateOrder = button.getAttribute('data-date_order');
+    const status = button.getAttribute('data-status');
 
-  document.getElementById("orderId").value =
-    button.getAttribute("data-order_id");
-  document.getElementById("invoice_number").value = button.getAttribute(
-    "data-invoice_number"
-  );
-  document.getElementById("supplier").value =
-    button.getAttribute("data-supplier");
-  document.getElementById("product_name").value =
-    button.getAttribute("data-product_name");
-    document.getElementById("product_unit").value =
-    button.getAttribute("data-product_unit");
-  document.getElementById("qty").value = button.getAttribute("data-qty");
-  document.getElementById("price").value =
-    button.getAttribute("data-price");
-  document.getElementById("subtotal").value =
-    button.getAttribute("data-subtotal");
-  document.getElementById("status").value =
-    button.getAttribute("data-status");
-  document.getElementById("date_order").value =
-    button.getAttribute("data-date_order");
+    document.getElementById('orderId').value = orderId;
+    document.getElementById('invoice_number').value = invoiceNumber;
+    document.getElementById('supplier').value = supplier;
+    document.getElementById('productId').value = productName;
+    document.getElementById('product_unit').value = unit;
+    document.getElementById('qty').value = qty;
+    document.getElementById('price').value = price;
+    document.getElementById('subtotal').value = subtotal;
+    document.getElementById('date_order').value = dateOrder;
+    document.getElementById('status').value = status;
 
-  // Update form action to the edit route
-  document.getElementById(
-    "editOrderForm"
-  ).action = `/edit_order/${button.getAttribute("data-order_id")}`;
+    // Update form action to the edit route
+    document.getElementById("editOrderForm").action = `/edit_order/${orderId}`;
 
-  modal.show();
-}
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('editOrderModal'));
+    modal.show();
+  };
 
-document.querySelectorAll(".edit-btn").forEach((button) => {
-  button.addEventListener("click", () => openOrderEditModal(button));
+  // Attach event listeners to all edit buttons
+  document.querySelectorAll(".edit-btn").forEach((button) => {
+    button.addEventListener("click", () => populateForm(button));
+  });
+
+  // Calculate subtotal
+  function calculateSubtotal() {
+    const qty = parseFloat(document.getElementById("qty").value) || 0;
+    const price = parseFloat(document.getElementById("price").value) || 0;
+    const subtotal = qty * price;
+    document.getElementById("subtotal").value = subtotal.toFixed(2);
+  }
+
+  document.getElementById("qty").addEventListener("input", calculateSubtotal);
+  document.getElementById("price").addEventListener("input", calculateSubtotal);
+
+  // Remove or adjust category modal functions if not used
 });
-
-function calculateSubtotal() {
-  const qty = parseFloat(document.getElementById("qty").value) || 0;
-  const price = parseFloat(document.getElementById("price").value) || 0;
-  const subtotal = qty * price;
-  document.getElementById("subtotal").value = subtotal.toFixed(2);
-}
-
-document.getElementById("qty").addEventListener("input", calculateSubtotal);
-document
-  .getElementById("price")
-  .addEventListener("input", calculateSubtotal);
-
-  // Show the modal CategoryEditModal
-function openCategoryEditModal(button) {
-  const modal = new bootstrap.Modal(document.getElementById("addCategory"));
-
-  document.getElementById("categoryId").value =
-    button.getAttribute("data-id");
-  document.getElementById("categoryName").value =
-    button.getAttribute("data-name");
-    document.getElementById("category_unit").value =
-    button.getAttribute("data-unit");
-  document.getElementById(
-    "editCategoryForm"
-  ).action = `/update_category/${button.getAttribute("data-id")}`;
-
-  modal.show();
-}
-
 
 
 

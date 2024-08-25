@@ -202,14 +202,15 @@ class CustomerCRUD:
 import mysql.connector
 from flask import flash, redirect, url_for
 
+import mysql.connector
+from flask import flash, redirect, url_for
+
 class OrderCRUD:
     def __init__(self, mydb):
         self.mydb = mydb
 
     def add_order(self, request):
-        """
-        Add a new order to the database.
-        """
+      
         invoice_number = request.form.get('invoice_number')
         supplier = request.form.get('supplier')
         product_name = request.form.get('product_name')
@@ -237,37 +238,69 @@ class OrderCRUD:
 
         return redirect(url_for('add_order'))
 
-    def edit_order(self, request, order_id):
-        """
-        Edit an existing order based on the order_id.
-        """
-        invoice_number = request.form.get('invoice_number')
-        supplier = request.form.get('supplier')
-        product_name = request.form.get('product_name')
-        product_unit = request.form.get('product_unit')
-        qty = request.form.get('qty')
-        price = request.form.get('price')
-        status = request.form.get('status')
-
+    def update_order(self, order_id, invoice_number, supplier_id, product_id, product_unit, quantity, price, subtotal, date_order, status):
         query = """
-            UPDATE purchase 
-            SET invoice_number = %s, supp_id = %s, product_name = %s, product_unit = %s, qty = %s, price = %s, status = %s 
-            WHERE order_id = %s
+        UPDATE purchase
+        SET invoice_number = %s,
+            supp_id = %s,
+            product_name = %s,
+            product_unit = %s,
+            qty = %s,
+            price = %s,
+            subtotal = %s,
+            date_order = %s,
+            status = %s
+        WHERE order_id = %s
         """
-        val = (invoice_number, supplier, product_name, product_unit, qty, price, status, order_id)
-
+        values = (invoice_number, supplier_id, product_id, product_unit, quantity, price, subtotal, date_order, status, order_id)
+        
         try:
             with self.mydb.cursor() as cursor:
-                cursor.execute(query, val)
+                cursor.execute(query, values)
                 self.mydb.commit()
-                flash('Order updated successfully.', 'success')
+                flash('Order updated successfully!', 'success')
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
 
+    def get_order(self, order_id):
+        query = "SELECT * FROM purchase WHERE order_id = %s"
+        
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(query, (order_id,))
+                order = cursor.fetchone()
+            return order
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return None
+
+    def get_suppliers(self):
+      
+        query = "SELECT id, name FROM suppliers"
+        
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(query)
+                suppliers = cursor.fetchall()
+            return suppliers
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []
+
+    def get_products(self):
+        query = "SELECT id, name FROM product_list"
+        
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(query)
+                products = cursor.fetchall()
+            return products
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []
+
     def delete_order(self, order_id):
-        """
-        Delete an order by its order_id.
-        """
+       
         try:
             with self.mydb.cursor() as cursor:
                 cursor.execute("DELETE FROM purchase WHERE order_id = %s", (order_id,))
@@ -277,13 +310,10 @@ class OrderCRUD:
             flash(f'An error occurred: {err}', 'danger')
 
     def fetch_purchases(self):
-        """
-        Fetch all orders with supplier and product details.
-        """
         try:
             with self.mydb.cursor() as cursor:
                 query = """
-                    SELECT p.order_id, p.invoice_number, s.supp_name, pl.name, pl.product_unit,
+                    SELECT p.order_id, p.invoice_number, s.supp_id AS supplier_name, pl.name AS product_name, p.product_unit,
                         p.qty, p.price, p.subtotal, p.date_order, p.status
                     FROM purchase p
                     JOIN suppliers s ON p.supp_id = s.supp_id
