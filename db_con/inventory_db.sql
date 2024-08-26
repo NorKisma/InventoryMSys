@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 26, 2024 at 12:51 AM
+-- Generation Time: Aug 27, 2024 at 12:13 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -154,7 +154,6 @@ VALUES (
 
 CREATE TABLE `inventory` (
   `id` int(11) NOT NULL,
-  `category_id` int(11) DEFAULT NULL,
   `product_id` int(11) DEFAULT NULL,
   `qty` int(11) NOT NULL,
   `type` tinyint(1) NOT NULL,
@@ -187,14 +186,21 @@ INSERT INTO `product_list` (
     `price`,
     `description`
   )
-VALUES (3, 'Baasto', 'PS', 'Electronic', 52.00, 'd'),
-  (
+VALUES (
     5,
     'Laptop',
     'PS',
     'Computers',
     52.00,
     'xcvcxvxc'
+  ),
+  (
+    6,
+    'Desktop',
+    'PS',
+    'Computers',
+    52.00,
+    'Desktop  only one'
   );
 -- --------------------------------------------------------
 --
@@ -207,14 +213,56 @@ CREATE TABLE `purchase` (
   `supp_id` int(11) NOT NULL,
   `product_id` int(20) NOT NULL,
   `product_unit` varchar(255) NOT NULL,
-  `qty` int(11) NOT NULL,
+  `qty` int(50) NOT NULL,
   `price` decimal(10, 2) NOT NULL,
   `subtotal` decimal(10, 2) NOT NULL,
   `date_order` datetime NOT NULL,
   `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `status` enum('Pending', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending' FOREIGN KEY (supp_id) REFERENCES suppliers(id),
-  FOREIGN KEY (product_id) REFERENCES products(id)
+  `status` enum('Pending', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending'
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+--
+-- Dumping data for table `purchase`
+--
+
+INSERT INTO `purchase` (
+    `order_id`,
+    `invoice_number`,
+    `supp_id`,
+    `product_id`,
+    `product_unit`,
+    `qty`,
+    `price`,
+    `subtotal`,
+    `date_order`,
+    `date_updated`,
+    `status`
+  )
+VALUES (
+    77,
+    '13',
+    1,
+    3,
+    'PS',
+    88,
+    2.00,
+    176.00,
+    '2024-08-09 00:00:00',
+    '2024-08-26 14:05:44',
+    'Pending'
+  ),
+  (
+    83,
+    '12',
+    1,
+    5,
+    'PS',
+    6,
+    320.00,
+    1920.00,
+    '2024-08-06 00:00:00',
+    '2024-08-26 15:11:14',
+    'Pending'
+  );
 -- --------------------------------------------------------
 --
 -- Table structure for table `suppliers`
@@ -345,7 +393,6 @@ ADD PRIMARY KEY (`id`);
 --
 ALTER TABLE `inventory`
 ADD PRIMARY KEY (`id`),
-  ADD KEY `category_id` (`category_id`),
   ADD KEY `product_id` (`product_id`);
 --
 -- Indexes for table `product_list`
@@ -356,7 +403,9 @@ ADD PRIMARY KEY (`id`);
 -- Indexes for table `purchase`
 --
 ALTER TABLE `purchase`
-ADD PRIMARY KEY (`order_id`);
+ADD PRIMARY KEY (`order_id`),
+  ADD KEY `supp_id` (`supp_id`),
+  ADD KEY `product_id` (`product_id`);
 --
 -- Indexes for table `suppliers`
 --
@@ -393,13 +442,13 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 ALTER TABLE `product_list`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,
-  AUTO_INCREMENT = 6;
+  AUTO_INCREMENT = 7;
 --
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
 MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT,
-  AUTO_INCREMENT = 63;
+  AUTO_INCREMENT = 84;
 --
 -- AUTO_INCREMENT for table `suppliers`
 --
