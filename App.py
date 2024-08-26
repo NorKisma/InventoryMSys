@@ -312,65 +312,62 @@ def add_supplier():
 def delete_supplier(id):
     return supplier_crud.delete_supplier(id)
 
+@app.route('/add_order', methods=['GET', 'POST'])
+def add_order():
+    if request.method == 'POST':
+        return order_crud.add_order(request)
+    suppliers = order_crud.fetch_suppliers()
+    products = order_crud.get_products()
+    return render_template('PurOrder.html', suppliers=suppliers, products=products)
+   
 
 @app.route('/pur_lists')
 def pur_lists():
     data = order_crud.fetch_purchases() 
-    return render_template('pur_lists.html', data=data)  
-
-@app.route('/add_order', methods=['GET', 'POST'])
-def add_order():
-    order_crud = OrderCRUD(mydb)
-    if request.method == 'POST':
-        return order_crud.add_order(request)
-    # Fetch suppliers and products for the form
-    cursor = mydb.cursor()
-    cursor.execute("SELECT supp_id, supp_name FROM suppliers")
-    suppliers = cursor.fetchall()
-    cursor.execute("SELECT id, name FROM product_list")
-    products = cursor.fetchall()
-    return render_template('PurOrder.html', suppliers=suppliers, products=products)
-@app.route('/get_product_unit/<int:productId>', methods=['GET'])
-def get_product_unit(productId):
-    order_crud = OrderCRUD(mydb)
-    cursor = mydb.cursor()
-    query = "SELECT product_unit FROM product_list WHERE id = %s"
-    cursor.execute(query, (productId,))
-    product_unit = cursor.fetchone()
-    if product_unit:
-        return jsonify({'product_unit': product_unit[0]})
-    return jsonify({'error': 'Product unit not found'}), 404
-
+    return render_template('pur_lists.html', data=data) 
 
 @app.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
 def edit_order(order_id):
-    if request.method == 'POST':
-        # Extract data from request and update order
-        invoice_number = request.form.get('invoice_number')
-        supplier_id = request.form.get('supplier_id')
-        product_id = request.form.get('product_id')
-        product_unit = request.form.get('product_unit')
-        quantity = request.form.get('quantity')
-        price = request.form.get('price')
-        subtotal = request.form.get('subtotal')
-        date_order = request.form.get('date_order')
-        status = request.form.get('status')
-
-        order_crud.update_order(order_id, invoice_number, supplier_id, product_id, product_unit, quantity, price, subtotal, date_order, status)
+    orders = order_crud.fetch_purchases()
+    order = next((o for o in orders if o[0] == order_id), None)
+    
+    if not order:
+        flash('Order not found.', 'danger')
         return redirect(url_for('pur_lists'))
-
-    order = order_crud.get_order(order_id)
-    suppliers = order_crud.get_suppliers()
+    
+    if request.method == 'POST':
+        return order_crud.add_order(request)
+    
     products = order_crud.get_products()
-    return render_template('edit_order.html', order=order, suppliers=suppliers, products=products)
-
-
+    suppliers = order_crud.fetch_suppliers()
+    
+    return render_template('pur_lists.html', order=order, products=products, suppliers=suppliers)
 
 @app.route('/delete_order/<int:order_id>', methods=['POST'])
-@admin_required
 def delete_order(order_id):
     order_crud.delete_order(order_id)
     return redirect(url_for('pur_lists'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
 
 
  

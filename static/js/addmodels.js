@@ -146,3 +146,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+
+
+
+    // Populate the modal fields with the product data
+    function openProductEditModal(button) {
+      const form = document.getElementById('editProductForm');
+      form.action = '/edit_product/' + button.getAttribute('data-id');
+      document.getElementById('editProductName').value = button.getAttribute('data-name');
+      document.getElementById('editProductUnit').value = button.getAttribute('data-unit');
+      document.getElementById('editProductPrice').value = button.getAttribute('data-price');
+      document.getElementById('editProductDescription').value = button.getAttribute('data-description');
+      new bootstrap.Modal(document.getElementById('editProductModal')).show();
+  }
+  
+
+    // Set the form action URL for updating the product (assuming a route for editing exists)
+    const form = document.getElementById('addProductForm');
+    form.action = `/edit_product/${productId}`;
+
+    // Show the modal
+    const addProductModal = new bootstrap.Modal(document.getElementById('addProduct'));
+    addProductModal.show();
+
+
+// Function to confirm product deletion
+function confirmDelete(productId) {
+    const confirmed = confirm("Are you sure you want to delete this product?");
+    if (confirmed) {
+        // Submit the form to delete the product
+        document.getElementById(`deleteForm${productId}`).submit();
+    }
+}

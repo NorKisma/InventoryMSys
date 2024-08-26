@@ -7,48 +7,30 @@
       <h4 class="card-title">Edit Order</h4>
     </div>
     <div class="card-body">
-      <form method="post" action="{{ url_for('edit_order', order_id=order.id) }}">
-        <div class="mb-3">
-          <label for="date_order">Date Order</label>
-          <input
-            type="date"
-            id="date_order"
-            name="date_order"
-            class="form-control"
-            value="{{ order.date_order }}"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <label for="invoice_number">Invoice Number</label>
-          <input
-            type="text"
-            id="invoice_number"
-            name="invoice_number"
-            class="form-control"
-            value="{{ order.invoice_number }}"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <label for="supplier" class="form-label">Supplier</label>
-          <select id="supplier" name="supplier" class="form-control" required>
-            <option value="" disabled>Select a supplier</option>
+     
+      <form class="edit_order" method="POST" action="{{ url_for('edit_order', order_id=order[0]) }}">
+        <label for="invoice_number">Invoice Number:</label>
+        <input type="text" id="invoice_number" name="invoice_number" value="{{ order[1] }}" class="form-control" required>
+        
+        <label for="supplier">Supplier:</label>
+        <select id="supplier" name="supplier" class="form-control" required>
             {% for supplier in suppliers %}
-              <option value="{{ supplier.id }}" {% if supplier.id == order.supplier_id %}selected{% endif %}>{{ supplier.name }}</option>
+                <option value="{{ supplier[0] }}" {% if supplier[0] == order[2] %}selected{% endif %}>
+                    {{ supplier[1] }}
+                </option>
             {% endfor %}
-          </select>
-        </div>
-
-        <div class="mb-3">
-          <label for="product_name" class="form-label">Product Name</label>
-          <select id="product_name" name="product_name" class="form-control" required>
-            <option value="" disabled>Select Product</option>
+        </select>
+        
+        <label for="product_name">Product Name:</label>
+        <select id="product_name" name="product_name" class="form-control" required>
             {% for product in products %}
-              <option value="{{ product.id }}" {% if product.id == order.product_id %}selected{% endif %}>{{ product.name }}</option>
+                <option value="{{ product[0] }}" {% if product[0] == order[3] %}selected{% endif %}>
+                    {{ product[1] }}
+                </option>
             {% endfor %}
-          </select>
-        </div>
+        </select>
+
+        
 
         <div class="mb-3">
           <label for="product_unit">Product Unit</label>
@@ -57,12 +39,13 @@
             id="product_unit"
             name="product_unit"
             class="form-control"
-            value="{{ order.product_unit }}"
+            value="{{ order[4] }}"
+           
             required
             readonly
           />
         </div>
-
+        
         <div class="mb-3">
           <label for="quantity">Quantity</label>
           <input
@@ -70,11 +53,12 @@
             id="quantity"
             name="quantity"
             class="form-control"
-            value="{{ order.quantity }}"
+            value="{{ order[5] }}"
             required
             oninput="calculateSubtotal()"
           />
         </div>
+        
         <div class="mb-3">
           <label for="price">Price</label>
           <input
@@ -83,11 +67,12 @@
             id="price"
             name="price"
             class="form-control"
-            value="{{ order.price }}"
+            value="{{ order[6] }}"
             required
             oninput="calculateSubtotal()"
           />
         </div>
+        
         <div class="mb-3">
           <label for="subtotal">Subtotal</label>
           <input
@@ -96,11 +81,12 @@
             id="subtotal"
             name="subtotal"
             class="form-control"
-            value="{{ order.subtotal }}"
+            value="{{ order[7] }}"
             required
             readonly
           />
         </div>
+        
         <div class="mb-3">
           <label for="status">Status</label>
           <select id="status" name="status" class="form-control" required>
@@ -116,35 +102,32 @@
     </div>
   </div>
 </div>
-
 <script>
-  document.getElementById("product_name").addEventListener("change", function () {
-    var productId = this.value; // Get selected productId
-
-    if (productId) {
-      // Fetch the product unit using AJAX
-      fetch("/get_product_unit/" + productId)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.product_unit) {
-            document.getElementById("product_unit").value = data.product_unit; // Update product_unit field
-          } else {
-            alert("Product unit not found");
-          }
-        })
-        .catch((error) => console.error("Error fetching product unit:", error));
-    } else {
-      document.getElementById("product_unit").value = ""; // Clear product_unit field if no product selected
-    }
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initialize product unit based on the initially selected product
+    updateProductUnit();
   });
 
-  function calculateSubtotal() {
-    var quantity = parseFloat(document.getElementById("quantity").value) || 0;
-    var price = parseFloat(document.getElementById("price").value) || 0;
-    var subtotal = quantity * price;
-
-    document.getElementById("subtotal").value = subtotal.toFixed(2);
+  function updateProductUnit() {
+    var productSelect = document.getElementById("productId");
+    var selectedOption = productSelect.options[productSelect.selectedIndex];
+    var unit = selectedOption ? selectedOption.getAttribute("data-unit") : "";
+    document.getElementById("productUnit").value = unit;
   }
-</script>
 
+  // Update product unit when the selection changes
+  document
+    .getElementById("productId")
+    .addEventListener("change", updateProductUnit);
+
+    <script>
+      function calculateSubtotal() {
+        const quantity = document.getElementById('quantity').value || 0;
+        const price = document.getElementById('price').value || 0;
+        const subtotal = (quantity * price).toFixed(2);
+        document.getElementById('subtotal').value = subtotal;
+      }
+      </script>
+      
+</script>
 {% endblock %}

@@ -27,6 +27,7 @@
             required
           />
         </div>
+        <!-- Supplier Dropdown -->
         <div class="mb-3">
           <label for="supplier" class="form-label">Supplier</label>
           <select id="supplier" name="supplier" class="form-control" required>
@@ -37,9 +38,7 @@
           </select>
         </div>
 
-
-
-        
+        <!-- Product Dropdown -->
         <div class="mb-3">
           <label for="productId" class="form-label">Product Name</label>
           <select
@@ -50,19 +49,21 @@
           >
             <option value="">Select Product</option>
             {% for product in products %}
-            <option value="{{ product[0] }}">{{ product[1] }}</option>
+            <option value="{{ product[0] }}" data-unit="{{ product[2] }}">
+              {{ product[1] }}
+            </option>
             {% endfor %}
           </select>
         </div>
 
+        <!-- Product Unit -->
         <div class="mb-3">
-          <label for="product_unit">Product Unit</label>
+          <label for="productUnit" class="form-label">Product Unit</label>
           <input
             type="text"
-            id="product_unit"
+            id="productUnit"
             name="product_unit"
             class="form-control"
-            required
             readonly
           />
         </div>
@@ -102,51 +103,38 @@
             readonly
           />
         </div>
-        </div>
-        <div class="mb-3 ">
+
+        <div class="mb-3">
           <label for="status">Status</label>
           <select class="form-control" id="status" name="status" required>
             <option value="Pending">Pending</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
           </select>
-
         </div>
         <div class="mb-3">
-             <button type="submit" class="btn btn-primary">Submit</button></div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
       </form>
     </div>
   </div>
 </div>
-
+<script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
 <script>
-  document.getElementById("productId").addEventListener("change", function () {
-    var productId = this.value; // Get selected productId
-
-    if (productId) {
-      // Fetch the product unit using AJAX
-      fetch("/get_product_unit/" + productId)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.product_unit) {
-            document.getElementById("product_unit").value = data.product_unit; // Update product_unit field
-          } else {
-            alert("Product unit not found");
-          }
-        })
-        .catch((error) => console.error("Error fetching product unit:", error));
-    } else {
-      document.getElementById("product_unit").value = ""; // Clear product_unit field if no product selected
-    }
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initialize product unit based on the initially selected product
+    updateProductUnit();
   });
 
-  function calculateSubtotal() {
-    var quantity = parseFloat(document.getElementById("qty").value) || 0;
-    var price = parseFloat(document.getElementById("price").value) || 0;
-    var subtotal = quantity * price;
-
-    document.getElementById("subtotal").value = subtotal.toFixed(2);
+  function updateProductUnit() {
+    var productSelect = document.getElementById("productId");
+    var selectedOption = productSelect.options[productSelect.selectedIndex];
+    var unit = selectedOption ? selectedOption.getAttribute("data-unit") : "";
+    document.getElementById("productUnit").value = unit;
   }
+
+  // Update product unit when the selection changes
+  document
+    .getElementById("productId")
+    .addEventListener("change", updateProductUnit);
 </script>
 
 {% endblock %}
