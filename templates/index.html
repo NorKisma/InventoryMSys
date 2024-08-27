@@ -84,43 +84,78 @@
     </div>
     <!-- Table Element -->
     <div class="card border-0">
-      <div class="card-header">
-        <h5 class="card-title">Basic Table</h5>
-        <h6 class="card-subtitle text-muted">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum
-          ducimus, necessitatibus reprehenderit itaque!
-        </h6>
-      </div>
-      <div class="card-body">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">First</th>
-              <th scope="col">Last</th>
-              <th scope="col">Handle</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>@fat</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td colspan="2">Larry the Bird</td>
-              <td>@twitter</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="container mt-5">
+        <div class="row">
+          <!-- First Table -->
+          <div class="col-md-8">
+            <div class="card-header">
+              <h5 class="card-title">Table 1</h5>
+              <h6 class="card-subtitle text-muted">Description for Table 1.</h6>
+            </div>
+            <div class="card-body">
+              <table class="table" id="searchTable1">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th class="sortable">Invoice Number</th>
+                    <th class="sortable">Quantity</th>
+                    <th class="sortable">Price</th>
+                    <th class="sortable">Subtotal</th>
+                    <th class="sortable">Date Order</th>
+                    <th class="sortable">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="orderTableBody1">
+                  {% for row in data1 %}
+                  <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[5] }}</td>
+                    <td>{{ row[6] }}</td>
+                    <td>{{ row[7] }}</td>
+                    <td>{{ row[8] }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Second Table -->
+          <div class="col-md-4">
+            <div class="card-header">
+              <h5 class="card-title">Table 2</h5>
+              <h6 class="card-subtitle text-muted">Description for Table 2.</h6>
+            </div>
+            <div class="card-body">
+              <table class="table" id="searchTable2">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th class="sortable">Invoice Number</th>
+                    <th class="sortable">Quantity</th>
+                    <th class="sortable">Price</th>
+                    <th class="sortable">Subtotal</th>
+                    <th class="sortable">Date Order</th>
+                    <th class="sortable">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="orderTableBody2">
+                  {% for row in data2 %}
+                  <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[5] }}</td>
+                    <td>{{ row[6] }}</td>
+                    <td>{{ row[7] }}</td>
+                    <td>{{ row[8] }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

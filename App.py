@@ -303,7 +303,6 @@ def delete_customer(id):
 
 
 @app.route('/add_supplier', methods=['GET', 'POST'])
-
 def add_supplier():
     return supplier_crud.add_supplier()
 
@@ -328,20 +327,42 @@ def pur_lists():
 
 @app.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
 def edit_order(order_id):
-    orders = order_crud.fetch_purchases()
-    order = next((o for o in orders if o[0] == order_id), None)
-    
-    if not order:
-        flash('Order not found.', 'danger')
+    try:
+        # Fetch all orders and find the one with the given order_id
+        orders = order_crud.fetch_purchases()
+        order = next((o for o in orders if o[0] == order_id), None)
+        
+        if not order:
+            flash('Order not found.', 'danger')
+            return redirect(url_for('pur_lists'))
+
+        if request.method == 'POST':
+            # Handle form submission to update the order
+            order_crud.update_order(
+                order_id=order_id,
+                invoice_number=request.form.get('invoice_number'),
+                supplier=request.form.get('supplier'),
+                product_name=request.form.get('product_id'),
+                product_unit=request.form.get('product_unit'),
+                qty=request.form.get('qty'),
+                price=request.form.get('price'),
+                subtotal=request.form.get('subtotal'),
+                status=request.form.get('status'),
+                date_order=request.form.get('date_order')
+            )
+            return redirect(url_for('pur_lists'))
+
+        # Fetch products and suppliers for the dropdowns
+        products = order_crud.get_products()
+        suppliers = order_crud.fetch_suppliers()
+
+        return render_template('edit_order.html', order=order, products=products, suppliers=suppliers)
+
+    except Exception as e:
+        flash(f'An unexpected error occurred: {e}', 'danger')
+        # Optionally log the error
+        # app.logger.error(f'Error in edit_order route: {e}')
         return redirect(url_for('pur_lists'))
-    
-    if request.method == 'POST':
-        return order_crud.add_order(request)
-    
-    products = order_crud.get_products()
-    suppliers = order_crud.fetch_suppliers()
-    
-    return render_template('pur_lists.html', order=order, products=products, suppliers=suppliers)
 
 @app.route('/delete_order/<int:order_id>', methods=['POST'])
 def delete_order(order_id):

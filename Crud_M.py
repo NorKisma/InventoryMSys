@@ -402,8 +402,8 @@ class OrderCRUD:
             return redirect(url_for('pur_lists'))
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
-            return redirect(url_for('update_order', order_id=order_id))
-        return redirect(url_for('pur_lists'))
+            return redirect(url_for('pur_lists', order_id=order_id))
+        return redirect(url_for('edit_order'))
 
     def delete_order(self, order_id):
         try:

@@ -155,7 +155,7 @@ a.sidebar-link {
 
     border-radius: 10px;
     
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
 }
 
 .card-body {
@@ -189,16 +189,22 @@ a.sidebar-link {
 /* General table styling */
 .table {
     width: 100%;
-    border-collapse: collapse; 
-    margin-bottom: .2rem; 
-   
-  }
-  
-  .table thead {
-    background-color:#343a40; 
-    color: #f1f3f5; 
-  
-  }
+    border-collapse: collapse;
+    margin-bottom: 0.2rem;
+}
+
+.table thead {
+    background-color: #0c8548;
+    color: #f1f3f5;
+    text-align: middle; 
+}
+
+.table td {
+    text-align: middle; 
+    vertical-align: middle; 
+    padding: 0.5rem; 
+}
+
 
   .status-pending {
     color: rgb(160, 10, 102);
@@ -282,7 +288,7 @@ html[data-bs-theme="dark"] .navbar {
 }
 
 html[data-bs-theme="light"] .navbar {
-    background: #846ee6; 
+    background: #076d2e; 
     color: #FFF; 
 }
 html[data-bs-theme="dark"] #sidebar {
@@ -290,7 +296,8 @@ html[data-bs-theme="dark"] #sidebar {
 }
 
 html[data-bs-theme="light"] #sidebar {
-    background: #0b3d1f; 
+    background: #044b1f; 
     color: #FFF;
     
 }
+
