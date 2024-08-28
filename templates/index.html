@@ -7,13 +7,16 @@
     </div>
     <div class="row">
       <div class="col-12 col-md-3 d-flex">
-        <div class="card flex-fill border-0 illustration">
+        <div class="card1 flex-fill border-0 illustration">
           <div class="card-body p-0 d-flex flex-fill">
             <div class="row g-0 w-100">
               <div class="col-6">
-                <div class="p-3 m-1">
-                  <h4>Welcome Back, Admin</h4>
-                  <p class="mb-0">Admin Dashboard, CodzSword</p>
+                <div class="flex-grow-1">
+                  <h4>$ 78.00</h4>
+                  <p class="mb-2">Total Earnings</p>
+                  <div class="mb-0">
+                    <span> Since Last Month </span>
+                  </div>
                 </div>
               </div>
               <div class="col-6 align-self-end text-end">
@@ -28,31 +31,16 @@
         </div>
       </div>
       <div class="col-12 col-md-3 d-flex">
-        <div class="card flex-fill border-0">
-          <div class="card-body py-4">
-            <div class="d-flex align-items-start">
-              <div class="flex-grow-1">
-                <h4 class="mb-2">$ 78.00</h4>
-                <p class="mb-2">Total Earnings</p>
-                <div class="mb-0">
-                  <span class="badge text-success me-2"> +9.0% </span>
-                  <span class="text-muted"> Since Last Month </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 col-md-3 d-flex">
-        <div class="card flex-fill border-0">
-          <div class="card-body py-4">
-            <div class="d-flex align-items-start">
-              <div class="flex-grow-1">
-                <h4 class="mb-2">$ 78.00</h4>
-                <p class="mb-2">Total Earnings</p>
-                <div class="mb-0">
-                  <span class="badge text-success me-2"> +9.0% </span>
-                  <span class="text-muted"> Since Last Month </span>
+        <div class="card1 flex-fill border-0 illustration">
+          <div class="card-body p-0 d-flex flex-fill">
+            <div class="row g-0 w-100">
+              <div class="col-6">
+                <div class="flex-grow-1">
+                  <h4 class="mb-2">$ 78.00</h4>
+                  <p class="mb-2">Total Earnings</p>
+                  <div class="mb-0">
+                    <span> Since Last Month </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -61,103 +49,128 @@
       </div>
 
       <div class="col-12 col-md-3 d-flex">
-        <div class="card flex-fill border-0">
-          <div class="card-body py-4">
-            <div class="d-flex align-items-start">
-              <div class="icon-container">
-                <i class="fas fa-users"></i>
-              </div>
-              <div class="flex-grow-1">
-                <h4 class="mb-2">
-                  {{ user_count }}
-                  <span class="badge text-success me-2">
-                    <p class="mb-0">Total Users</p>
-                  </span>
-                </h4>
-
-                <div class="mb-0"></div>
+        <div class="card1 flex-fill border-0 illustration">
+          <div class="card-body p-0 d-flex flex-fill">
+            <div class="row g-0 w-100">
+              <div class="col-6">
+                <div class="flex-grow-1">
+                  <h4 class="mb-2">$ 78.00</h4>
+                  <p class="mb-2">Total Earnings</p>
+                  <div class="mb-0">
+                    <span> Since Last Month </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      
+      <div class="col-12 col-md-3 d-flex">
+        <div class="card1 flex-fill border-0 illustration">
+          <div class="card-body p-0 d-flex flex-fill">
+            <div class="row g-0 w-100">
+              <div class="col-6">
+                <div class="flex-grow-1">
+                  
+                     
+                  <i class="fas fa-users"></i>
+                    <h4 class="mb-2">{{ user_count }}</h4>
+
+                  <p class="mb-2">Total Users</p>
+                  <div class="mb-0">
+                    <span>Since Last Month</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+      
+    </div>
+  </div>
+ 
+<!-- Container for Side-by-Side Cards -->
+
+  <div class="row">
+    <!-- First Card (Table 1) -->
+    <div class="col-md-8">
+      <div class="card border-0">
+        <div class="card-body">
+          <h5 class="card-title">Table 1</h5>
+          <h6 class="card-subtitle text-muted">Description for Table 1.</h6>
+          <table class="table" id="searchTable1">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="sortable">Invoice Number</th>
+                <th class="sortable">Quantity</th>
+                <th class="sortable">Price</th>
+                <th class="sortable">Subtotal</th>
+                <th class="sortable">Date Order</th>
+                <th class="sortable">Status</th>
+              </tr>
+            </thead>
+            <tbody id="orderTableBody1">
+              {% for row in data1 %}
+              <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[5] }}</td>
+                <td>{{ row[6] }}</td>
+                <td>{{ row[7] }}</td>
+                <td>{{ row[8] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-    <!-- Table Element -->
-    <div class="card border-0">
-      <div class="container mt-5">
-        <div class="row">
-          <!-- First Table -->
-          <div class="col-md-8">
-            <div class="card-header">
-              <h5 class="card-title">Table 1</h5>
-              <h6 class="card-subtitle text-muted">Description for Table 1.</h6>
-            </div>
-            <div class="card-body">
-              <table class="table" id="searchTable1">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th class="sortable">Invoice Number</th>
-                    <th class="sortable">Quantity</th>
-                    <th class="sortable">Price</th>
-                    <th class="sortable">Subtotal</th>
-                    <th class="sortable">Date Order</th>
-                    <th class="sortable">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="orderTableBody1">
-                  {% for row in data1 %}
-                  <tr>
-                    <td>{{ row[0] }}</td>
-                    <td>{{ row[1] }}</td>
-                    <td>{{ row[5] }}</td>
-                    <td>{{ row[6] }}</td>
-                    <td>{{ row[7] }}</td>
-                    <td>{{ row[8] }}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          <!-- Second Table -->
-          <div class="col-md-4">
-            <div class="card-header">
-              <h5 class="card-title">Table 2</h5>
-              <h6 class="card-subtitle text-muted">Description for Table 2.</h6>
-            </div>
-            <div class="card-body">
-              <table class="table" id="searchTable2">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th class="sortable">Invoice Number</th>
-                    <th class="sortable">Quantity</th>
-                    <th class="sortable">Price</th>
-                    <th class="sortable">Subtotal</th>
-                    <th class="sortable">Date Order</th>
-                    <th class="sortable">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="orderTableBody2">
-                  {% for row in data2 %}
-                  <tr>
-                    <td>{{ row[0] }}</td>
-                    <td>{{ row[1] }}</td>
-                    <td>{{ row[5] }}</td>
-                    <td>{{ row[6] }}</td>
-                    <td>{{ row[7] }}</td>
-                    <td>{{ row[8] }}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
+    <!-- Second Card (Table 2) -->
+    <div class="col-md-4">
+      <div class="card border-0">
+        <div class="card-body">
+          <h5 class="card-title">Table 2</h5>
+          <h6 class="card-subtitle text-muted">Description for Table 2.</h6>
+          <table class="table" id="searchTable2">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="sortable">Invoice Number</th>
+                <th class="sortable">Quantity</th>
+                <th class="sortable">Price</th>
+                <th class="sortable">Date Order</th>
+                <th class="sortable">Status</th>
+              </tr>
+            </thead>
+            <tbody id="orderTableBody2">
+              {% for row in data2 %}
+              <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[6] }}</td>
+                <td>{{ row[7] }}</td>
+                <td>{{ row[8] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+
+
+
+
+
 </main>
 {% endblock %}
