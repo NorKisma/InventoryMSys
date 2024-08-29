@@ -331,6 +331,7 @@ def edit_order(order_id):
         # Fetch all orders and find the one with the given order_id
         orders = order_crud.fetch_purchases()
         order = next((o for o in orders if o[0] == order_id), None)
+       
         
         if not order:
             flash('Order not found.', 'danger')
@@ -355,7 +356,7 @@ def edit_order(order_id):
         # Fetch products and suppliers for the dropdowns
         products = order_crud.get_products()
         suppliers = order_crud.fetch_suppliers()
-
+       
         return render_template('edit_order.html', order=order, products=products, suppliers=suppliers)
 
     except Exception as e:

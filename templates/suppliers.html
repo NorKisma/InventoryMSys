@@ -15,7 +15,7 @@
         type="button"
         class="btn btn-primary"
         data-bs-toggle="modal"
-        data-bs-target="#editSupplierModal"
+        data-bs-target="#addSupplier"
       >
         <i class="fa fa-plus-circle"></i> Add New Supplier
       </button>
@@ -48,17 +48,13 @@
           <td>{{ row[6] }}</td>
           <td>
             <button
-              class="btn btn-primary btn-sm edit-btn"
-              data-id="{{ row[0] }}"
-              data-name="{{ row[1] }}"
-              data-contact="{{ row[2] }}"
-              data-email="{{ row[3] }}"
-              data-company="{{ row[4] }}"
-              data-address="{{ row[5] }}"
-              data-date-added="{{ row[6] }}"
-              onclick="editSupplierModal(this)"
+              type="button"
+              class="btn btn-primary btn-sm"
+              data-toggle="modal"
+              data-target="#addSupplier"
+              onclick="populateModal('{{ row[0] }}', '{{ row[1] }}', '{{ row[2] }}', '{{ row[3] }}', '{{ row[4] }}', '{{ row[5] }}', '{{ row[6] }}')"
             >
-              <i class="fas fa-edit"></i>
+              Edit
             </button>
 
             <form

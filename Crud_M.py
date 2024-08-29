@@ -81,18 +81,18 @@ class Supplier:
     def add_supplier(self):
         if request.method == 'POST':
             supplier_data = {
-                'supplierName': request.form.get('supplierName'),
-                'supplierContact': request.form.get('supplierContact'),
-                'supplierEmail': request.form.get('supplierEmail'),
-                'supplierCompany': request.form.get('supplierCompany'),
-                'supplierAddress': request.form.get('supplierAddress'),
-                'supplierDate': request.form.get('supplierDate'),
-                'supplierId': request.form.get('supplierId')
+                'supplierName': request.form.get('supp_name'),
+                'supplierContact': request.form.get('suppContact'),
+                'supplierEmail': request.form.get('suppEmail'),
+                'supplierCompany': request.form.get('suppCompany'),
+                'supplierAddress': request.form.get('suppAddress'),
+                'supplierDate': request.form.get('dateAdded'),
+                'supplierId': request.form.get('suppId')
             }
 
             if supplier_data['supplierId']:
                 sql = """UPDATE suppliers 
-                         SET supp_Name = %s, supp_contact = %s, supp_email = %s, supp_company = %s, supp_address = %s, date_added = %s 
+                         SET supp_name = %s, supp_contact = %s, supp_email = %s, supp_company = %s, supp_address = %s, date_added = %s 
                          WHERE supp_id = %s"""
                 val = (supplier_data['supplierName'], supplier_data['supplierContact'], supplier_data['supplierEmail'],
                        supplier_data['supplierCompany'], supplier_data['supplierAddress'], supplier_data['supplierDate'],
@@ -111,7 +111,7 @@ class Supplier:
             except mysql.connector.Error as err:
                 flash(f'An error occurred: {err}', 'danger')
 
-            return redirect(url_for('add_supplier_route'))
+            return redirect(url_for('add_supplier'))
 
         # For GET requests, render the template with the data
         data = self.fetch_suppliers()
@@ -359,7 +359,8 @@ class OrderCRUD:
             subtotal = request.form.get('subtotal')
             status = request.form.get('status')
             date_order = request.form.get('date_order')
-            order_id = request.form.get('order_id')  # For updating existing orders
+            order_id = request.form.get('order_id') 
+            stock_from = 'received'
 
             if order_id:
                 return self.update_order(order_id, invoice_number, supplier, product_name, product_unit, qty, price, subtotal, status, date_order)
@@ -399,11 +400,39 @@ class OrderCRUD:
                 cursor.execute(sql, val)
                 self.mydb.commit()
                 flash('Order updated successfully.', 'success')
+
+                # Update inventory if the order is completed
+                if status == 'completed':
+                    self.update_inventory(product_name, qty)
+
             return redirect(url_for('pur_lists'))
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return redirect(url_for('pur_lists', order_id=order_id))
         return redirect(url_for('edit_order'))
+
+    def update_inventory(self, product_name, qty):
+        # Check if the product exists in the inventory
+        check_sql = "SELECT qty FROM inventory WHERE product_id = %s"
+        update_sql = "UPDATE inventory SET qty = qty + %s, date_updated = NOW() WHERE product_id = %s"
+        insert_sql = "INSERT INTO inventory (product_id, qty, stock_from, date_updated) VALUES (%s, %s, 'purchase', NOW())"
+        
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(check_sql, (product_name,))
+                result = cursor.fetchone()
+
+                if result:
+                    # Update the existing quantity
+                    cursor.execute(update_sql, (qty, product_name))
+                else:
+                    # Insert a new inventory record
+                    cursor.execute(insert_sql, (product_name, qty))
+                
+                self.mydb.commit()
+                flash('Inventory updated successfully.', 'success')
+        except mysql.connector.Error as err:
+            flash(f'An error occurred while updating inventory: {err}', 'danger')
 
     def delete_order(self, order_id):
         try:
@@ -452,3 +481,6 @@ class OrderCRUD:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
+   
+
+

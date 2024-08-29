@@ -360,4 +360,136 @@
   </div>
 </div>
 
+<!-- Modal for Registering/Editing Supplier -->
+<div
+  class="modal fade"
+  id="addSupplier"
+  tabindex="-1"
+  aria-labelledby="supplierModalTitle"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="supplierModalTitle">
+          Register New Supplier
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="supplierForm"
+          action="{{ url_for('add_supplier') }}"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <input type="hidden" id="suppId" name="suppId" value="" />
+          <div class="form-group">
+            <label for="suppName">Supplier Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="supp_name"
+              name="supp_name"
+              placeholder="Enter supplier's name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="suppContact">Contact Number</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="suppContact"
+              name="suppContact"
+              placeholder="Enter supplier's contact number"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="suppEmail">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="suppEmail"
+              name="suppEmail"
+              placeholder="Enter supplier's email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="suppCompany">Company</label>
+            <input
+              type="text"
+              class="form-control"
+              id="suppCompany"
+              name="suppCompany"
+              placeholder="Enter supplier's company name"
+            />
+          </div>
+          <div class="form-group">
+            <label for="suppAddress">Address</label>
+            <input
+              type="text"
+              class="form-control"
+              id="suppAddress"
+              name="suppAddress"
+              placeholder="Enter supplier's address"
+            />
+          </div>
+          <div class="form-group">
+            <label for="dateAdded">Date Added</label>
+            <input
+              type="date"
+              class="form-control"
+              id="dateAdded"
+              name="dateAdded"
+              required
+            />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="submitSupplierForm()"
+            >
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function populateModal(
+    id,
+    name,
+    contact,
+    email,
+    company,
+    address,
+    date_added
+  ) {
+    document.getElementById("suppId").value = id;
+    document.getElementById("supp_name").value = name;
+    document.getElementById("suppContact").value = contact;
+    document.getElementById("suppEmail").value = email;
+    document.getElementById("suppCompany").value = company;
+    document.getElementById("suppAddress").value = address;
+    document.getElementById("dateAdded").value = date_added;
+  }
+</script>
 <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
