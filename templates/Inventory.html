@@ -1,0 +1,165 @@
+{% extends 'base.html' %} {% block content %}
+<div class="card border-0">
+  <div class="card-header">
+    <h6 class="card-title">Inventory Information</h6>
+
+    <!-- Button trigger modal -->
+    <div class="d-flex justify-content-end">
+      <input
+        id="searchInput"
+        type="text"
+        class="form-control"
+        placeholder="Search..."
+      />
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#addInventory"
+      >
+        <i class="fa fa-plus-circle"></i> Add New Inventory
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <table class="table" id="searchTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product Name</th>
+          <th>Quantity Onhand</th>
+          <th>Unit Of Measure</th>
+          <th>Sale Price</th>
+
+          <th>Totals</th>
+          <th>Date Updated</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="inventoryTableBody">
+        {% for row in data %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td>{{ row[2] }}</td>
+          <td>{{ row[3] }}</td>
+          <td>{{ row[4] }}</td>
+          <td>{{ row[5] }}</td>
+          <td>
+            <button
+              class="btn btn-primary btn-sm edit-btn"
+              data-id="{{ row.inventory_id }}"
+              data-product-id="{{ row.product_id }}"
+              onclick="openInventoryEditModal(this)"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+
+            <form
+              id="deleteForm{{ row.inventory_id }}"
+              action="{{ url_for('delete_inventory', id=row.inventory_id) }}"
+              method="POST"
+              style="display: inline"
+            >
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                onclick="confirmDelete('{{ row.inventory_id }}')"
+              >
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal for adding a new inventory -->
+  <div
+    class="modal fade"
+    id="addInventory"
+    tabindex="-1"
+    aria-labelledby="addInventoryLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addInventoryLabel">Add New Inventory</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form
+            id="addInventoryForm"
+            method="POST"
+            action="{{ url_for('add_inventory') }}"
+          >
+            <input type="hidden" id="inventory_id" name="inventory_id" />
+            <div class="mb-3">
+              <label for="product_id" class="form-label">Product ID</label>
+              <input
+                type="text"
+                class="form-control"
+                id="product_id"
+                name="product_id"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="qty" class="form-label">Quantity</label>
+              <input
+                type="number"
+                class="form-control"
+                id="qty"
+                name="qty"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="type" class="form-label">Type</label>
+              <input
+                type="text"
+                class="form-control"
+                id="type"
+                name="type"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="stock_from" class="form-label">Stock From</label>
+              <input
+                type="text"
+                class="form-control"
+                id="stock_from"
+                name="stock_from"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="form_id" class="form-label">Form ID</label>
+              <input
+                type="text"
+                class="form-control"
+                id="form_id"
+                name="form_id"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Inventory</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
+</div>
+{% endblock %}

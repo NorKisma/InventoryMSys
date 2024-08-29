@@ -20,7 +20,8 @@
             id="date_order"
             name="date_order"
             class="form-control"
-            value="{{ order[8] }}" required 
+            value="{{ order[8] }}" 
+            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}required 
           />
         </div>
 
@@ -33,6 +34,7 @@
             name="invoice_number"
             class="form-control"
             value="{{ order[1] }}"
+            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
             required
           />
         </div>
@@ -45,6 +47,7 @@
           {% for supplier in suppliers %}
           <option value="{{ supplier[0] }}" {% if supplier[0] == order[2] %} selected {% endif %}>
             {{ supplier[1] }}
+            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
           </option>
           {% endfor %}
         </select>
@@ -57,6 +60,7 @@
             {% for product in products %}
             <option value="{{ product[0] }}" data-unit="{{ product[2] }}" {% if product[0] == order[4] %} selected {% endif %}>
               {{ product[1] }}
+              {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
             </option>
             {% endfor %}
           </select>
@@ -70,6 +74,7 @@
             name="product_unit"
             class="form-control"
             value="{{ order[4] }}"
+            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
             readonly
           />
         </div>
@@ -83,6 +88,7 @@
             name="qty"
             class="form-control"
             value="{{ order[5] }}"
+            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
             required
             oninput="calculateSubtotal()"
           />
@@ -98,31 +104,46 @@
             name="price"
             class="form-control"
             value="{{ order[6] }}"
+            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
             required
             oninput="calculateSubtotal()"
           />
         </div>
 
-        <!-- Subtotal -->
-        <div class="mb-3">
-          <label for="subtotal">Subtotal</label>
-          <input
-            type="number"
-            step="0.01"
-            id="subtotal"
-            name="subtotal"
-            class="form-control"
-            value="{{ order[7] }}"
-            required
-            readonly
-          />
-        </div>
+       <!-- Subtotal -->
+<div class="mb-3">
+  <label for="subtotal">Subtotal</label>
+  <input
+    type="number"
+    step="0.01"
+    id="subtotal"
+    name="subtotal"
+    class="form-control"
+    value="{{ order[7] }}"
+    {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
+    required
+    readonly
+  />
+</div>
 
-        <!-- Status -->
-        <select class="form-control" id="status" name="status" required>
-          <option value="Pending" {% if order[9] == 'Pending' %} selected {% endif %}>Pending</option>
-          <!-- Add other status options as needed -->
-        </select>
+
+        <div class="mb-3">
+          <label for="status">Status</label>
+          <select name="status" class="form-control" id="status" required
+                  {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}>
+            {% if session['role'] == 'admin' %}
+              <option value="Pending" {% if order[9] == 'Pending' %} selected {% endif %}>Pending</option>
+              <option value="Completed" {% if order[9] == 'Completed' %} selected {% endif %}>Completed</option>
+              <option value="Shipped" {% if order[9] == 'Shipped' %} selected {% endif %}>Shipped</option>
+              <!-- Add more options as needed -->
+            {% else %}
+              <option value="Pending" {% if order[9] == 'Pending' %} selected {% endif %}>Pending</option>
+              <option value="Completed" {% if order[9] == 'Completed' %} selected {% endif %}>Completed</option>
+              <!-- You can add more non-admin visible options here if needed -->
+            {% endif %}
+          </select>
+        </div>
+        
 
         <div class="mb-3">
           <button type="submit" class="btn btn-primary">Submit</button>
