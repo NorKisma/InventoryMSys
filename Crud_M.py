@@ -360,7 +360,7 @@ class OrderCRUD:
             status = request.form.get('status')
             date_order = request.form.get('date_order')
             order_id = request.form.get('order_id') 
-            stock_from = 'received'
+            stock_from = 'purchase'
 
             if order_id:
                 return self.update_order(order_id, invoice_number, supplier, product_name, product_unit, qty, price, subtotal, status, date_order)
@@ -402,9 +402,8 @@ class OrderCRUD:
                 flash('Order updated successfully.', 'success')
 
                 # Update inventory if the order is completed
-                if status == 'completed':
+                if status == 'Received':
                     self.update_inventory(product_name, qty)
-
             return redirect(url_for('pur_lists'))
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
@@ -427,7 +426,7 @@ class OrderCRUD:
                     cursor.execute(update_sql, (qty, product_name))
                 else:
                     # Insert a new inventory record
-                    cursor.execute(insert_sql, (product_name, qty))
+                    cursor.execute(insert_sql, (product_name, qty ))
                 
                 self.mydb.commit()
                 flash('Inventory updated successfully.', 'success')
@@ -484,3 +483,143 @@ class OrderCRUD:
    
 
 
+class SalesCRUD:
+    def __init__(self, mydb):
+        self.mydb = mydb
+
+    def add_sale(self, request):
+        if request.method == 'POST':
+            
+            customer_id = request.form.get('customer_id')
+            product_name = request.form.get('product_name')
+          
+            qty = request.form.get('qty')
+            price_sale = request.form.get('price_sale')
+            subtotal = request.form.get('subtotal')
+            payment_method = request.form.get('payment_method')
+            paid_status = request.form.get('paid_status')
+            date_sale = request.form.get('date_sale')
+            sale_id = request.form.get('sale_id')
+
+            if sale_id:
+                return self.update_sale(sale_id, customer_id, product_name,  qty, price_sale, subtotal, payment_method, paid_status, date_sale)
+            else:
+                return self.insert_sale(customer_id, product_name,  qty, price_sale, subtotal, payment_method, paid_status, date_sale)
+
+    def insert_sale(self,  customer_id, product_name,  qty, price_sale, subtotal, payment_method, paid_status, date_sale):
+        sql = """
+            INSERT INTO sales ( cust_id, product_id,  qty, price_sale, 
+                subtotal, payment_method, paid_status, date_sale, date_updated)
+            VALUES (%s, %s, %s, %s, %s, %s, %s,  %s, NOW())
+        """
+        val = ( customer_id, product_name,  qty, price_sale, subtotal, payment_method, paid_status, date_sale)
+        
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(sql, val)
+                self.mydb.commit()
+                flash('Sale added successfully.', 'success')
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return redirect(url_for('add_sale'))
+        
+        return redirect(url_for('sales_list'))
+
+    def update_sale(self, sale_id, customer_id, product_name,  qty, price_sale, subtotal, payment_method, paid_status, date_sale):
+        sql = """
+            UPDATE sales 
+            SET cust_id = %s, product_id = %s,  qty = %s, 
+                price_sale = %s, subtotal = %s, payment_method = %s, paid_status = %s, date_sale = %s, date_updated = NOW()
+            WHERE sale_id = %s
+        """
+        val = (customer_id, product_name, qty, price_sale, subtotal, payment_method, paid_status, date_sale, sale_id)
+        
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(sql, val)
+                self.mydb.commit()
+                flash('Sale updated successfully.', 'success')
+
+                # Update inventory if necessary (e.g., reduce stock after sale)
+                self.update_inventory(product_name, -qty)
+            return redirect(url_for('sales_list'))
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return redirect(url_for('sales_list', sale_id=sale_id))
+
+    def update_inventory(self, product_name, qty_change):
+        # Check if the product exists in the inventory
+        check_sql = "SELECT qty FROM inventory WHERE product_id = %s"
+        update_sql = "UPDATE inventory SET qty = qty - %s, date_updated = NOW() WHERE product_id = %s"
+        
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(check_sql, (product_name,))
+                result = cursor.fetchone()
+
+                if result:
+                    # Update the existing quantity in inventory
+                    cursor.execute(update_sql, (qty_change, product_name))
+                
+                self.mydb.commit()
+                flash('Inventory updated successfully.', 'success')
+        except mysql.connector.Error as err:
+            flash(f'An error occurred while updating inventory: {err}', 'danger')
+
+    def delete_sale(self, sale_id):
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute("DELETE FROM sales WHERE sale_id = %s", (sale_id,))
+                self.mydb.commit()
+                flash('Sale deleted successfully.', 'success')
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+        return redirect(url_for('sales_list'))
+
+    def fetch_sales(self):
+        try:
+            with self.mydb.cursor() as cursor:
+                query = """
+                    SELECT s.sale_id,  c.customer_name, p.name,
+                       s.qty, s.price_sale, s.subtotal, s.date_sale, s.payment_method, s.paid_status
+                    FROM sales s
+                    JOIN customers c ON s.cust_id = c.id 
+                    JOIN product_list p ON s.product_id = p.id
+                """
+                cursor.execute(query)
+                sales = cursor.fetchall()
+                return sales if sales else []
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')  
+            return []
+
+    def get_products(self):
+        query = "SELECT id, name, price FROM product_list"
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(query)
+                products = cursor.fetchall()
+                return products if products else []
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []
+    def get_inventor(self):
+        query = "SELECT inventory_id,  qty FROM inventory"
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute(query)
+                products = cursor.fetchall()
+                return products if products else []
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []
+
+    def fetch_customers(self):
+        try:
+            with self.mydb.cursor() as cursor:
+                cursor.execute("SELECT id, Customer_Name FROM customers")
+                customers = cursor.fetchall()
+                return customers if customers else []
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []

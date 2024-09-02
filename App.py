@@ -5,7 +5,7 @@ import hashlib
 from functools import wraps
 
 import os
-from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,CategoryCRUD,ProductCRUD
+from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,CategoryCRUD,ProductCRUD,SalesCRUD
 
 import mysql.connector  
 from db_con.db import mydb 
@@ -35,6 +35,7 @@ customer_crud = CustomerCRUD(mydb)
 supplier_crud = Supplier(mydb)
 category_crud = CategoryCRUD(mydb)
 product_crud = ProductCRUD(mydb)
+sales_crud = SalesCRUD(mydb)
 #admin_required
 def admin_required(f):
     @wraps(f)
@@ -351,6 +352,9 @@ def edit_order(order_id):
                 status=request.form.get('status'),
                 date_order=request.form.get('date_order')
             )
+            status=request.form.get('status')
+            if status == 'Received':
+                    self.update_inventory(product_name, qty)
             return redirect(url_for('pur_lists'))
 
         # Fetch products and suppliers for the dropdowns
@@ -427,6 +431,36 @@ def delete_product(product_id):
 
 
 
+# Route to display sales list
+@app.route('/sales_list')
+def sales_list():
+    sales = sales_crud.fetch_sales()
+    return render_template('sales_list.html', sales=sales)
+
+
+# Route to add or update a sale
+@app.route('/add_sale', methods=['GET', 'POST'])
+@app.route('/edit_sale/<int:sale_id>', methods=['GET', 'POST'])
+def add_sale(sale_id=None):
+    customers = sales_crud.fetch_customers()
+    products = sales_crud.get_products()
+
+    if request.method == 'POST':
+        sales_crud.add_sale(request)
+        return redirect(url_for('sales_list'))
+
+    if sale_id:
+        sale = sales_crud.fetch_sales_by_id(sale_id)
+        return render_template('edit_sale.html', sale=sale, customers=customers, products=products)
+    
+    return render_template('add_sale.html', customers=customers, products=products)
+
+
+# Route to delete a sale
+@app.route('/delete_sale/<int:sale_id>', methods=['POST'])
+def delete_sale(sale_id):
+    sales_crud.delete_sale(sale_id)
+    return redirect(url_for('sales_list'))
 
 
 

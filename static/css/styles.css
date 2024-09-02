@@ -235,15 +235,8 @@ a.sidebar-link {
 }
 
 
-  .status-pending {
-    color: rgb(160, 10, 102);
-    font-weight: bold;
-  }
-  
-  .status-completed {
-    color: green;
-    font-weight: bold;
-  }
+
+
 
 .illustration {
     background-color: var(--bs-primary-bg-subtle);

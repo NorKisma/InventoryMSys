@@ -178,3 +178,5 @@ function confirmDelete(productId) {
         document.getElementById(`deleteForm${productId}`).submit();
     }
 }
+
+

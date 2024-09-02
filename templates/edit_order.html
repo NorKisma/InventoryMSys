@@ -16,12 +16,12 @@
         <div class="mb-3">
           <label for="date_order">Date Order</label>
           <input
-            type="date"
+            type="text"
             id="date_order"
             name="date_order"
             class="form-control"
             value="{{ order[8] }}" 
-            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}required 
+                   required 
           />
         </div>
 
@@ -34,7 +34,7 @@
             name="invoice_number"
             class="form-control"
             value="{{ order[1] }}"
-            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
+            {% if order[9] == 'Received' and session['role'] != 'admin' %} disabled {% endif %}
             required
           />
         </div>
@@ -47,7 +47,7 @@
           {% for supplier in suppliers %}
           <option value="{{ supplier[0] }}" {% if supplier[0] == order[2] %} selected {% endif %}>
             {{ supplier[1] }}
-            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
+            {% if order[9] == 'Received' and session['role'] != 'admin' %} disabled {% endif %}
           </option>
           {% endfor %}
         </select>
@@ -60,7 +60,7 @@
             {% for product in products %}
             <option value="{{ product[0] }}" data-unit="{{ product[2] }}" {% if product[0] == order[4] %} selected {% endif %}>
               {{ product[1] }}
-              {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
+              {% if order[9] == 'Received' and session['role'] != 'admin' %} disabled {% endif %}
             </option>
             {% endfor %}
           </select>
@@ -74,7 +74,7 @@
             name="product_unit"
             class="form-control"
             value="{{ order[4] }}"
-            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
+            {% if order[9] == 'Received' and session['role'] != 'admin' %} disabled {% endif %}
             readonly
           />
         </div>
@@ -88,7 +88,7 @@
             name="qty"
             class="form-control"
             value="{{ order[5] }}"
-            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
+            {% if order[9] == 'Received' and session['role'] != 'admin' %} disabled {% endif %}
             required
             oninput="calculateSubtotal()"
           />
@@ -104,7 +104,7 @@
             name="price"
             class="form-control"
             value="{{ order[6] }}"
-            {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
+            {% if order[9] == 'Received' and session['role'] != 'admin' %} disabled {% endif %}
             required
             oninput="calculateSubtotal()"
           />
@@ -120,7 +120,7 @@
     name="subtotal"
     class="form-control"
     value="{{ order[7] }}"
-    {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}
+    {% if order[9] == 'Received' and session['role'] != 'admin' %} disabled {% endif %}
     required
     readonly
   />
@@ -130,15 +130,15 @@
         <div class="mb-3">
           <label for="status">Status</label>
           <select name="status" class="form-control" id="status" required
-                  {% if order[9] == 'Completed' and session['role'] != 'admin' %} disabled {% endif %}>
+                  {% if order[9] == 'Received' and session['role'] != 'admin' %} disabled {% endif %}>
             {% if session['role'] == 'admin' %}
               <option value="Pending" {% if order[9] == 'Pending' %} selected {% endif %}>Pending</option>
-              <option value="Completed" {% if order[9] == 'Completed' %} selected {% endif %}>Completed</option>
-              <option value="Shipped" {% if order[9] == 'Shipped' %} selected {% endif %}>Shipped</option>
-              <!-- Add more options as needed -->
+              <option value="Received" {% if order[9] == 'Received' %} selected {% endif %}>Received</option>
+              <option value="Cancelled" {% if order[9] == 'Cancelled' %} selected {% endif %}>Cancelled</option>
+              <!-- Add more options as needed -->  
             {% else %}
               <option value="Pending" {% if order[9] == 'Pending' %} selected {% endif %}>Pending</option>
-              <option value="Completed" {% if order[9] == 'Completed' %} selected {% endif %}>Completed</option>
+              
               <!-- You can add more non-admin visible options here if needed -->
             {% endif %}
           </select>
