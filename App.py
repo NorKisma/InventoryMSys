@@ -437,8 +437,6 @@ def sales_list():
     sales = sales_crud.fetch_sales()
     return render_template('sales_list.html', sales=sales)
 
-
-# Route to add or update a sale
 @app.route('/add_sale', methods=['GET', 'POST'])
 @app.route('/edit_sale/<int:sale_id>', methods=['GET', 'POST'])
 def add_sale(sale_id=None):
@@ -446,15 +444,25 @@ def add_sale(sale_id=None):
     products = sales_crud.get_products()
 
     if request.method == 'POST':
+        # Extract form data
+        product_id = int(request.form.get('product_id'))  # Use product_id
+        qty = int(request.form.get('qty'))
+
+        # Add or update the sale
         sales_crud.add_sale(request)
+
+        # Update inventory after successful sale
+        sales_crud.update_inventory(product_id, -qty)
+
         return redirect(url_for('sales_list'))
 
+    # Handle edit mode if sale_id is provided
     if sale_id:
         sale = sales_crud.fetch_sales_by_id(sale_id)
         return render_template('edit_sale.html', sale=sale, customers=customers, products=products)
-    
-    return render_template('add_sale.html', customers=customers, products=products)
 
+    # Render the add sale form
+    return render_template('sales.html', customers=customers, products=products)
 
 # Route to delete a sale
 @app.route('/delete_sale/<int:sale_id>', methods=['POST'])

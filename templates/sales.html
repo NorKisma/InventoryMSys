@@ -38,39 +38,19 @@
             id="productId"
             name="product_id"
             required
+            onchange="updateProductDetails()"
           >
             <option value="" disabled selected>Select Product</option>
             {% for product in products %}
-            <option value="{{ product[0] }}" data-unit="{{ product[2] }}">
+            <option
+              value="{{ product[0] }}"
+              data-price="{{ product[2] }}"
+              data-qty="{{ product[3] }}"
+            >
               {{ product[1] }}
             </option>
             {% endfor %}
           </select>
-        </div>
-
-        <!-- Product Unit (read-only) -->
-        <div class="mb-3">
-          <label for="productUnit" class="form-label">Product Unit</label>
-          <input
-            type="text"
-            id="productUnit"
-            name="product_unit"
-            class="form-control"
-            readonly
-          />
-        </div>
-
-        <!-- Quantity -->
-        <div class="mb-3">
-          <label for="quantity">Quantity</label>
-          <input
-            type="number"
-            id="qty"
-            name="qty"
-            class="form-control"
-            required
-            oninput="calculateSubtotal()"
-          />
         </div>
 
         <!-- PriceSale -->
@@ -82,9 +62,27 @@
             id="priceSale"
             name="price_sale"
             class="form-control"
+            readonly
+          />
+        </div>
+
+        <!-- Quantity -->
+
+        <label for="quantity">Old Quantity</label>
+        <input type="number" id="quty" name="quty" disabled />
+
+        <!-- Quantity -->
+        <div class="mb-3">
+          <label for="quantity">Sale Quantity</label>
+          <input
+            type="number"
+            id="qty"
+            name="qty"
+            class="form-control"
             required
             oninput="calculateSubtotal()"
           />
+          <span id="error-message" style="color: red"></span>
         </div>
 
         <!-- Subtotal (read-only) -->
@@ -99,30 +97,40 @@
             readonly
           />
         </div>
-
-        <!-- Payment Method -->
         <div class="mb-3">
-          <label for="paymentMethod">Payment Method</label>
-          <select class="form-control" id="paymentMethod" name="payment_method">
-            <option value="" disabled selected>Select Payment Method</option>
-            <option value="Cash">Cash</option>
-            <option value="Card">Card</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-          </select>
+          <label for="discount" class="form-label">Discount</label>
+          <input
+            type="number"
+            step="0.01"
+            id="discount"
+            name="discount"
+            class="form-control"
+            required
+          />
         </div>
 
-        <!-- Paid/Unpaid Status -->
         <div class="mb-3">
-          <label for="paidStatus">Payment Status</label>
-          <select
+          <label for="paymentStatus">Payment Status</label>
+          <input
+            type="number"
             class="form-control"
-            id="paidStatus"
-            name="paid_status"
+            id="payment"
+            name="payment"
+            placeholder="Enter payment status"
             required
-          >
-            <option value="Paid">Paid</option>
-            <option value="Unpaid">Unpaid</option>
-          </select>
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="Balance">Balance</label>
+          <input
+            type="text"
+            class="form-control"
+            id="Balance"
+            name="Balance"
+            placeholder="Balance"
+            readonly
+          />
         </div>
 
         <!-- Submit Button -->
@@ -136,29 +144,75 @@
 
 <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    updateProductUnit();
-  });
-
-  function updateProductUnit() {
-    var productSelect = document.getElementById("productId");
-    var selectedOption = productSelect.options[productSelect.selectedIndex];
-    var unit = selectedOption ? selectedOption.getAttribute("data-unit") : "";
-    document.getElementById("productUnit").value = unit;
+  function updateProductDetails() {
+    const productId = document.getElementById("productId").value;
+    const selectedOption = document.querySelector("#productId option:checked");
+    if (selectedOption) {
+      const price = selectedOption.getAttribute("data-price");
+      const quantity = selectedOption.getAttribute("data-qty");
+      document.getElementById("priceSale").value = price;
+      document.getElementById("quty").value = quantity;
+    }
   }
-
-  // Update product unit when the selection changes
-  document
-    .getElementById("productId")
-    .addEventListener("change", updateProductUnit);
+  document.addEventListener("DOMContentLoaded", function () {
+    const oldQuantityField = document.getElementById("quty");
+    const saleQuantityField = document.getElementById("qty");
+    const errorMessage = document.getElementById("error-message");
+    function validateSaleQuantity() {
+      const oldQuantity = parseInt(oldQuantityField.value, 10);
+      const saleQuantity = parseInt(saleQuantityField.value, 10);
+      errorMessage.textContent = "";
+      // Validate oldQuantity
+      if (isNaN(oldQuantity) || oldQuantity <= 0) {
+        errorMessage.textContent = "Old quantity is invalid.";
+        saleQuantityField.disabled = true;
+        return;
+      } else {
+        saleQuantityField.disabled = false;
+      }
+      // Validate saleQuantity
+      if (isNaN(saleQuantity) || saleQuantity <= 0) {
+        errorMessage.textContent = "Sale quantity must be a positive number.";
+      } else if (saleQuantity > oldQuantity) {
+        errorMessage.textContent = "Sale quantity cannot exceed old quantity.";
+      }
+    }
+    // Add event listeners
+    oldQuantityField.addEventListener("input", validateSaleQuantity);
+    saleQuantityField.addEventListener("input", validateSaleQuantity);
+  });
 
   // Calculate subtotal based on quantity and price
   function calculateSubtotal() {
     var qty = parseFloat(document.getElementById("qty").value) || 0;
     var priceSale = parseFloat(document.getElementById("priceSale").value) || 0;
-    var subtotal = qty * priceSale;
+    var discount = parseFloat(document.getElementById("discount").value) || 0;
+    var subtotal = qty * priceSale - discount;
     document.getElementById("subtotal").value = subtotal.toFixed(2);
   }
+  document.getElementById("qty").addEventListener("input", calculateSubtotal);
+  document
+    .getElementById("priceSale")
+    .addEventListener("input", calculateSubtotal);
+  document
+    .getElementById("discount")
+    .addEventListener("input", calculateSubtotal);
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var paymentStatusInput = document.getElementById("payment");
+    var subtotalInput = document.getElementById("subtotal");
+    var balanceInput = document.getElementById("Balance");
+
+    // Function to update the balance
+    function updateBalance() {
+      var paymentStatus = parseFloat(paymentStatusInput.value) || 0;
+      var subtotal = parseFloat(subtotalInput.value) || 0;
+      var balance = subtotal - paymentStatus;
+      balanceInput.value = balance.toFixed(2);
+    }
+    paymentStatusInput.addEventListener("input", updateBalance);
+    subtotalInput.addEventListener("input", updateBalance);
+  });
 
   // Validate payment method based on payment status
   function validatePayment() {
