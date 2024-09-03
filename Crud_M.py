@@ -536,7 +536,7 @@ class SalesCRUD:
         try:
             with self.mydb.cursor() as cursor:
                 query = """
-                    SELECT s.sale_id, c.customer_name, p.name, s.qty, s.price_sale, s.discount, s.subtotal, s.date_sale, s.payment,s.Balance
+                    SELECT s.sale_id, c.customer_name, p.name, s.qty, s.price_sale,  s.subtotal,s.discount,s.payment,s.Balance, s.date_sale
                     FROM sales s
                     JOIN customers c ON s.cust_id = c.id 
                     JOIN product_list p ON s.product_id = p.id

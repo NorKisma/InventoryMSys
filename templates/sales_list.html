@@ -32,16 +32,20 @@
             <th class="sortable">Product Name</th>
             <th class="sortable">Quantity</th>
             <th class="sortable">Price Sale</th>
-            <th class="sortable">Payment Method</th>
+            <th class="sortable">Subtotal</th>
+            <th class="sortable">Discount</th>
+            <th class="sortable">Payment</th>
+            <th class="sortable">Balance</th>
             <th class="sortable">Paid Status</th>
             <th class="sortable">Date</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody id="salesTableBody">
-          {% for row in data %}
+          {% for data in row %}
           <tr>
             <td>{{ row[0] }}</td>
+            <!-- Sale ID -->
             <td>{{ row[1] }}</td>
             <!-- Customer Name -->
             <td>{{ row[2] }}</td>
@@ -51,16 +55,22 @@
             <td>{{ row[4] }}</td>
             <!-- Price Sale -->
             <td>{{ row[5] }}</td>
-            <!-- Payment Method -->
+            <!-- Subtotal -->
+            <td>{{ row[6] }}</td>
+            <!-- Discount -->
+            <td>{{ row[7] }}</td>
+            <!-- Payment -->
+            <td>{{ row[8] }}</td>
+            <!-- Balance -->
 
             <!-- Paid Status with color coding -->
             <td
-              style="{% if row[6] == 'Unpaid' %} color: red; {% else %} color: green; {% endif %}"
+              style="{% if row[8] > 0 %} color: red; {% else %} color: green; {% endif %}"
             >
-              {{ row[6] }}
+              {{ 'Unpaid' if row[8] > 0 else 'Paid' }}
             </td>
 
-            <td>{{ row[7] }}</td>
+            <td>{{ row[9] }}</td>
             <!-- Sale Date -->
 
             <td>

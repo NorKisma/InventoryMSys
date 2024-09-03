@@ -5,7 +5,7 @@ import hashlib
 from functools import wraps
 
 import os
-from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,CategoryCRUD,ProductCRUD,SalesCRUD
+from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,ProductCRUD,SalesCRUD
 
 import mysql.connector  
 from db_con.db import mydb 
@@ -33,7 +33,7 @@ order_crud = OrderCRUD(mydb)
 crud_users = usersCRUD(mydb, allowed_file)
 customer_crud = CustomerCRUD(mydb)
 supplier_crud = Supplier(mydb)
-category_crud = CategoryCRUD(mydb)
+
 product_crud = ProductCRUD(mydb)
 sales_crud = SalesCRUD(mydb)
 #admin_required
