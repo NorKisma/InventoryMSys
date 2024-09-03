@@ -204,65 +204,6 @@ class CustomerCRUD:
   
 
 
-
-
-
-  
-
-class CategoryCRUD:
-    def __init__(self, mydb):
-        self.mydb = mydb
-
-    def add_category(self):
-        if request.method == 'POST':
-            category_name = request.form.get('category_name')
-          
-           
-            # Insert a new category
-            sql = "INSERT INTO category (category_name) VALUES (%s)"
-            val = (category_name,)
-            try:
-                with self.mydb.cursor() as mycursor:
-                    mycursor.execute(sql, val)
-                    self.mydb.commit()
-            except mysql.connector.Error as err:
-                flash(f'An error occurred: {err}', 'danger')
-        return redirect(url_for('categories'))
-
-    def update_category(self, category_id):
-        if request.method == 'POST':
-            category_name = request.form.get('category_name')  # Get category name from the form
-           
-            # Update category SQL query
-            sql = "UPDATE category SET category_name = %s  WHERE category_Id  = %s"
-            val = (category_name, category_Id)
-            try:
-                with self.mydb.cursor() as mycursor:
-                    mycursor.execute(sql, val)
-                    self.mydb.commit()  # Commit the changes
-                flash('Category updated successfully.', 'success')
-            except mysql.connector.Error as err:
-                flash(f'An error occurred: {err}', 'danger')
-        return redirect(url_for('categories'))
-    def delete_category(self, category_Id):
-        try:
-            with self.mydb.cursor() as mycursor:
-                mycursor.execute("DELETE FROM category WHERE category_Id  = %s", (category_Id,))
-                self.mydb.commit()
-        except mysql.connector.Error as err:
-            flash(f'An error occurred: {err}', 'danger')
-        return redirect(url_for('categories'))
-
-    def fetch_categories(self):
-     try:
-        with self.mydb.cursor() as mycursor:
-            # Ensure that both category_Id and category_name are being selected
-            mycursor.execute("SELECT category_Id, category_name FROM category")
-            return mycursor.fetchall()
-     except mysql.connector.Error as err:
-        flash(f'An error occurred: {err}', 'danger')
-        return []
-        
 class ProductCRUD:
     def __init__(self, mydb):
         self.mydb = mydb
