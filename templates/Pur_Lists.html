@@ -52,14 +52,14 @@
             <td>{{ row[6] }}</td>
             <td>{{ row[7] }}</td>
            
-          
+            <td>{{ row[8] }}</td>
             <td
-            style="{% if row[8] == 'Pending' %} color: red;{% elif row[9] == 'Received' %} color: green;{% endif %}"
+            style="{% if row[9] == 'Pending' %} color: red;{% elif row[9] == 'Received' %} color: green;{% endif %}"
         >
-            {{ row[8] }}
+            {{ row[9] }}
         </td>
         
-
+       
 
 
             <td>
@@ -94,8 +94,16 @@
           {% endfor %}
         </tbody>
       </table>
+
+
     </div>
+      
+
   </div>
+
+
+
+
     <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
 
     {% endblock %}

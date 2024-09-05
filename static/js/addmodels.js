@@ -147,8 +147,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
-
     // Populate the modal fields with the product data
     function openProductEditModal(button) {
       const form = document.getElementById('editProductForm');
@@ -180,3 +178,125 @@ function confirmDelete(productId) {
 }
 
 
+//<!-- Pagination Controls -->
+document.addEventListener('DOMContentLoaded', function() {
+  const rowsPerPage = 10; // Number of rows per page
+  let currentPage = 1;
+  const tableRows = Array.from(document.querySelectorAll('#salesTableBody tr'));
+  const totalPages = Math.ceil(tableRows.length / rowsPerPage);
+
+  function showPage(page) {
+      tableRows.forEach((row, index) => {
+          row.style.display = (index >= (page - 1) * rowsPerPage && index < page * rowsPerPage) ? '' : 'none';
+      });
+      document.getElementById('pageInfo').textContent = `Page ${page} of ${totalPages}`;
+      document.getElementById('prevPage').disabled = page === 1;
+      document.getElementById('nextPage').disabled = page === totalPages;
+  }
+
+  document.getElementById('prevPage').addEventListener('click', function() {
+      if (currentPage > 1) {
+          currentPage--;
+          showPage(currentPage);
+      }
+  });
+
+  document.getElementById('nextPage').addEventListener('click', function() {
+      if (currentPage < totalPages) {
+          currentPage++;
+          showPage(currentPage);
+      }
+  });
+
+  showPage(currentPage); // Initial call to display the first page
+});
+
+//<!--end  Pagination Controls -->
+function updateProductDetails() {
+  const productId = document.getElementById("productId").value;
+  const selectedOption = document.querySelector("#productId option:checked");
+  if (selectedOption) {
+    const price = selectedOption.getAttribute("data-price");
+    const quantity = selectedOption.getAttribute("data-qty");
+    document.getElementById("priceSale").value = price;
+    document.getElementById("quty").value = quantity;
+  }
+}
+document.addEventListener("DOMContentLoaded", function () {
+  const oldQuantityField = document.getElementById("quty");
+  const saleQuantityField = document.getElementById("qty");
+  const errorMessage = document.getElementById("error-message");
+  function validateSaleQuantity() {
+    const oldQuantity = parseInt(oldQuantityField.value, 10);
+    const saleQuantity = parseInt(saleQuantityField.value, 10);
+    errorMessage.textContent = "";
+    // Validate oldQuantity
+    if (isNaN(oldQuantity) || oldQuantity <= 0) {
+      errorMessage.textContent = "Old quantity is invalid.";
+      saleQuantityField.disabled = true;
+      return;
+    } else {
+      saleQuantityField.disabled = false;
+    }
+    // Validate saleQuantity
+    if (isNaN(saleQuantity) || saleQuantity <= 0) {
+      errorMessage.textContent = "Sale quantity must be a positive number.";
+    } else if (saleQuantity > oldQuantity) {
+      errorMessage.textContent = "Sale quantity cannot exceed old quantity.";
+    }
+  }
+  // Add event listeners
+  oldQuantityField.addEventListener("input", validateSaleQuantity);
+  saleQuantityField.addEventListener("input", validateSaleQuantity);
+});
+
+// Calculate subtotal based on quantity and price
+function calculateSubtotal() {
+  var qty = parseFloat(document.getElementById("qty").value) || 0;
+  var priceSale = parseFloat(document.getElementById("priceSale").value) || 0;
+  var discount = parseFloat(document.getElementById("discount").value) || 0;
+  var subtotal = qty * priceSale - discount;
+  document.getElementById("subtotal").value = subtotal.toFixed(2);
+}
+document.getElementById("qty").addEventListener("input", calculateSubtotal);
+document
+  .getElementById("priceSale")
+  .addEventListener("input", calculateSubtotal);
+document
+  .getElementById("discount")
+  .addEventListener("input", calculateSubtotal);
+
+document.addEventListener("DOMContentLoaded", function () {
+  var paymentStatusInput = document.getElementById("payment");
+  var subtotalInput = document.getElementById("subtotal");
+  var balanceInput = document.getElementById("Balance");
+
+  // Function to update the balance
+  function updateBalance() {
+    var paymentStatus = parseFloat(paymentStatusInput.value) || 0;
+    var subtotal = parseFloat(subtotalInput.value) || 0;
+    var balance = subtotal - paymentStatus;
+    balanceInput.value = balance.toFixed(2);
+  }
+  paymentStatusInput.addEventListener("input", updateBalance);
+  subtotalInput.addEventListener("input", updateBalance);
+});
+
+// Validate payment method based on payment status
+function validatePayment() {
+  var paymentStatus = document.getElementById("paidStatus").value;
+  var paymentMethod = document.getElementById("paymentMethod").value;
+
+  if (paymentStatus === "Paid" && paymentMethod === "") {
+    alert("Please select a payment method.");
+    return false;
+  }
+
+  if (paymentStatus === "Paid") {
+    alert("Payment successful!");
+  } else if (paymentStatus === "Unpaid") {
+    alert("Payment is pending.");
+  }
+
+  return true;
+}

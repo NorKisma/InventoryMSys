@@ -234,6 +234,19 @@ a.sidebar-link {
     padding: 0.5rem; 
 }
 
+.pagination-controls {
+    margin-top: 20px;
+}
+
+.pagination-controls button {
+    min-width: 100px;
+}
+
+.pagination-controls .page-info {
+    display: flex;
+    align-items: right;
+    margin: 0 15px;
+}
 
 
 

@@ -532,20 +532,55 @@ class SalesCRUD:
             flash(f'An error occurred: {err}', 'danger')
         return redirect(url_for('sales_list'))
 
-    def fetch_sales(self):
+    def fetch_sales(self, sale_id=None):
         try:
             with self.mydb.cursor() as cursor:
-                query = """
-                    SELECT s.sale_id, c.customer_name, p.name, s.qty, s.price_sale,  s.subtotal,s.discount,s.payment,s.Balance, s.date_sale
-                    FROM sales s
-                    JOIN customers c ON s.cust_id = c.id 
-                    JOIN product_list p ON s.product_id = p.id
-                """
-                cursor.execute(query)
-                sales = cursor.fetchall()
-                return sales if sales else []
+                if sale_id is not None:
+                    # Fetch a specific sale by ID
+                    query = """
+                        SELECT 
+                            s.sale_id AS sale_id, 
+                            c.customer_name AS customer_name, 
+                            p.name AS product_name, 
+                            s.qty AS quantity, 
+                            s.price_sale AS price_sale, 
+                            s.subtotal AS subtotal,
+                            s.discount AS discount,
+                            s.payment AS payment_method,
+                            s.Balance AS balance,
+                            s.date_sale AS sale_date
+                        FROM sales s
+                        JOIN customers c ON s.cust_id = c.id 
+                        JOIN product_list p ON s.product_id = p.id
+                        WHERE s.sale_id = %s
+                    """
+                    cursor.execute(query, (sale_id,))
+                    sales = cursor.fetchone()
+                    return sales if sales else None  # Return None if no sale is found
+                else:
+                    # Fetch all sales
+                    query = """
+                        SELECT 
+                            s.sale_id AS sale_id, 
+                            c.customer_name AS customer_name, 
+                            p.name AS product_name, 
+                            s.qty AS quantity, 
+                            s.price_sale AS price_sale, 
+                            s.subtotal AS subtotal,
+                            s.discount AS discount,
+                            s.payment AS payment_method,
+                            s.Balance AS balance,
+                            s.date_sale AS sale_date
+                        FROM sales s
+                        JOIN customers c ON s.cust_id = c.id 
+                        JOIN product_list p ON s.product_id = p.id
+                    """
+                    cursor.execute(query)
+                    sales = cursor.fetchall()
+                    return sales if sales else []
         except mysql.connector.Error as err:
-            flash(f'An error occurred: {err}', 'danger')  
+            # Handle the error and flash a message or log it
+            print(f'An error occurred: {err}')  # Replace with logging if needed
             return []
 
     def get_products(self):
