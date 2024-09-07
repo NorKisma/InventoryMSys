@@ -672,3 +672,27 @@ class SalesCRUD:
             flash(f'An error occurred: {err}', 'danger')
             return []
 
+class SalesView:
+    def __init__(self, mydb):
+        self.mydb = mydb
+
+    def view_sales(self, customer_id=None):
+        try:
+            cursor = self.mydb.cursor()
+            query = """
+                SELECT `Customer ID`, `Customer Name`, `Product Name`, `Telephone`, 
+                    `Quantity`, `Price Sale`, `Subtotal`, `Discount`, 
+                    `Paid Payment`, `Balance`, `Sale Date`
+                FROM VeiwCustomer
+            """
+            if customer_id:
+                query += " WHERE `Customer ID` = %s"
+                cursor.execute(query, (customer_id,))
+            else:
+                cursor.execute(query)
+
+            sales = cursor.fetchall()
+            return render_template('view_customer.html', sales=sales)
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return redirect(url_for('view_customer'))

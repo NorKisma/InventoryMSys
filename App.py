@@ -5,7 +5,7 @@ import hashlib
 from functools import wraps
 
 import os
-from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,ProductCRUD,SalesCRUD,InventoryCRUD
+from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,ProductCRUD,SalesCRUD,InventoryCRUD,SalesView
 
 import mysql.connector  
 from db_con.db import mydb 
@@ -34,7 +34,7 @@ crud_users = usersCRUD(mydb, allowed_file)
 customer_crud = CustomerCRUD(mydb)
 supplier_crud = Supplier(mydb)
 inventory_crud = InventoryCRUD(mydb)
-
+sales_view = SalesView(mydb)
 product_crud = ProductCRUD(mydb)
 sales_crud = SalesCRUD(mydb)
 #admin_required
@@ -404,10 +404,14 @@ def update_inventory(inventory_id):
 
 
 
+@app.route('/view_customer')
+def view_customer():
+    customer_id = request.args.get('customer_id')
+    return sales_view.view_sales(customer_id)
 
-
-
-
+@app.route('/view_sales')
+def view_sales():
+    return render_template('view_customer.html')
 
 
 
