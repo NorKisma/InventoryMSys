@@ -58,17 +58,18 @@
             <td>{{ sale[7] }}</td>
             <td>{{ sale[8] }}</td>
 
+            {% set balance = sale[8]|int %}
             <td
               style="
-                  {% if sale[8] == '0' %}
-                    color: green;
-                    font-weight: bold;
-                  {% else %}
-                    color: red;
-                    font-style: italic;
-                  {% endif %}"
+                {% if balance == 0 %}
+                  color: green;
+                  font-weight: bold;
+                {% else %}
+                  color: red;
+                  font-style: italic;
+                {% endif %}"
             >
-              {% if sale[8] == '0' %} paid {% else %} Unpaid {% endif %}
+              {% if balance == 0 %} Paid {% else %} Unpaid {% endif %}
             </td>
 
             <td>{{ sale[9] }}</td>

@@ -5,7 +5,7 @@ import hashlib
 from functools import wraps
 
 import os
-from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,ProductCRUD,SalesCRUD
+from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,ProductCRUD,SalesCRUD,InventoryCRUD
 
 import mysql.connector  
 from db_con.db import mydb 
@@ -33,6 +33,7 @@ order_crud = OrderCRUD(mydb)
 crud_users = usersCRUD(mydb, allowed_file)
 customer_crud = CustomerCRUD(mydb)
 supplier_crud = Supplier(mydb)
+inventory_crud = InventoryCRUD(mydb)
 
 product_crud = ProductCRUD(mydb)
 sales_crud = SalesCRUD(mydb)
@@ -376,8 +377,27 @@ def delete_order(order_id):
 
 
 
+@app.route('/Inventory_list')
+def inventory_list():
+    inventory_data = inventory_crud.fetch_inventory()
+    return render_template('Inventory_list.html', data=inventory_data)
 
+@app.route('/edit_inventory/<int:inventory_id>', methods=['GET'])
+def edit_inventory(inventory_id):
+    inventory_item = inventory_crud.get_inventory_by_id(inventory_id)
+    return render_template('edit_inventory.html', inventory=inventory_item)
 
+@app.route('/update_inventory/<int:inventory_id>', methods=['POST'])
+def update_inventory(inventory_id):
+    product_id = request.form.get('product_id')
+    qty = request.form.get('qty')
+    date_updated = request.form.get('date_updated')
+    return inventory_crud.update_inventory(
+        inventory_id,
+        product_id,
+        qty,
+        date_updated
+    )
 
 
 
@@ -458,27 +478,41 @@ def add_sale():
 
 @app.route('/update_sale/<int:sale_id>', methods=['POST'])
 def update_sale(sale_id):
-    # Extract form data
-    sale_id = int(request.form.get('sale_id'))
-    date_sale = request.form.get('date_sale')
-    cust_id = int(request.form.get('cust_id'))
-    product_id = int(request.form.get('product_id'))
-    qty = int(request.form.get('qty'))
-    price_sale = float(request.form.get('price_sale'))
-    subtotal = float(request.form.get('subtotal'))
-    discount = float(request.form.get('discount'))
-    payment = float(request.form.get('payment'))
-    balance = float(request.form.get('Balance'))
+        # Initialize your SalesCRUD instance
+        sales_crud = SalesCRUD(mydb)  # Replace `mydb` with your actual database connection instance
 
-    # Update sale data
-    sales_crud.update_sale(sale_id, date_sale, cust_id, product_id, qty, price_sale, subtotal, discount, payment, balance)
+        # Extract data from the form
+        customer_id = request.form.get('cust_id')
+        product_id = int(request.form.get('product_id'))
+        qty = int(request.form.get('qty'))
+        price_sale = float(request.form.get('price_sale'))
+        discount = float(request.form.get('discount'))
+        subtotal = request.form.get('subtotal')
+        payment = request.form.get('payment')
+        balance = request.form.get('Balance')
+        date_sale = request.form.get('date_sale')
 
-    # Update inventory if quantity changes
-    old_qty = sales_crud.get_old_quantity(sale_id)  # Assuming you have a method to get old quantity
-    if qty != old_qty:
-        sales_crud.update_inventory(product_id, old_qty - qty)
+        # Update sale data
+        sales_crud.update_sale(
+            sale_id,
+            customer_id,
+            product_id,
+            qty,
+            price_sale,
+            discount,
+            subtotal,
+            payment,
+            balance,
+            date_sale
+        )
 
-    return redirect(url_for('sales_list'))
+        # Update inventory if quantity changes
+        old_qty = sales_crud.get_old_quantity(sale_id)  # Get old quantity
+        if old_qty is not None and qty != old_qty:
+            sales_crud.update_inventory(product_id, old_qty - qty)
+
+        return redirect(url_for('sales_list'))
+
 
 @app.route('/edit_sale/<int:sale_id>', methods=['GET', 'POST'])
 def edit_sale(sale_id):
@@ -490,12 +524,15 @@ def edit_sale(sale_id):
     # Fetch customers and products for dropdowns
     customers = sales_crud.fetch_customers()
     products = sales_crud.get_products()
-
+    # Ku dar method-ka qaybta wacitaanka
+ 
+    
     if request.method == 'POST':
         product_id = int(request.form.get('product_id'))
         qty = int(request.form.get('qty'))
-
+          
         # Update sale data
+        
         sales_crud.update_sale(sale_id, request.form)
         # Update inventory
         sales_crud.update_inventory(product_id, -qty)

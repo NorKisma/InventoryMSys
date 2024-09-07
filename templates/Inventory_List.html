@@ -1,9 +1,9 @@
 {% extends 'base.html' %} {% block content %}
+
 <div class="card border-0">
   <div class="card-header">
-    <h6 class="card-title">Category Information</h6>
+    <h6 class="card-title">Inventory Information</h6>
 
-    <!-- Button trigger modal -->
     <div class="d-flex justify-content-end">
       <input
         id="searchInput"
@@ -11,108 +11,50 @@
         class="form-control"
         placeholder="Search..."
       />
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#addCategory"
-      >
-        <i class="fa fa-plus-circle"></i> Add New Category
-      </button>
     </div>
-  </div>
 
-  <div class="card-body">
-    <table class="table" id="searchTable">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Category Name</th>
-
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="categoryTableBody">
-        {% for row in data %}
-        <tr>
-          <td>{{ row[0] }}</td>
-          <td>{{ row[1] }}</td>
-
-          <td>
-            <button
-              class="btn btn-primary btn-sm edit-btn"
-              data-id="{{ row[0] }}"
-              data-name="{{ row[1] }}"
-              onclick="openCategoryEditModal(this)"
-            >
-              <i class="fas fa-edit"></i>
-            </button>
-
-            <form
-              id="deleteForm{{ row[0] }}"
-              action="{{ url_for('delete_category', id=row[0]) }}"
-              method="POST"
-              style="display: inline"
-            >
-              <button
-                type="button"
-                class="btn btn-danger btn-sm"
-                onclick="confirmDelete('{{ row[0] }}')"
-              >
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Modal for adding a new category -->
-  <div
-    class="modal fade"
-    id="addCategory"
-    tabindex="-1"
-    aria-labelledby="addCategoryLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addCategoryLabel">Add New Category</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="modal-body">
-          <form
-            id="editCategoryForm"
-            method="POST"
-            action="{{ url_for('add_category') }}"
-          >
-            <input type="hidden" id="category_Id" name="id" />
-            <div class="mb-3">
-              <label for="categoryName" class="form-label">Category Name</label>
-              <input
-                type="text"
-                class="form-control"
-                id="category_name"
-                name="category_name"
-                required
-              />
-            </div>
-
-            <button type="submit" class="btn btn-primary">Add Category</button>
-          </form>
-        </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered" id="searchTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th class="sortable">Product Name</th>
+              <th class="sortable">Quantity</th>
+              <th class="sortable">Date Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody">
+            {% for row in data %}
+            <tr>
+              <td>{{ row[0] }}</td>
+              <!-- Inventory ID -->
+              <td>{{ row[1] }}</td>
+              <!-- Product Name -->
+              <td>{{ row[2] }}</td>
+              <!-- Quantity -->
+              <td>{{ row[3] }}</td>
+              <!-- Date Updated -->
+              <td>
+                <!-- Edit Button -->
+                <a
+                  href="{{ url_for('edit_inventory', inventory_id=row[0]) }}"
+                  class="btn btn-primary btn-sm"
+                >
+                  Adjustments
+                  <i class="fas fa-edit"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
-  </div>
 
-  <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
+
+    {% endblock %}
+  </div>
 </div>
-{% endblock %}

@@ -249,8 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
   oldQuantityField.addEventListener("input", validateSaleQuantity);
   saleQuantityField.addEventListener("input", validateSaleQuantity);
 });
-
-// Calculate subtotal based on quantity and price
+// Function to calculate subtotal
 function calculateSubtotal() {
   var qty = parseFloat(document.getElementById("qty").value) || 0;
   var priceSale = parseFloat(document.getElementById("priceSale").value) || 0;
@@ -258,13 +257,11 @@ function calculateSubtotal() {
   var subtotal = qty * priceSale - discount;
   document.getElementById("subtotal").value = subtotal.toFixed(2);
 }
+
+// Add event listeners for input changes
 document.getElementById("qty").addEventListener("input", calculateSubtotal);
-document
-  .getElementById("priceSale")
-  .addEventListener("input", calculateSubtotal);
-document
-  .getElementById("discount")
-  .addEventListener("input", calculateSubtotal);
+document.getElementById("priceSale").addEventListener("input", calculateSubtotal);
+document.getElementById("discount").addEventListener("input", calculateSubtotal);
 
 document.addEventListener("DOMContentLoaded", function () {
   var paymentStatusInput = document.getElementById("payment");
@@ -278,9 +275,12 @@ document.addEventListener("DOMContentLoaded", function () {
     var balance = subtotal - paymentStatus;
     balanceInput.value = balance.toFixed(2);
   }
+
+  // Add event listeners for balance updates
   paymentStatusInput.addEventListener("input", updateBalance);
   subtotalInput.addEventListener("input", updateBalance);
 });
+
 
 // Validate payment method based on payment status
 function validatePayment() {
