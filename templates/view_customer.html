@@ -2,78 +2,233 @@
 <div class="container mt-4">
   <div class="card border-0">
     <div class="card-header">
-      <h6 class="card-title">Sales Information</h6>
+      <h6 class="card-title">Customer Statement</h6>
 
+      
       <div class="d-flex justify-content-end">
-        <!-- Search Input -->
-        <form method="get" action="{{ url_for('view_sales') }}" class="d-flex">
+        <form
+          method="get"
+          action="{{ url_for('customer_statement') }}"
+          class="d-flex"
+        >
           <input
-            id="searchInput"
+            id="customerId"
             name="customer_id"
             type="text"
             class="form-control"
-            placeholder="Search by Customer ID..."
+            placeholder="Enter Customer ID..."
             value="{{ request.args.get('customer_id', '') }}"
           />
-          <button type="submit" class="btn btn-primary ms-2">Search</button>
+          <input
+            id="customerName"
+            name="customer_name"
+            type="text"
+            class="form-control ms-2"
+            placeholder="Enter Customer Name..."
+            value="{{ request.args.get('customer_name', '') }}"
+          />
+          <input
+            id="customerTelephone"
+            name="customer_telephone"
+            type="text"
+            class="form-control ms-2"
+            placeholder="Enter Customer Telephone..."
+            value="{{ request.args.get('customer_telephone', '') }}"
+          />
+          <button type="submit" class="btn btn-primary ms-2">Generate</button>
         </form>
       </div>
-    </div>
+      
 
+    </div>
     <div class="card-body">
+      {% if sales %}
+      <h6 class="text-muted">
+        Customer ID: {{ sales[0][0] }} | Name: {{ sales[0][2] }} | Telephone: {{
+        sales[0][10] }}
+      </h6>
+      {% else %}
+      <h6 class="text-muted">No customer data available.</h6>
+      {% endif %} {% if sales %}
       <div class="table-responsive">
-        <!-- Table -->
-        <table class="table table-striped table-bordered" id="searchTable">
+        <table class="table table-striped table-bordered" id="salesTable">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Sale ID</th>
-              <th>Customer Name</th>
+              <th>Customer ID</th>
+              <th>Sale Date</th>
               <th>Product Name</th>
-              <th>Telephone</th>
               <th>Quantity</th>
               <th>Price Sale</th>
               <th>Subtotal</th>
               <th>Discount</th>
               <th>Paid Payment</th>
               <th>Balance</th>
-              <th>Sale Date</th>
             </tr>
           </thead>
-          <tbody id="salesTableBody">
-            {% for sale in sales %}
+          <tbody>
+            {% set total_subtotal = 0 %} {% set total_paid = 0 %} {% set
+            total_balance = 0 %} {% for sale in sales %}
             <tr>
-              <td>{{ loop.index }}</td>
               <td>{{ sale[0] }}</td>
-              <!-- Sale ID -->
               <td>{{ sale[1] }}</td>
-              <!-- Customer Name -->
-              <td>{{ sale[2] }}</td>
-              <!-- Product Name -->
               <td>{{ sale[3] }}</td>
-              <!-- Telephone -->
               <td>{{ sale[4] }}</td>
-              <!-- Quantity -->
               <td>{{ sale[5] }}</td>
-              <!-- Price Sale -->
-              <td>{{ sale[6] }}</td>
-              <!-- Subtotal -->
-              <td>{{ sale[7] }}</td>
-              <!-- Discount -->
-              <td>{{ sale[8] }}</td>
-              <!-- Paid Payment -->
-              <td>{{ sale[9] }}</td>
-              <!-- Balance -->
-              <td>{{ sale[10] }}</td>
-              <!-- Sale Date -->
+              <td>{{ sale[6] | float | round(2) }}</td>
+              <td>{{ sale[7] | float | round(2) }}</td>
+              <td>{{ sale[8] | float | round(2) }}</td>
+              <td>{{ sale[9] | float | round(2) }}</td>
             </tr>
-            {% endfor %}
+            {% set total_subtotal = total_subtotal + (sale[6] | float) %} {% set
+            total_paid = total_paid + (sale[8] | float) %} {% set total_balance
+            = total_balance + (sale[9] | float) %} {% endfor %}
           </tbody>
         </table>
       </div>
+
+      <div class="mt-4 text-center">
+        <h5>Total Summary</h5>
+        <div class="row justify-content-center">
+          <div class="col-auto">
+            <strong>Total Subtotal:</strong> <span id="totalSubtotal">0.00</span>
+          </div>
+          <div class="col-auto">
+            <strong>Total Paid:</strong> <span id="totalPaid">0.00</span>
+          </div>
+          <div class="col-auto">
+            <strong>Total Balance:</strong> <span id="totalBalance">0.00</span>
+          </div>
+        </div>
+      </div>
+      
+      <button id="printButton" class="btn btn-primary mt-4"  onclick="printSales()">Print</button>
+      
+      {% else %}
+      <p>No sales data available for this customer.</p>
+      {% endif %}
+      </div>
+      </div>
     </div>
+   
   </div>
 </div>
+<script>
+  function printSales() {
+    // Create a new window
+    const printWindow = window.open("", "", "height=600,width=800");
 
+    // Get the HTML content for the sales table and summary
+    const salesContent = `
+      <html>
+        <head>
+          <title>Print Sales</title>
+          <style>
+            @media print {
+              table {
+                border-collapse: collapse;
+                width: 100%;
+              }
+              th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+              }
+              th {
+                background-color: #f2f2f2;
+              }
+              .mt-4 {
+                margin-top: 1rem;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <h6>Customer ID: {{ sales[0][0] }} | Name: {{ sales[0][2] }} | Telephone: {{ sales[0][10] }}</h6>
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered" id="salesTable">
+              <thead>
+                <tr>
+                  <th>Customer ID</th>
+                  <th>Sale Date</th>
+                  <th>Product Name</th>
+                  <th>Quantity</th>
+                  <th>Price Sale</th>
+                  <th>Subtotal</th>
+                  <th>Discount</th>
+                  <th>Paid Payment</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sale in sales %}
+                <tr>
+                  <td>{{ sale[0] }}</td>
+                  <td>{{ sale[1] }}</td>
+                  <td>{{ sale[3] }}</td>
+                  <td>{{ sale[4] }}</td>
+                  <td>{{ sale[5] }}</td>
+                  <td>{{ sale[6] | float | round(2) }}</td>
+                  <td>{{ sale[7] | float | round(2) }}</td>
+                  <td>{{ sale[8] | float | round(2) }}</td>
+                  <td>{{ sale[9] | float | round(2) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-4 text-lift">
+            <h5>Total Summary</h5>
+            <div class="row justify-content-lift">
+              <div class="col-auto">
+                <strong>Total Subtotal:</strong> {{ total_subtotal | float | round(2) }}
+              </div>
+              <div class="col-auto">
+                <strong>Total Paid:</strong> {{ total_paid | float | round(2) }}
+              </div>
+              <div class="col-auto">
+                <strong>Total Balance:</strong> {{ total_balance | float | round(2) }}
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // Write the content to the new window
+    printWindow.document.open();
+    printWindow.document.write(salesContent);
+    printWindow.document.close();
+
+    // Print the content
+    printWindow.print();
+  }
+</script>
+<script>
+  function calculateTotals() {
+    let totalSubtotal = 0;
+    let totalPaid = 0;
+    let totalBalance = 0;
+    
+    $('#salesTable tbody tr').each(function() {
+      const subtotal = parseFloat($(this).find('td').eq(5).text()) || 0;
+      const paid = parseFloat($(this).find('td').eq(7).text()) || 0;
+      const balance = parseFloat($(this).find('td').eq(8).text()) || 0;
+
+      totalSubtotal += subtotal;
+      totalPaid += paid;
+      totalBalance += balance;
+    });
+    
+    $('#totalSubtotal').text(totalSubtotal.toFixed(2));
+    $('#totalPaid').text(totalPaid.toFixed(2));
+    $('#totalBalance').text(totalBalance.toFixed(2));
+  }
+
+  $(document).ready(function() {
+    calculateTotals();
+   
+    });
+  });
+</script>
 <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 {% endblock %}

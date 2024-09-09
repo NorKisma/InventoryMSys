@@ -672,27 +672,62 @@ class SalesCRUD:
             flash(f'An error occurred: {err}', 'danger')
             return []
 
+
+
+
+
 class SalesView:
     def __init__(self, mydb):
         self.mydb = mydb
 
-    def view_sales(self, customer_id=None):
-        try:
-            cursor = self.mydb.cursor()
-            query = """
-                SELECT `Customer ID`, `Customer Name`, `Product Name`, `Telephone`, 
-                    `Quantity`, `Price Sale`, `Subtotal`, `Discount`, 
-                    `Paid Payment`, `Balance`, `Sale Date`
-                FROM VeiwCustomer
-            """
-            if customer_id:
-                query += " WHERE `Customer ID` = %s"
-                cursor.execute(query, (customer_id,))
-            else:
-                cursor.execute(query)
+    def get_sales(self, customer_id=None, customer_name=None, customer_telephone=None):
+        query = """
+            SELECT `Customer ID`, `Sale Date`, `Customer Name`, `Product Name`, 
+                   `Quantity`, `Price Sale`, `Subtotal`, `Discount`, 
+                   `Paid Payment`, `Balance`, `Telephone`
+            FROM veiwcustomer
+            WHERE 1=1
+        """
+        params = []
+       
+        if customer_id:
+            query += " AND `Customer ID` = %s"
+            params.append(customer_id)
 
+        if customer_name:
+            query += " AND `Customer Name` LIKE %s"
+            params.append(f"%{customer_name}%")
+
+        if customer_telephone:
+            query += " AND `Telephone` LIKE %s"
+            params.append(f"%{customer_telephone}%")
+
+        try:
+            cursor = self.mydb.cursor()  # Create a cursor
+            cursor.execute(query, tuple(params))
             sales = cursor.fetchall()
-            return render_template('view_customer.html', sales=sales)
+            cursor.close()  # Close the cursor after use
+            return sales
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
-            return redirect(url_for('view_customer'))
+            return []
+
+    def get_sales_by_date_range(self, start_date, end_date):
+        query = """
+            SELECT `Customer ID`, `Sale Date`, `Customer Name`, `Product Name`, 
+                   `Quantity`, `Price Sale`, `Subtotal`, `Discount`, 
+                   `Paid Payment`, `Balance`, `Telephone`
+            FROM veiwcustomer
+            WHERE `Sale Date` BETWEEN %s AND %s
+        """
+        params = [start_date, end_date]
+
+        try:
+            cursor = self.mydb.cursor()  # Create a cursor
+            cursor.execute(query, tuple(params))
+            sales = cursor.fetchall()
+            cursor.close()  # Close the cursor after use
+            return sales
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []

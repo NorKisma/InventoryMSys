@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 import hashlib
 from functools import wraps
-
+import pdfkit
 import os
 from Crud_M import Supplier,CustomerCRUD,usersCRUD,OrderCRUD,ProductCRUD,SalesCRUD,InventoryCRUD,SalesView
 
@@ -11,6 +11,7 @@ import mysql.connector
 from db_con.db import mydb 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  
+
 
 
 UPLOAD_FOLDER = 'static/uploads/'
@@ -32,8 +33,9 @@ def md5_hash(password):
 order_crud = OrderCRUD(mydb)
 crud_users = usersCRUD(mydb, allowed_file)
 customer_crud = CustomerCRUD(mydb)
-supplier_crud = Supplier(mydb)
+
 inventory_crud = InventoryCRUD(mydb)
+supplier_crud = Supplier(mydb)
 sales_view = SalesView(mydb)
 product_crud = ProductCRUD(mydb)
 sales_crud = SalesCRUD(mydb)
@@ -403,31 +405,6 @@ def update_inventory(inventory_id):
 
 
 
-
-@app.route('/view_customer')
-def view_customer():
-    customer_id = request.args.get('customer_id')
-    return sales_view.view_sales(customer_id)
-
-@app.route('/view_sales')
-def view_sales():
-    return render_template('view_customer.html')
-
-
-
-
-
-   
-
-
- 
-
-
-
-
-
-
-
 @app.route('/products')
 def products():
     products = product_crud.fetch_products()  # Fetch all products
@@ -553,6 +530,106 @@ def edit_sale(sale_id):
 def delete_sale(sale_id):
     sales_crud.delete_sale(sale_id)
     return redirect(url_for('sales_list'))
+
+
+
+
+
+
+
+@app.route('/view_customer', methods=['GET'])
+def view_customer():
+    customer_id = request.args.get('customer_id', '')
+    customer_name = request.args.get('customer_name', '')
+  
+ 
+
+   
+    try:
+        with mydb.cursor() as mycursor:  # Context manager for cursor
+       
+            sales = sales_view.get_sales(customer_id, customer_name)
+    except Exception as e:
+        flash(f"Database connection error: {e}", "danger")
+        return redirect(url_for('view_customer'))
+
+    return render_template('view_customer.html', sales=sales)
+
+@app.route('/customer_statement', methods=['GET'])
+def customer_statement():
+    customer_id = request.args.get('customer_id', None)
+
+    if not customer_id:
+        flash("Customer ID is required to generate the statement.", "danger")
+        return redirect(url_for('view_customer'))
+
+    try:
+        with mydb.cursor() as mycursor:  # Context manager for cursor
+            sales_view = SalesView(mycursor)
+            sales = sales_view.get_sales(customer_id=customer_id)
+
+            if not sales:
+                flash("No sales data found for this customer.", "warning")
+                return redirect(url_for('view_customer'))
+    except Exception as e:
+        flash(f"Database connection error: {e}", "danger")
+        return redirect(url_for('view_customer'))
+
+    return render_template('view_customer.html', sales=sales)
+
+@app.route('/customer_statement_pdf', methods=['GET'])
+def customer_statement_pdf():
+    customer_id = request.args.get('customer_id', None)
+
+    if not customer_id:
+        flash("Customer ID is required to generate the statement.", "danger")
+        return redirect(url_for('view_customer'))
+
+    try:
+        with mydb.cursor() as mycursor:  # Context manager for cursor
+            sales_view = SalesView(mycursor)
+            sales = sales_view.get_sales(customer_id=customer_id)
+
+            if not sales:
+                flash("No sales data found for this customer.", "warning")
+                return redirect(url_for('view_customer'))
+
+            rendered = render_template('view_customer.html', sales=sales)
+            pdf = pdfkit.from_string(rendered, False)
+
+            return send_file(
+                io.BytesIO(pdf),
+                attachment_filename='customer_statement.pdf',
+                as_attachment=True
+            )
+    except Exception as e:
+        flash(f"Database connection error: {e}", "danger")
+        return redirect(url_for('view_customer'))
+
+
+@app.route('/daily_sales_report')
+def daily_sales_report():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+   
+    sales = sales_view.get_sales_by_date_range(start_date, end_date)
+
+    return render_template('daily_sales_report.html', sales=sales)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
