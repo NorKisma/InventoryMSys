@@ -681,22 +681,22 @@ class SalesView:
 
     def get_sales_for_customer(self, customer_id=None, customer_name=None, telephone=None):
         query = '''
-        SELECT Sale ID, date_sales, customer_name, telephone, product_name, quantity, price_sale, subtotal, payment, balance
+        SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
+            `Quantity`, `Price Sale`, `Subtotal`, `Paid Payment`, `Balance`
         FROM veiwcustomer
         WHERE 1=1
         '''
         params = []
-
-        if customer_id:
-            query += " AND customer_id = %s"
-            params.append(customer_id)
-
         if customer_name:
-            query += " AND customer_name LIKE %s"
+            query += " AND `Customer Name` LIKE %s"
             params.append(f"%{customer_name}%")
 
+        if customer_id:
+            query += " AND `Customer ID` = %s"
+            params.append(customer_id)
+
         if telephone:
-            query += " AND telephone LIKE %s"
+            query += " AND `Telephone` LIKE %s"
             params.append(f"%{telephone}%")
 
         try:
@@ -704,13 +704,11 @@ class SalesView:
             cursor.execute(query, tuple(params))
             sales = cursor.fetchall()
             cursor.close()  # Close the cursor after use
-            return [{'Sale ID': sale[0], 'date_sales': sale[1], 'customer_name': sale[2], 'telephone': sale[3], 
-                    'product_name': sale[4], 'quantity': sale[5], 'price_sale': sale[6], 'subtotal': sale[7],
-                    'payment': sale[8], 'balance': sale[9]} for sale in sales]
+            return sales  # Return tuples directly
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
-
+  
     def customer_sales_report(self):
         customer_id = request.args.get('customer_id')
         customer_name = request.args.get('customer_name')
@@ -721,16 +719,14 @@ class SalesView:
         else:
             sales = []  # Handle the case where no parameters are provided
 
-        # Calculate totals
-        total_subtotal = sum(sale['subtotal'] for sale in sales)
-        total_payment = sum(sale['payment'] for sale in sales)
-        total_balance = sum(sale['balance'] for sale in sales)
+        # Calculate totals assuming sales is a list of tuples
+        total_subtotal = sum(sale[7] for sale in sales)
+        total_payment = sum(sale[8] for sale in sales)
+        total_balance = sum(sale[9] for sale in sales)
 
         return render_template('customer_sales_report.html', sales=sales, total_subtotal=total_subtotal, total_payment=total_payment, total_balance=total_balance)
 
-
-
-   
+    
 
 
 
@@ -745,7 +741,7 @@ class SalesView:
         params = [start_date, end_date]
 
         try:
-            cursor = self.mydb.cursor()  # Create a cursor
+            cursor = self.db.cursor()  # Create a cursor
             cursor.execute(query, tuple(params))
             sales = cursor.fetchall()
             cursor.close()  # Close the cursor after use
@@ -768,7 +764,7 @@ class SalesView:
         params = [month]
 
         try:
-            cursor = self.mydb.cursor()  # Create a cursor
+            cursor = self.db.cursor()  # Create a cursor
             cursor.execute(query, params)
             sales = cursor.fetchall()
             cursor.close()

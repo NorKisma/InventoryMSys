@@ -58,17 +58,26 @@
           {% for sale in sales %}
           <tr>
             <td>{{ sale[0] }}</td>
+            <!-- Sale ID -->
             <td>{{ sale[1] }}</td>
+            <!-- Sale Date -->
             <td>{{ sale[2] }}</td>
+            <!-- Customer Name -->
             <td>{{ sale[3] }}</td>
+            <!-- Telephone -->
             <td>{{ sale[4] }}</td>
+            <!-- Product Name -->
             <td>{{ sale[5] }}</td>
-            <td>{{ sale[6] }}</td>
-            <td>{{ sale[7] }}</td>
-            <td>{{ sale[8] }}</td>
-            <td>{{ sale[9] }}</td>
-
-            {% set balance = sale[9] | float %}
+            <!-- Quantity -->
+            <td>${{ sale[6] }}</td>
+            <!-- Price Sale -->
+            <td>${{ sale[7] }}</td>
+            <!-- Subtotal -->
+            <td>${{ sale[8] }}</td>
+            <!-- Paid Payment -->
+            <td>${{ sale[9] }}</td>
+            {% set balance = sale[8] | float %}
+            <!-- Balance -->
             <td
               style="
                 {% if balance == 0 %}
@@ -79,7 +88,7 @@
                   font-style: italic;
                 {% endif %}"
             >
-              {% if balance == 0 %} Paid {% else %} Unpaid {% endif %}
+              {% if balance == 0 %} Paided {% else %} Unpaid {% endif %}
             </td>
           </tr>
           {% endfor %}
@@ -91,9 +100,9 @@
             <td colspan="7" class="text-end">
               <strong>Total Subtotal</strong>
             </td>
-            <td><strong>{{ total_subtotal }}</strong></td>
-            <td><strong>{{ total_payment }}</strong></td>
-            <td><strong>{{ total_balance }}</strong></td>
+            <td><strong>$ {{ total_subtotal }}</strong></td>
+            <td><strong>$ {{ total_payment }}</strong></td>
+            <td><strong>$ {{ total_balance }}</strong></td>
             <td></td>
           </tr>
         </tfoot>
