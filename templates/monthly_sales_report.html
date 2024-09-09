@@ -2,11 +2,11 @@
 
 <div class="card border-0">
   <div class="card-header">
-    <h6 class="card-title">Daily Sales Report</h6>
+    <h6 class="card-title">Monthly Sales Report</h6>
     <!-- Search Input -->
 
     <div class="d-flex justify-content-end">
-      <!-- Date Picker -->
+      <!-- Month Picker -->
       <input
         id="searchInput"
         type="text"
@@ -15,24 +15,16 @@
       />
       <form
         method="get"
-        action="{{ url_for('daily_sales_report') }}"
+        action="{{ url_for('monthly_sales_report') }}"
         class="d-flex"
       >
         <input
-          id="startDatePicker"
-          name="start_date"
-          type="date"
+          id="monthPicker"
+          name="month"
+          type="month"
           class="form-control"
-          placeholder="Start Date"
-          value="{{ request.args.get('start_date', '') }}"
-        />
-        <input
-          id="endDatePicker"
-          name="end_date"
-          type="date"
-          class="form-control ms-2"
-          placeholder="End Date"
-          value="{{ request.args.get('end_date', '') }}"
+          placeholder="Select Month"
+          value="{{ request.args.get('month', '') }}"
         />
         <button type="submit" class="btn btn-primary ms-2">
           Generate Report
@@ -57,7 +49,7 @@
         <thead>
           <tr>
             <th>Sales ID</th>
-            <th>Date Sales</th>
+            <th>Date sales</th>
             <th>Customer Name</th>
             <th>Telephone</th>
             <th>Product Name</th>

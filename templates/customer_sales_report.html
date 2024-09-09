@@ -2,37 +2,22 @@
 
 <div class="card border-0">
   <div class="card-header">
-    <h6 class="card-title">Daily Sales Report</h6>
+    <h6 class="card-title">Customer Sales Report</h6>
     <!-- Search Input -->
-
     <div class="d-flex justify-content-end">
-      <!-- Date Picker -->
-      <input
-        id="searchInput"
-        type="text"
-        class="form-control"
-        placeholder="Search..."
-      />
+      <!-- Customer Picker -->
       <form
         method="get"
-        action="{{ url_for('daily_sales_report') }}"
+        action="{{ url_for('customer_sales_report') }}"
         class="d-flex"
       >
         <input
-          id="startDatePicker"
-          name="start_date"
-          type="date"
+          id="customerPicker"
+          name="customer_id"
+          type="text"
           class="form-control"
-          placeholder="Start Date"
-          value="{{ request.args.get('start_date', '') }}"
-        />
-        <input
-          id="endDatePicker"
-          name="end_date"
-          type="date"
-          class="form-control ms-2"
-          placeholder="End Date"
-          value="{{ request.args.get('end_date', '') }}"
+          placeholder="Enter Customer ID"
+          value="{{ request.args.get('customer_id', '') }}"
         />
         <button type="submit" class="btn btn-primary ms-2">
           Generate Report
@@ -94,7 +79,7 @@
                   font-style: italic;
                 {% endif %}"
             >
-              {% if balance == 0 %} Paided {% else %} Unpaid {% endif %}
+              {% if balance == 0 %} Paid {% else %} Unpaid {% endif %}
             </td>
           </tr>
           {% endfor %}

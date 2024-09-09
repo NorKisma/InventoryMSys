@@ -533,94 +533,58 @@ def delete_sale(sale_id):
 
 
 
+@app.route('/customer_sales_report', methods=['GET'])
+def customer_sales_report():
+    return sales_view.customer_sales_report()
 
 
 
 
-@app.route('/view_customer', methods=['GET'])
-def view_customer():
-    customer_id = request.args.get('customer_id', '')
-    customer_name = request.args.get('customer_name', '')
-  
- 
-
-   
-    try:
-        with mydb.cursor() as mycursor:  # Context manager for cursor
-       
-            sales = sales_view.get_sales(customer_id, customer_name)
-    except Exception as e:
-        flash(f"Database connection error: {e}", "danger")
-        return redirect(url_for('view_customer'))
-
-    return render_template('view_customer.html', sales=sales)
-
-@app.route('/customer_statement', methods=['GET'])
-def customer_statement():
-    customer_id = request.args.get('customer_id', None)
-
-    if not customer_id:
-        flash("Customer ID is required to generate the statement.", "danger")
-        return redirect(url_for('view_customer'))
-
-    try:
-        with mydb.cursor() as mycursor:  # Context manager for cursor
-            sales_view = SalesView(mycursor)
-            sales = sales_view.get_sales(customer_id=customer_id)
-
-            if not sales:
-                flash("No sales data found for this customer.", "warning")
-                return redirect(url_for('view_customer'))
-    except Exception as e:
-        flash(f"Database connection error: {e}", "danger")
-        return redirect(url_for('view_customer'))
-
-    return render_template('view_customer.html', sales=sales)
-
-@app.route('/customer_statement_pdf', methods=['GET'])
-def customer_statement_pdf():
-    customer_id = request.args.get('customer_id', None)
-
-    if not customer_id:
-        flash("Customer ID is required to generate the statement.", "danger")
-        return redirect(url_for('view_customer'))
-
-    try:
-        with mydb.cursor() as mycursor:  # Context manager for cursor
-            sales_view = SalesView(mycursor)
-            sales = sales_view.get_sales(customer_id=customer_id)
-
-            if not sales:
-                flash("No sales data found for this customer.", "warning")
-                return redirect(url_for('view_customer'))
-
-            rendered = render_template('view_customer.html', sales=sales)
-            pdf = pdfkit.from_string(rendered, False)
-
-            return send_file(
-                io.BytesIO(pdf),
-                attachment_filename='customer_statement.pdf',
-                as_attachment=True
-            )
-    except Exception as e:
-        flash(f"Database connection error: {e}", "danger")
-        return redirect(url_for('view_customer'))
-
-
-@app.route('/daily_sales_report')
+@app.route('/daily_sales_report', methods=['GET'])
 def daily_sales_report():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-   
-    sales = sales_view.get_sales_by_date_range(start_date, end_date)
+    if start_date and end_date:
+        sales = sales_view.get_sales_by_date_range(start_date, end_date)
 
-    return render_template('daily_sales_report.html', sales=sales)
+        # Calculate total subtotal, payment, and balance
+        total_subtotal = sum(float(sale[7]) for sale in sales)
+        total_payment = sum(float(sale[8]) for sale in sales)
+        total_balance = sum(float(sale[9]) for sale in sales)
+    else:
+        sales = []
+        total_subtotal = total_payment = total_balance = 0
+
+    return render_template(
+        'daily_sales_report.html',
+        sales=sales,
+        total_subtotal=total_subtotal,
+        total_payment=total_payment,
+        total_balance=total_balance
+    )
 
 
+@app.route('/monthly_sales_report', methods=['GET'])
+def monthly_sales_report():
+    month = request.args.get('month')
+    if month:
+        sales = sales_view.get_sales_by_month(month)
+        # Calculate total subtotal, payment, and balance
+        total_subtotal = sum(float(sale[7]) for sale in sales) 
+        total_payment = sum(float(sale[8]) for sale in sales)  
+        total_balance = sum(float(sale[9]) for sale in sales)  
+    else:
+        sales = []
+        total_subtotal = total_payment = total_balance = 0
 
-
-
+    return render_template(
+        'monthly_sales_report.html',
+        sales=sales,
+        total_subtotal=total_subtotal,
+        total_payment=total_payment,
+        total_balance=total_balance
+    )
 
 
 

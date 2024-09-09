@@ -675,48 +675,70 @@ class SalesCRUD:
 
 
 
-
 class SalesView:
-    def __init__(self, mydb):
-        self.mydb = mydb
+    def __init__(self, db):
+        self.db = db
 
-    def get_sales(self, customer_id=None, customer_name=None, customer_telephone=None):
-        query = """
-            SELECT `Customer ID`, `Sale Date`, `Customer Name`, `Product Name`, 
-                   `Quantity`, `Price Sale`, `Subtotal`, `Discount`, 
-                   `Paid Payment`, `Balance`, `Telephone`
-            FROM veiwcustomer
-            WHERE 1=1
-        """
+    def get_sales_for_customer(self, customer_id=None, customer_name=None, telephone=None):
+        query = '''
+        SELECT Sale ID, date_sales, customer_name, telephone, product_name, quantity, price_sale, subtotal, payment, balance
+        FROM veiwcustomer
+        WHERE 1=1
+        '''
         params = []
-       
+
         if customer_id:
-            query += " AND `Customer ID` = %s"
+            query += " AND customer_id = %s"
             params.append(customer_id)
 
         if customer_name:
-            query += " AND `Customer Name` LIKE %s"
+            query += " AND customer_name LIKE %s"
             params.append(f"%{customer_name}%")
 
-        if customer_telephone:
-            query += " AND `Telephone` LIKE %s"
-            params.append(f"%{customer_telephone}%")
+        if telephone:
+            query += " AND telephone LIKE %s"
+            params.append(f"%{telephone}%")
 
         try:
-            cursor = self.mydb.cursor()  # Create a cursor
+            cursor = self.db.cursor()  # Adjust based on your actual DB connection
             cursor.execute(query, tuple(params))
             sales = cursor.fetchall()
             cursor.close()  # Close the cursor after use
-            return sales
+            return [{'Sale ID': sale[0], 'date_sales': sale[1], 'customer_name': sale[2], 'telephone': sale[3], 
+                    'product_name': sale[4], 'quantity': sale[5], 'price_sale': sale[6], 'subtotal': sale[7],
+                    'payment': sale[8], 'balance': sale[9]} for sale in sales]
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
 
+    def customer_sales_report(self):
+        customer_id = request.args.get('customer_id')
+        customer_name = request.args.get('customer_name')
+        telephone = request.args.get('telephone')
+
+        if customer_id or customer_name or telephone:
+            sales = self.get_sales_for_customer(customer_id, customer_name, telephone)
+        else:
+            sales = []  # Handle the case where no parameters are provided
+
+        # Calculate totals
+        total_subtotal = sum(sale['subtotal'] for sale in sales)
+        total_payment = sum(sale['payment'] for sale in sales)
+        total_balance = sum(sale['balance'] for sale in sales)
+
+        return render_template('customer_sales_report.html', sales=sales, total_subtotal=total_subtotal, total_payment=total_payment, total_balance=total_balance)
+
+
+
+   
+
+
+
     def get_sales_by_date_range(self, start_date, end_date):
         query = """
-            SELECT `Customer ID`, `Sale Date`, `Customer Name`, `Product Name`, 
-                   `Quantity`, `Price Sale`, `Subtotal`, `Discount`, 
-                   `Paid Payment`, `Balance`, `Telephone`
+             SELECT `Sale ID`, `Sale Date`, `Customer Name`,`Telephone`, `Product Name`, 
+                   `Quantity`, `Price Sale`, `Subtotal`,  
+                   `Paid Payment`, `Balance`
             FROM veiwcustomer
             WHERE `Sale Date` BETWEEN %s AND %s
         """
@@ -727,6 +749,29 @@ class SalesView:
             cursor.execute(query, tuple(params))
             sales = cursor.fetchall()
             cursor.close()  # Close the cursor after use
+            return sales
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return []
+    
+    def get_sales_by_month(self, month):
+        """
+        Get sales filtered by the selected month (format: YYYY-MM)
+        """
+        query = """
+            SELECT `Sale ID`, `Sale Date`, `Customer Name`,`Telephone`, `Product Name`, 
+                   `Quantity`, `Price Sale`, `Subtotal`,  
+                   `Paid Payment`, `Balance`
+            FROM veiwcustomer
+            WHERE DATE_FORMAT(`Sale Date`, '%Y-%m') = %s
+        """
+        params = [month]
+
+        try:
+            cursor = self.mydb.cursor()  # Create a cursor
+            cursor.execute(query, params)
+            sales = cursor.fetchall()
+            cursor.close()
             return sales
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
