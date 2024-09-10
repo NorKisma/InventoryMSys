@@ -8,8 +8,51 @@ function submitCustomerForm() {
 function submitUserForm() {
   document.getElementById('userForm').submit();
 }
+function openProductModal(button) {
+  const form = document.getElementById('productForm');
+  
+  if (button) {
+      // Edit mode
+      const id = button.getAttribute('data-id');
+      const name = button.getAttribute('data-name');
+      const unit = button.getAttribute('data-unit');
+      const category = button.getAttribute('data-category-id');
+      const price = button.getAttribute('data-price');
+      const description = button.getAttribute('data-description');
+      
+      // Populate form for editing
+      document.getElementById('productId').value = id;
+      document.getElementById('productName').value = name;
+      document.getElementById('product_unit').value = unit;
+      document.getElementById('category_name').value = category;
+      document.getElementById('productPrice').value = price;
+      document.getElementById('productDescription').value = description;
 
-// Handle form submission for suppliers
+      // Update form action and modal title for editing
+      form.action = `/edit_product/${id}`;  // Directly set URL
+      document.getElementById('submitProductBtn').textContent = 'Update Product';
+      document.getElementById('addProductLabel').textContent = 'Edit Product';
+  } else {
+      // Add mode
+      form.reset();
+      document.getElementById('productId').value = '';
+      form.action = "{{ url_for('add_product') }}";  // Ensure this URL is correct
+      document.getElementById('submitProductBtn').textContent = 'Add Product';
+      document.getElementById('addProductLabel').textContent = 'Add New Product';
+  }
+  
+  new bootstrap.Modal(document.getElementById('addProduct')).show();
+}
+
+
+
+
+
+
+
+
+
+
 
 // Open User Edit Modal with pre-filled data
 function openUserEditModal(button) {
@@ -86,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
 
 
 
@@ -222,81 +266,83 @@ function updateProductDetails() {
     document.getElementById("quty").value = quantity;
   }
 }
-document.addEventListener("DOMContentLoaded", function () {
-  const oldQuantityField = document.getElementById("quty");
-  const saleQuantityField = document.getElementById("qty");
-  const errorMessage = document.getElementById("error-message");
-  function validateSaleQuantity() {
-    const oldQuantity = parseInt(oldQuantityField.value, 10);
-    const saleQuantity = parseInt(saleQuantityField.value, 10);
-    errorMessage.textContent = "";
-    // Validate oldQuantity
-    if (isNaN(oldQuantity) || oldQuantity <= 0) {
-      errorMessage.textContent = "Old quantity is invalid.";
-      saleQuantityField.disabled = true;
-      return;
-    } else {
-      saleQuantityField.disabled = false;
+
+
+
+ document.addEventListener("DOMContentLoaded", function () {
+    const oldQuantityField = document.getElementById("quty");
+    const saleQuantityField = document.getElementById("qty");
+    const errorMessage = document.getElementById("error-message");
+    function validateSaleQuantity() {
+      const oldQuantity = parseInt(oldQuantityField.value, 10);
+      const saleQuantity = parseInt(saleQuantityField.value, 10);
+      errorMessage.textContent = "";
+      // Validate oldQuantity
+      if (isNaN(oldQuantity) || oldQuantity <= 0) {
+        errorMessage.textContent = "Old quantity is invalid.";
+        saleQuantityField.disabled = true;
+        return;
+      } else {
+        saleQuantityField.disabled = false;
+      }
+      // Validate saleQuantity
+      if (isNaN(saleQuantity) || saleQuantity <= 0) {
+        errorMessage.textContent = "Sale quantity must be a positive number.";
+      } else if (saleQuantity > oldQuantity) {
+        errorMessage.textContent = "Sale quantity cannot exceed old quantity.";
+      }
     }
-    // Validate saleQuantity
-    if (isNaN(saleQuantity) || saleQuantity <= 0) {
-      errorMessage.textContent = "Sale quantity must be a positive number.";
-    } else if (saleQuantity > oldQuantity) {
-      errorMessage.textContent = "Sale quantity cannot exceed old quantity.";
+    // Add event listeners
+    oldQuantityField.addEventListener("input", validateSaleQuantity);
+    saleQuantityField.addEventListener("input", validateSaleQuantity);
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var priceSaleInput = document.getElementById("priceSale");
+    var qtyInput = document.getElementById("qty");
+    var subtotalInput = document.getElementById("subtotal");
+    var discountInput = document.getElementById("discount");
+    var paymentInput = document.getElementById("payment");
+    var balanceInput = document.getElementById("Balance");
+    var qutyInput = document.getElementById("quty"); // Old quantity
+
+    // Function to update product details when a product is selected
+    function updateProductDetails() {
+      var selectedProduct =
+        document.getElementById("productId").selectedOptions[0];
+      var price = selectedProduct.getAttribute("data-price");
+      var qty = selectedProduct.getAttribute("data-qty");
+
+      priceSaleInput.value = price;
+      qutyInput.value = qty; // Set old quantity
+      calculateSubtotal(); // Recalculate subtotal if product changes
     }
-  }
-  // Add event listeners
-  oldQuantityField.addEventListener("input", validateSaleQuantity);
-  saleQuantityField.addEventListener("input", validateSaleQuantity);
-});
-// Function to calculate subtotal
-function calculateSubtotal() {
-  var qty = parseFloat(document.getElementById("qty").value) || 0;
-  var priceSale = parseFloat(document.getElementById("priceSale").value) || 0;
-  var discount = parseFloat(document.getElementById("discount").value) || 0;
-  var subtotal = qty * priceSale - discount;
-  document.getElementById("subtotal").value = subtotal.toFixed(2);
-}
 
-// Add event listeners for input changes
-document.getElementById("qty").addEventListener("input", calculateSubtotal);
-document.getElementById("priceSale").addEventListener("input", calculateSubtotal);
-document.getElementById("discount").addEventListener("input", calculateSubtotal);
+    // Function to calculate subtotal
+    function calculateSubtotal() {
+      var price = parseFloat(priceSaleInput.value) || 0;
+      var qty = parseFloat(qtyInput.value) || 0;
+      var discount = parseFloat(discountInput.value) || 0;
+      var subtotal = price * qty - discount;
 
-document.addEventListener("DOMContentLoaded", function () {
-  var paymentStatusInput = document.getElementById("payment");
-  var subtotalInput = document.getElementById("subtotal");
-  var balanceInput = document.getElementById("Balance");
+      subtotalInput.value = subtotal.toFixed(2);
+      updateBalance(); // Update balance after calculating subtotal
+    }
 
-  // Function to update the balance
-  function updateBalance() {
-    var paymentStatus = parseFloat(paymentStatusInput.value) || 0;
-    var subtotal = parseFloat(subtotalInput.value) || 0;
-    var balance = subtotal - paymentStatus;
-    balanceInput.value = balance.toFixed(2);
-  }
+    // Function to update the balance based on payment
+    function updateBalance() {
+      var payment = parseFloat(paymentInput.value) || 0;
+      var subtotal = parseFloat(subtotalInput.value) || 0;
+      var balance = subtotal - payment;
 
-  // Add event listeners for balance updates
-  paymentStatusInput.addEventListener("input", updateBalance);
-  subtotalInput.addEventListener("input", updateBalance);
-});
+      balanceInput.value = balance.toFixed(2);
+    }
 
-
-// Validate payment method based on payment status
-function validatePayment() {
-  var paymentStatus = document.getElementById("paidStatus").value;
-  var paymentMethod = document.getElementById("paymentMethod").value;
-
-  if (paymentStatus === "Paid" && paymentMethod === "") {
-    alert("Please select a payment method.");
-    return false;
-  }
-
-  if (paymentStatus === "Paid") {
-    alert("Payment successful!");
-  } else if (paymentStatus === "Unpaid") {
-    alert("Payment is pending.");
-  }
-
-  return true;
-}
+    // Event listeners for dynamic updates
+    qtyInput.addEventListener("input", calculateSubtotal);
+    discountInput.addEventListener("input", calculateSubtotal);
+    paymentInput.addEventListener("input", updateBalance);
+    document
+      .getElementById("productId")
+      .addEventListener("change", updateProductDetails);
+  });

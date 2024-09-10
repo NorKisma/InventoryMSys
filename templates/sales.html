@@ -143,6 +143,83 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>
-<script></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const oldQuantityField = document.getElementById("quty");
+    const saleQuantityField = document.getElementById("qty");
+    const errorMessage = document.getElementById("error-message");
+    function validateSaleQuantity() {
+      const oldQuantity = parseInt(oldQuantityField.value, 10);
+      const saleQuantity = parseInt(saleQuantityField.value, 10);
+      errorMessage.textContent = "";
+      // Validate oldQuantity
+      if (isNaN(oldQuantity) || oldQuantity <= 0) {
+        errorMessage.textContent = "Old quantity is invalid.";
+        saleQuantityField.disabled = true;
+        return;
+      } else {
+        saleQuantityField.disabled = false;
+      }
+      // Validate saleQuantity
+      if (isNaN(saleQuantity) || saleQuantity <= 0) {
+        errorMessage.textContent = "Sale quantity must be a positive number.";
+      } else if (saleQuantity > oldQuantity) {
+        errorMessage.textContent = "Sale quantity cannot exceed old quantity.";
+      }
+    }
+    // Add event listeners
+    oldQuantityField.addEventListener("input", validateSaleQuantity);
+    saleQuantityField.addEventListener("input", validateSaleQuantity);
+  });
 
+  document.addEventListener("DOMContentLoaded", function () {
+    var priceSaleInput = document.getElementById("priceSale");
+    var qtyInput = document.getElementById("qty");
+    var subtotalInput = document.getElementById("subtotal");
+    var discountInput = document.getElementById("discount");
+    var paymentInput = document.getElementById("payment");
+    var balanceInput = document.getElementById("Balance");
+    var qutyInput = document.getElementById("quty"); // Old quantity
+
+    // Function to update product details when a product is selected
+    function updateProductDetails() {
+      var selectedProduct =
+        document.getElementById("productId").selectedOptions[0];
+      var price = selectedProduct.getAttribute("data-price");
+      var qty = selectedProduct.getAttribute("data-qty");
+
+      priceSaleInput.value = price;
+      qutyInput.value = qty; // Set old quantity
+      calculateSubtotal(); // Recalculate subtotal if product changes
+    }
+
+    // Function to calculate subtotal
+    function calculateSubtotal() {
+      var price = parseFloat(priceSaleInput.value) || 0;
+      var qty = parseFloat(qtyInput.value) || 0;
+      var discount = parseFloat(discountInput.value) || 0;
+      var subtotal = price * qty - discount;
+
+      subtotalInput.value = subtotal.toFixed(2);
+      updateBalance(); // Update balance after calculating subtotal
+    }
+
+    // Function to update the balance based on payment
+    function updateBalance() {
+      var payment = parseFloat(paymentInput.value) || 0;
+      var subtotal = parseFloat(subtotalInput.value) || 0;
+      var balance = subtotal - payment;
+
+      balanceInput.value = balance.toFixed(2);
+    }
+
+    // Event listeners for dynamic updates
+    qtyInput.addEventListener("input", calculateSubtotal);
+    discountInput.addEventListener("input", calculateSubtotal);
+    paymentInput.addEventListener("input", updateBalance);
+    document
+      .getElementById("productId")
+      .addEventListener("change", updateProductDetails);
+  });
+</script>
 {% endblock %}

@@ -50,9 +50,9 @@
             <button
               type="button"
               class="btn btn-primary btn-sm"
-              data-toggle="modal"
-              data-target="#addSupplier"
-              onclick="populateModal('{{ row[0] }}', '{{ row[1] }}', '{{ row[2] }}', '{{ row[3] }}', '{{ row[4] }}', '{{ row[5] }}', '{{ row[6] }}')"
+              data-bs-toggle="modal"
+              data-bs-target="#addSupplier"
+              onclick="addSupplier('{{ row[0] }}', '{{ row[1] }}', '{{ row[2] }}', '{{ row[3] }}', '{{ row[4] }}', '{{ row[5] }}', '{{ row[6] }}')"
             >
               Edit
             </button>
@@ -80,4 +80,27 @@
 
   {% include 'addmodels.html' %}
 </div>
+
+<script>
+  // Function to filter table rows based on search input
+  document.getElementById("searchInput").addEventListener("input", function () {
+    var input = this.value.toLowerCase();
+    var rows = document.querySelectorAll("#supplierTableBody tr");
+
+    rows.forEach(function (row) {
+      var cells = row.getElementsByTagName("td");
+      var match = Array.from(cells).some(function (cell) {
+        return cell.textContent.toLowerCase().includes(input);
+      });
+      row.style.display = match ? "" : "none";
+    });
+  });
+
+  // Function to show a confirmation dialog before deletion
+  function confirmDelete(supplierId) {
+    if (confirm("Are you sure you want to delete this supplier?")) {
+      document.getElementById("deleteForm" + supplierId).submit();
+    }
+  }
+</script>
 {% endblock %}

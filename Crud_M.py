@@ -279,34 +279,24 @@ class ProductCRUD:
 
         return redirect(url_for('products'))
 
-    def update_product(self, product_id):
-        if request.method == 'POST':
-            # Fetch form data
-            product_unit = request.form.get('product_unit')
-            product_name = request.form.get('product_name')
-            category_name = request.form.get('category_name')
-            price = request.form.get('price')
-            description = request.form.get('description')
-
-            # Ensure category_id is an integer before updating the database
-          
-            # Update product SQL query
-            sql = """
-            UPDATE product_list 
-            SET category_name = %s, product_unit = %s, name = %s, price = %s, description = %s 
+    def update_product(self, product_id, product_name, product_unit, category_name, price, description):
+        try:
+            cursor = self.mydb.cursor()
+            
+            query = '''
+            UPDATE product_list
+            SET category_name = %s, product_unit = %s, name = %s, price = %s, description = %s
             WHERE id = %s
-            """
-            val = (category_name, product_unit, product_name, price, description, product_id)
-
-            try:
-                with self.mydb.cursor() as mycursor:
-                    mycursor.execute(sql, val)
-                    self.mydb.commit()  # Commit the changes to the database
-                flash('Product updated successfully.', 'success')
-            except mysql.connector.Error as err:
-                flash(f'An error occurred: {err}', 'danger')
-
-        return redirect(url_for('products'))
+            '''
+            cursor.execute(query, (category_name, product_unit, product_name, price, description, product_id))
+            self.mydb.commit()
+            
+            return redirect(url_for('products'))
+        except mysql.connector.Error as err:
+            print(f"An error occurred: {err}")
+            return False
+        finally:
+            cursor.close()
 
     def delete_product(self, product_id):
         try:
@@ -346,7 +336,7 @@ class OrderCRUD:
             status = request.form.get('status')
             date_order = request.form.get('date_order')
             order_id = request.form.get('order_id') 
-            stock_from = 'purchase'
+         
 
             if order_id:
                 return self.update_order(order_id, invoice_number, supplier, product_name, product_unit, qty, price, subtotal, status, date_order)
@@ -365,7 +355,6 @@ class OrderCRUD:
             with self.mydb.cursor() as cursor:
                 cursor.execute(sql, val)
                 self.mydb.commit()
-                flash('Order added successfully.', 'success')
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return redirect(url_for('add_order'))
@@ -511,7 +500,7 @@ class SalesCRUD:
             return redirect(url_for('add_sale'))
 
     def update_sale(self, sale_id, customer_id, product_id, qty, price_sale, discount, subtotal, payment, balance, date_sale):
-        old_qty = self.get_old_quantity(sale_id)
+   
         sql = """
             UPDATE sales 
             SET cust_id = %s, product_id = %s, qty = %s, 
@@ -525,11 +514,7 @@ class SalesCRUD:
             with self.mydb.cursor() as cursor:
                 cursor.execute(sql, val)
                 self.mydb.commit()
-                flash('Sale updated successfully.', 'success')
-                # Update inventory if necessary
-                if old_qty is not None:
-                    qty_change = old_qty - qty
-                    self.update_inventory(product_id, qty_change)
+             
             return redirect(url_for('sales_list'))
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
@@ -538,27 +523,29 @@ class SalesCRUD:
     def update_inventory(self, product_id, qty_change):
         check_sql = "SELECT qty FROM inventory WHERE product_id = %s"
         update_sql = "UPDATE inventory SET qty = qty + %s, date_updated = NOW() WHERE product_id = %s"
+        
         try:
             with self.mydb.cursor() as cursor:
                 cursor.execute(check_sql, (product_id,))
                 result = cursor.fetchone()
+                
                 if result:
                     current_qty = result[0]
-                    new_qty = current_qty - qty_change
 
-                    if new_qty < 0:
+                    # Ensure the stock is sufficient for the requested change
+                    if qty_change < 0 and current_qty < abs(qty_change):
                         flash('Error: Insufficient stock for this product.', 'danger')
                     else:
                         cursor.execute(update_sql, (qty_change, product_id))
                         self.mydb.commit()
-                        if new_qty == 0:
-                            flash('Warning: Inventory has reached zero for this product.', 'warning')
-                        else:
-                            flash('Inventory updated successfully.', 'success')
+
+                        flash('Inventory updated successfully.', 'success')
                 else:
                     flash('Product not found in inventory.', 'danger')
+                    
         except mysql.connector.Error as err:
             flash(f'An error occurred while updating inventory: {err}', 'danger')
+
 
     def delete_sale(self, sale_id):
         try:
@@ -675,14 +662,20 @@ class SalesCRUD:
 
 
 
+
+
+
 class SalesView:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, mydb):
+        self.mydb = mydb
 
     def get_sales_for_customer(self, customer_id=None, customer_name=None, telephone=None):
+        """
+        Get sales data filtered by customer ID, name, or telephone.
+        """
         query = '''
         SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
-            `Quantity`, `Price Sale`, `Subtotal`, `Paid Payment`, `Balance`
+               `Quantity`, `Price Sale`, `Subtotal`, `Paid Payment`, `Balance`
         FROM veiwcustomer
         WHERE 1=1
         '''
@@ -700,16 +693,19 @@ class SalesView:
             params.append(f"%{telephone}%")
 
         try:
-            cursor = self.db.cursor()  # Adjust based on your actual DB connection
+            cursor = self.mydb.cursor()
             cursor.execute(query, tuple(params))
             sales = cursor.fetchall()
-            cursor.close()  # Close the cursor after use
-            return sales  # Return tuples directly
+            cursor.close()
+            return sales
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
   
     def customer_sales_report(self):
+        """
+        Generate a sales report for a customer based on query parameters.
+        """
         customer_id = request.args.get('customer_id')
         customer_name = request.args.get('customer_name')
         telephone = request.args.get('telephone')
@@ -717,34 +713,32 @@ class SalesView:
         if customer_id or customer_name or telephone:
             sales = self.get_sales_for_customer(customer_id, customer_name, telephone)
         else:
-            sales = []  # Handle the case where no parameters are provided
+            sales = []
 
-        # Calculate totals assuming sales is a list of tuples
         total_subtotal = sum(sale[7] for sale in sales)
         total_payment = sum(sale[8] for sale in sales)
         total_balance = sum(sale[9] for sale in sales)
 
         return render_template('customer_sales_report.html', sales=sales, total_subtotal=total_subtotal, total_payment=total_payment, total_balance=total_balance)
 
-    
-
-
-
     def get_sales_by_date_range(self, start_date, end_date):
+        """
+        Get sales data for a specific date range.
+        """
         query = """
-             SELECT `Sale ID`, `Sale Date`, `Customer Name`,`Telephone`, `Product Name`, 
-                   `Quantity`, `Price Sale`, `Subtotal`,  
-                   `Paid Payment`, `Balance`
-            FROM veiwcustomer
-            WHERE `Sale Date` BETWEEN %s AND %s
+             SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
+                    `Quantity`, `Price Sale`, `Subtotal`,  
+                    `Paid Payment`, `Balance`
+             FROM veiwcustomer
+             WHERE `Sale Date` BETWEEN %s AND %s
         """
         params = [start_date, end_date]
 
         try:
-            cursor = self.db.cursor()  # Create a cursor
+            cursor = self.mydb.cursor()
             cursor.execute(query, tuple(params))
             sales = cursor.fetchall()
-            cursor.close()  # Close the cursor after use
+            cursor.close()
             return sales
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
@@ -752,10 +746,10 @@ class SalesView:
     
     def get_sales_by_month(self, month):
         """
-        Get sales filtered by the selected month (format: YYYY-MM)
+        Get sales data for a specific month (format: YYYY-MM).
         """
         query = """
-            SELECT `Sale ID`, `Sale Date`, `Customer Name`,`Telephone`, `Product Name`, 
+            SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
                    `Quantity`, `Price Sale`, `Subtotal`,  
                    `Paid Payment`, `Balance`
             FROM veiwcustomer
@@ -764,11 +758,39 @@ class SalesView:
         params = [month]
 
         try:
-            cursor = self.db.cursor()  # Create a cursor
+            cursor = self.mydb.cursor()
             cursor.execute(query, params)
             sales = cursor.fetchall()
             cursor.close()
             return sales
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
+            return []
+     
+    def sales_report(self, year):
+        """
+        Get sales data for a specific year.
+        """
+        # Ensure year is an integer
+        try:
+            year = (year)
+        except ValueError:
+            print('Invalid year format.')
+            return []
+
+        query = '''
+        SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
+               `Quantity`, `Price Sale`, `Subtotal`,  
+               `Paid Payment`, `Balance`
+        FROM veiwcustomer
+        WHERE YEAR(`Sale Date`) = %s
+        '''
+        try:
+            cursor = self.mydb.cursor()
+            cursor.execute(query, (year,))
+            sales = cursor.fetchall()
+            cursor.close()
+            return sales
+        except mysql.connector.Error as err:
+            print(f'An error occurred: {err}')
             return []

@@ -418,18 +418,36 @@ def add_product():
     return render_template('products.html')
 
 
-@app.route('/update_product/<int:product_id>', methods=['POST'])
-def update_product(product_id):
+@app.route('/edit_product', methods=['POST'])
+def edit_product():
+    product_id = request.form.get('product_id')
+    product_name = request.form.get('product_name')
+    product_unit = request.form.get('product_unit')
+    category_name = request.form.get('category_name')
+    price = request.form.get('price')
+    description = request.form.get('description')
+
    
-    return product_crud.update_product(product_id)
+    success = product_crud.update_product(product_id, product_name, product_unit, category_name, price, description)
+
+    if success:
+        flash('Product updated successfully.', 'success')
+    else:
+        flash('Failed to update product!', 'danger')
+
+    return render_template('products.html') 
+
+
+
+
+
+
+
 
 @app.route('/delete_product/<int:product_id>', methods=['POST'])
 def delete_product(product_id):
     
     return product_crud.delete_product(product_id)
-
-
-
 
 
 # Route to display sales list
@@ -456,43 +474,43 @@ def add_sale():
         return redirect(url_for('sales_list'))
     # Render the add sale form
     return render_template('sales.html', customers=customers, products=products)
-
 @app.route('/update_sale/<int:sale_id>', methods=['POST'])
 def update_sale(sale_id):
-        # Initialize your SalesCRUD instance
-        sales_crud = SalesCRUD(mydb)  # Replace `mydb` with your actual database connection instance
+    # Extract form data
+    customer_id = request.form.get('cust_id')
+    product_id = int(request.form.get('product_id'))
+    qty = int(request.form.get('qty'))
+    price_sale = float(request.form.get('price_sale'))
+    discount = float(request.form.get('discount'))
+    subtotal = request.form.get('subtotal')
+    payment = request.form.get('payment')
+    balance = request.form.get('Balance')
+    date_sale = request.form.get('date_sale')
 
-        # Extract data from the form
-        customer_id = request.form.get('cust_id')
-        product_id = int(request.form.get('product_id'))
-        qty = int(request.form.get('qty'))
-        price_sale = float(request.form.get('price_sale'))
-        discount = float(request.form.get('discount'))
-        subtotal = request.form.get('subtotal')
-        payment = request.form.get('payment')
-        balance = request.form.get('Balance')
-        date_sale = request.form.get('date_sale')
+    # Update sale data in the database
+    sales_crud.update_sale(
+        sale_id,
+        customer_id,
+        product_id,
+        qty,
+        price_sale,
+        discount,
+        subtotal,
+        payment,
+        balance,
+        date_sale
+    )
 
-        # Update sale data
-        sales_crud.update_sale(
-            sale_id,
-            customer_id,
-            product_id,
-            qty,
-            price_sale,
-            discount,
-            subtotal,
-            payment,
-            balance,
-            date_sale
-        )
+    # Fetch old quantity and update inventory if necessary
+    old_qty = sales_crud.get_old_quantity(sale_id)
+    if old_qty is not None and qty != old_qty:
+        # Calculate quantity change (old - new)
+        qty_change = old_qty - qty
+        sales_crud.update_inventory(product_id, qty_change)
 
-        # Update inventory if quantity changes
-        old_qty = sales_crud.get_old_quantity(sale_id)  # Get old quantity
-        if old_qty is not None and qty != old_qty:
-            sales_crud.update_inventory(product_id, old_qty - qty)
+    return redirect(url_for('sales_list'))
 
-        return redirect(url_for('sales_list'))
+
 
 
 @app.route('/edit_sale/<int:sale_id>', methods=['GET', 'POST'])
@@ -533,65 +551,58 @@ def delete_sale(sale_id):
 
 
 
-@app.route('/customer_sales_report', methods=['GET'])
+
+
+
+
+
+@app.route('/customer_sales_report')
 def customer_sales_report():
+    sales_view = SalesView(mydb)
     return sales_view.customer_sales_report()
 
-
-
-
-@app.route('/daily_sales_report', methods=['GET'])
+@app.route('/daily_sales_report')
 def daily_sales_report():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
+    
+    sales_view = SalesView(mydb)
+    
+    sales = sales_view.get_sales_by_date_range(start_date, end_date)
+    
+    total_subtotal = sum(sale[7] for sale in sales)
+    total_payment = sum(sale[8] for sale in sales)
+    total_balance = sum(sale[9] for sale in sales)
+    
+    return render_template('daily_sales_report.html', sales=sales, total_subtotal=total_subtotal, total_payment=total_payment, total_balance=total_balance)
 
-    if start_date and end_date:
-        sales = sales_view.get_sales_by_date_range(start_date, end_date)
-
-        # Calculate total subtotal, payment, and balance
-        total_subtotal = sum(float(sale[7]) for sale in sales)
-        total_payment = sum(float(sale[8]) for sale in sales)
-        total_balance = sum(float(sale[9]) for sale in sales)
-    else:
-        sales = []
-        total_subtotal = total_payment = total_balance = 0
-
-    return render_template(
-        'daily_sales_report.html',
-        sales=sales,
-        total_subtotal=total_subtotal,
-        total_payment=total_payment,
-        total_balance=total_balance
-    )
-
-
-@app.route('/monthly_sales_report', methods=['GET'])
+@app.route('/monthly_sales_report')
 def monthly_sales_report():
     month = request.args.get('month')
-    if month:
-        sales = sales_view.get_sales_by_month(month)
-        # Calculate total subtotal, payment, and balance
-        total_subtotal = sum(float(sale[7]) for sale in sales) 
-        total_payment = sum(float(sale[8]) for sale in sales)  
-        total_balance = sum(float(sale[9]) for sale in sales)  
-    else:
-        sales = []
-        total_subtotal = total_payment = total_balance = 0
+    
+    sales_view = SalesView(mydb)
+    
+    sales = sales_view.get_sales_by_month(month)
+    
+    total_subtotal = sum(sale[7] for sale in sales)
+    total_payment = sum(sale[8] for sale in sales)
+    total_balance = sum(sale[9] for sale in sales)
+    
+    return render_template('monthly_sales_report.html', sales=sales, total_subtotal=total_subtotal, total_payment=total_payment, total_balance=total_balance)
 
-    return render_template(
-        'monthly_sales_report.html',
-        sales=sales,
-        total_subtotal=total_subtotal,
-        total_payment=total_payment,
-        total_balance=total_balance
-    )
-
-
-
-
-
-
-
+@app.route('/sales_report')
+def sales_report():
+    year = request.args.get('year')
+    
+   
+    
+    sales = sales_view.sales_report(year)
+    
+    total_subtotal = sum(sale[7] for sale in sales)
+    total_payment = sum(sale[8] for sale in sales)
+    total_balance = sum(sale[9] for sale in sales)
+    
+    return render_template('sales_report.html', sales=sales, total_subtotal=total_subtotal, total_payment=total_payment, total_balance=total_balance)
 
 
 
