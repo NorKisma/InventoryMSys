@@ -10,7 +10,7 @@ function submitUserForm() {
 }
 function openProductModal(button) {
   const form = document.getElementById('productForm');
-  
+
   if (button) {
       // Edit mode
       const id = button.getAttribute('data-id');
@@ -19,7 +19,7 @@ function openProductModal(button) {
       const category = button.getAttribute('data-category-id');
       const price = button.getAttribute('data-price');
       const description = button.getAttribute('data-description');
-      
+
       // Populate form for editing
       document.getElementById('productId').value = id;
       document.getElementById('productName').value = name;
@@ -40,7 +40,7 @@ function openProductModal(button) {
       document.getElementById('submitProductBtn').textContent = 'Add Product';
       document.getElementById('addProductLabel').textContent = 'Add New Product';
   }
-  
+
   new bootstrap.Modal(document.getElementById('addProduct')).show();
 }
 
@@ -98,8 +98,8 @@ function submitSupplierForm() {
 
 function openSupplierEditModal(button) {
   const modal = new bootstrap.Modal(document.getElementById('editSupplierModal'));
-  
-  
+
+
   document.getElementById('SupplierId').value = button.getAttribute('data-id');
   document.getElementById('supplierName').value = button.getAttribute('data-name');
   document.getElementById('supplierContact').value = button.getAttribute('data-contact');
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('editProductDescription').value = button.getAttribute('data-description');
       new bootstrap.Modal(document.getElementById('editProductModal')).show();
   }
-  
+
 
     // Set the form action URL for updating the product (assuming a route for editing exists)
     const form = document.getElementById('addProductForm');
@@ -314,8 +314,8 @@ function updateProductDetails() {
       var qty = selectedProduct.getAttribute("data-qty");
 
       priceSaleInput.value = price;
-      qutyInput.value = qty; // Set old quantity
-      calculateSubtotal(); // Recalculate subtotal if product changes
+      qutyInput.value = qty;
+      calculateSubtotal();
     }
 
     // Function to calculate subtotal
@@ -326,7 +326,7 @@ function updateProductDetails() {
       var subtotal = price * qty - discount;
 
       subtotalInput.value = subtotal.toFixed(2);
-      updateBalance(); // Update balance after calculating subtotal
+      updateBalance();
     }
 
     // Function to update the balance based on payment
@@ -346,3 +346,48 @@ function updateProductDetails() {
       .getElementById("productId")
       .addEventListener("change", updateProductDetails);
   });
+
+
+
+
+ // satart  Function to populate the modal with supplier data for editing
+  // Function to show a confirmation dialog before deletion
+  function confirmDelete(supplierId) {
+    if (confirm("Are you sure you want to delete this supplier?")) {
+      document.getElementById("deleteForm" + supplierId).submit();
+    }
+  }
+
+  // Function to populate the modal with supplier data for editing
+  function addSupplier(id, name, contact, email, company, address, dateAdded) {
+    document.getElementById("supplierId").value = id;
+    document.getElementById("name").value = name;
+    document.getElementById("contact").value = contact;
+    document.getElementById("email").value = email;
+    document.getElementById("company").value = company;
+    document.getElementById("address").value = address;
+    document.getElementById("dateAdded").value = dateAdded;
+    document.getElementById("supplierModalLabel").innerText = id
+      ? "Edit Supplier"
+      : "Add Supplier";
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -449,6 +449,104 @@
   </div>
 </div>
 
+<!-- Modal for adding/editing suppliers -->
+<div
+  class="modal fade"
+  id="addSupplier"
+  tabindex="-1"
+  aria-labelledby="supplierModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="supplierModalLabel">Add/Edit Supplier</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form
+        id="supplierForm"
+        action="{{ url_for('add_supplier') }}"
+        method="POST"
+      >
+        <div class="modal-body">
+          <input type="hidden" id="supplierId" name="supplierId" />
+          <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              name="name"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="contact" class="form-label">Contact</label>
+            <input
+              type="text"
+              class="form-control"
+              id="contact"
+              name="contact"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="company" class="form-label">Company</label>
+            <input
+              type="text"
+              class="form-control"
+              id="company"
+              name="company"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="address" class="form-label">Address</label>
+            <textarea
+              class="form-control"
+              id="address"
+              name="address"
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="dateAdded" class="form-label">Date Added</label>
+            <input
+              type="date"
+              class="form-control"
+              id="dateAdded"
+              name="dateAdded"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script></script>
 
 <script src="{{ url_for('static', filename='js/addmodels.js') }}"></script>

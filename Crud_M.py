@@ -1,11 +1,11 @@
-from flask import Flask, request, render_template, redirect, url_for, flash, session,current_app
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import request, render_template, redirect, url_for, flash,current_app
+#from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 import hashlib
-from functools import wraps
+
 import os
 
-import mysql.connector  
+import mysql.connector
 class usersCRUD:
     def __init__(self, db, allowed_file_func):
         self.db = db
@@ -34,12 +34,12 @@ class usersCRUD:
                 password = hashlib.md5(password.encode()).hexdigest()
 
             if user_id:
-                sql = """UPDATE users 
+                sql = """UPDATE users
                          SET ful_name = %s, tel = %s, email = %s, role = %s, status = %s, DateT = %s, image = %s
                          WHERE id = %s"""
                 val = (full_name, tel, email, role, status, date_t, image_filename, user_id)
             else:
-                sql = """INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image) 
+                sql = """INSERT INTO users (ful_name, tel, email, password, role, status, DateT, image)
                          VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
                 val = (full_name, tel, email, password, role, status, date_t, image_filename)
 
@@ -56,6 +56,7 @@ class usersCRUD:
         return render_template('users.html', data=data)
 
     def delete_user(self, id):
+
         try:
             with self.db.cursor() as mycursor:
                 mycursor.execute("DELETE FROM users WHERE id = %s", (id,))
@@ -81,24 +82,24 @@ class Supplier:
     def add_supplier(self):
         if request.method == 'POST':
             supplier_data = {
-                'supplierName': request.form.get('supp_name'),
-                'supplierContact': request.form.get('suppContact'),
-                'supplierEmail': request.form.get('suppEmail'),
-                'supplierCompany': request.form.get('suppCompany'),
-                'supplierAddress': request.form.get('suppAddress'),
+                'supplierName': request.form.get('name'),
+                'supplierContact': request.form.get('contact'),
+                'supplierEmail': request.form.get('email'),
+                'supplierCompany': request.form.get('company'),
+                'supplierAddress': request.form.get('address'),
                 'supplierDate': request.form.get('dateAdded'),
-                'supplierId': request.form.get('suppId')
+                'supplierId': request.form.get('supplierId')
             }
 
             if supplier_data['supplierId']:
-                sql = """UPDATE suppliers 
-                         SET supp_name = %s, supp_contact = %s, supp_email = %s, supp_company = %s, supp_address = %s, date_added = %s 
+                sql = """UPDATE suppliers
+                         SET supp_name = %s, supp_contact = %s, supp_email = %s, supp_company = %s, supp_address = %s, date_added = %s
                          WHERE supp_id = %s"""
                 val = (supplier_data['supplierName'], supplier_data['supplierContact'], supplier_data['supplierEmail'],
                        supplier_data['supplierCompany'], supplier_data['supplierAddress'], supplier_data['supplierDate'],
                        supplier_data['supplierId'])
             else:
-                sql = """INSERT INTO suppliers (supp_name, supp_contact, supp_email, supp_company, supp_address, date_added) 
+                sql = """INSERT INTO suppliers (supp_name, supp_contact, supp_email, supp_company, supp_address, date_added)
                          VALUES (%s, %s, %s, %s, %s, %s)"""
                 val = (supplier_data['supplierName'], supplier_data['supplierContact'], supplier_data['supplierEmail'],
                        supplier_data['supplierCompany'], supplier_data['supplierAddress'], supplier_data['supplierDate'])
@@ -118,6 +119,7 @@ class Supplier:
         return render_template('suppliers.html', data=data)
 
     def delete_supplier(self, supplier_id):
+
         try:
             with self.mydb.cursor() as mycursor:
                 mycursor.execute("DELETE FROM suppliers WHERE supp_id = %s", (supplier_id,))
@@ -137,7 +139,7 @@ class Supplier:
             flash(f'An error occurred: {err}', 'danger')
             return []
 
-     
+
 class CustomerCRUD:
     def __init__(self, mydb):
         self.mydb = mydb
@@ -153,14 +155,14 @@ class CustomerCRUD:
 
             if customer_id:
                 sql = """
-                    UPDATE customers 
-                    SET Customer_Name = %s, tel = %s, email = %s, gender = %s, DateT = %s 
+                    UPDATE customers
+                    SET Customer_Name = %s, tel = %s, email = %s, gender = %s, DateT = %s
                     WHERE id = %s
                 """
                 val = (name, tel, email, gender, DateT, customer_id)
             else:
                 sql = """
-                    INSERT INTO customers (Customer_Name, tel, email, gender, DateT) 
+                    INSERT INTO customers (Customer_Name, tel, email, gender, DateT)
                     VALUES (%s, %s, %s, %s, %s)
                 """
                 val = (name, tel, email, gender, DateT)
@@ -206,11 +208,11 @@ class InventoryCRUD:
     def update_inventory(self,  product_id, qty, date_updated):
         # Update inventory SQL query
         sql = """
-        UPDATE inventory 
-        SET product_id = %s, qty = %s, date_updated = %s 
+        UPDATE inventory
+        SET product_id = %s, qty = %s, date_updated = %s
         WHERE inventory_id = %s
         """
-        val = (product_id, qty, date_updated, inventory_id)
+        val = (product_id, qty, date_updated)
 
         try:
             with self.mydb.cursor() as mycursor:
@@ -222,17 +224,17 @@ class InventoryCRUD:
 
         return redirect(url_for('Inventory_list'))
 
-   
+
     def fetch_inventory(self):
         try:
             with self.mydb.cursor() as cursor:
                 query = """
-                SELECT 
-                    inventory.inventory_id, 
-                    
+                SELECT
+                    inventory.inventory_id,
+
                     product_list.name AS product_name,
-                    inventory.qty, 
-                    inventory.date_updated 
+                    inventory.qty,
+                    inventory.date_updated
                 FROM inventory
                 JOIN product_list ON inventory.product_id = product_list.id
                 """
@@ -246,7 +248,7 @@ class InventoryCRUD:
 
 
 
-  
+
 
 
 class ProductCRUD:
@@ -261,10 +263,10 @@ class ProductCRUD:
             price = request.form.get('price')
             description = request.form.get('description')
 
-           
+
             # SQL query to insert a new product
             sql = """
-            INSERT INTO product_list (category_name, product_unit, name, price, description) 
+            INSERT INTO product_list (category_name, product_unit, name, price, description)
             VALUES (%s, %s, %s, %s, %s)
             """
             val = (category_name, product_unit, product_name, price, description)
@@ -282,7 +284,7 @@ class ProductCRUD:
     def update_product(self, product_id, product_name, product_unit, category_name, price, description):
         try:
             cursor = self.mydb.cursor()
-            
+
             query = '''
             UPDATE product_list
             SET category_name = %s, product_unit = %s, name = %s, price = %s, description = %s
@@ -290,7 +292,7 @@ class ProductCRUD:
             '''
             cursor.execute(query, (category_name, product_unit, product_name, price, description, product_id))
             self.mydb.commit()
-            
+
             return redirect(url_for('products'))
         except mysql.connector.Error as err:
             print(f"An error occurred: {err}")
@@ -335,8 +337,8 @@ class OrderCRUD:
             subtotal = request.form.get('subtotal')
             status = request.form.get('status')
             date_order = request.form.get('date_order')
-            order_id = request.form.get('order_id') 
-         
+            order_id = request.form.get('order_id')
+
 
             if order_id:
                 return self.update_order(order_id, invoice_number, supplier, product_name, product_unit, qty, price, subtotal, status, date_order)
@@ -345,12 +347,12 @@ class OrderCRUD:
 
     def insert_order(self, invoice_number, supplier, product_name, product_unit, qty, price, subtotal, status, date_order):
         sql = """
-            INSERT INTO purchase (invoice_number, supp_id, product_id, product_unit, qty, price, 
+            INSERT INTO purchase (invoice_number, supp_id, product_id, product_unit, qty, price,
                 subtotal, status, date_order, date_updated)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
         """
         val = (invoice_number, supplier, product_name, product_unit, qty, price, subtotal, status, date_order)
-        
+
         try:
             with self.mydb.cursor() as cursor:
                 cursor.execute(sql, val)
@@ -358,18 +360,18 @@ class OrderCRUD:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return redirect(url_for('add_order'))
-        
+
         return redirect(url_for('pur_lists'))
 
     def update_order(self, order_id, invoice_number, supplier, product_name, product_unit, qty, price, subtotal, status, date_order):
         sql = """
-            UPDATE purchase 
-            SET invoice_number = %s, supp_id = %s, product_id = %s, product_unit = %s, qty = %s, 
+            UPDATE purchase
+            SET invoice_number = %s, supp_id = %s, product_id = %s, product_unit = %s, qty = %s,
                 price = %s, subtotal = %s, status = %s, date_order = %s, date_updated = NOW()
             WHERE order_id = %s
         """
         val = (invoice_number, supplier, product_name, product_unit, qty, price, subtotal, status, date_order, order_id)
-        
+
         try:
             with self.mydb.cursor() as cursor:
                 cursor.execute(sql, val)
@@ -390,7 +392,7 @@ class OrderCRUD:
         check_sql = "SELECT qty FROM inventory WHERE product_id = %s"
         update_sql = "UPDATE inventory SET qty = qty + %s, date_updated = NOW() WHERE product_id = %s"
         insert_sql = "INSERT INTO inventory (product_id, qty, stock_from, date_updated) VALUES (%s, %s, 'purchase', NOW())"
-        
+
         try:
             with self.mydb.cursor() as cursor:
                 cursor.execute(check_sql, (product_name,))
@@ -402,7 +404,7 @@ class OrderCRUD:
                 else:
                     # Insert a new inventory record
                     cursor.execute(insert_sql, (product_name, qty ))
-                
+
                 self.mydb.commit()
                 flash('Inventory updated successfully.', 'success')
         except mysql.connector.Error as err:
@@ -425,14 +427,14 @@ class OrderCRUD:
                     SELECT p.order_id, p.invoice_number,  s.supp_name,  pl.name,
                         p.product_unit, p.qty, p.price, p.subtotal, p.date_order, p.status
                     FROM purchase p
-                    JOIN suppliers s ON p.supp_id  = s.supp_id 
+                    JOIN suppliers s ON p.supp_id  = s.supp_id
                     JOIN product_list pl ON p.product_id = pl.id
                 """
                 cursor.execute(query)
                 orders = cursor.fetchall()
                 return orders if orders else []
         except mysql.connector.Error as err:
-            flash(f'An error occurred: {err}', 'danger')  
+            flash(f'An error occurred: {err}', 'danger')
             return []
 
     def get_products(self):
@@ -455,7 +457,7 @@ class OrderCRUD:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
-   
+
 
 class SalesCRUD:
     def __init__(self, mydb):
@@ -481,7 +483,7 @@ class SalesCRUD:
 
     def insert_sale(self, customer_id, product_id, qty, price_sale, discount, subtotal, payment, balance, date_sale):
         sql = """
-            INSERT INTO sales (cust_id, product_id, qty, price_sale, discount, 
+            INSERT INTO sales (cust_id, product_id, qty, price_sale, discount,
                 subtotal, payment, Balance, date_sale, date_updated)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
         """
@@ -492,19 +494,18 @@ class SalesCRUD:
                 cursor.execute(sql, val)
                 self.mydb.commit()
                 flash('Sale added successfully.', 'success')
-                # Update inventory after successful insert
-                self.update_inventory(product_id, -qty)
+
                 return redirect(url_for('sales_list'))
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return redirect(url_for('add_sale'))
 
     def update_sale(self, sale_id, customer_id, product_id, qty, price_sale, discount, subtotal, payment, balance, date_sale):
-   
+
         sql = """
-            UPDATE sales 
-            SET cust_id = %s, product_id = %s, qty = %s, 
-                price_sale = %s, discount = %s, subtotal = %s, 
+            UPDATE sales
+            SET cust_id = %s, product_id = %s, qty = %s,
+                price_sale = %s, discount = %s, subtotal = %s,
                 payment = %s, Balance = %s, date_sale = %s, date_updated = NOW()
             WHERE sale_id = %s
         """
@@ -514,7 +515,7 @@ class SalesCRUD:
             with self.mydb.cursor() as cursor:
                 cursor.execute(sql, val)
                 self.mydb.commit()
-             
+
             return redirect(url_for('sales_list'))
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
@@ -523,12 +524,12 @@ class SalesCRUD:
     def update_inventory(self, product_id, qty_change):
         check_sql = "SELECT qty FROM inventory WHERE product_id = %s"
         update_sql = "UPDATE inventory SET qty = qty + %s, date_updated = NOW() WHERE product_id = %s"
-        
+
         try:
             with self.mydb.cursor() as cursor:
                 cursor.execute(check_sql, (product_id,))
                 result = cursor.fetchone()
-                
+
                 if result:
                     current_qty = result[0]
 
@@ -542,7 +543,7 @@ class SalesCRUD:
                         flash('Inventory updated successfully.', 'success')
                 else:
                     flash('Product not found in inventory.', 'danger')
-                    
+
         except mysql.connector.Error as err:
             flash(f'An error occurred while updating inventory: {err}', 'danger')
 
@@ -562,19 +563,19 @@ class SalesCRUD:
             with self.mydb.cursor() as cursor:
                 if sale_id is not None:
                     query = """
-                        SELECT 
-                            s.sale_id AS sale_id, 
-                            c.customer_name AS customer_name, 
-                            p.name AS product_name, 
-                            s.qty AS quantity, 
-                            s.price_sale AS price_sale, 
+                        SELECT
+                            s.sale_id AS sale_id,
+                            c.customer_name AS customer_name,
+                            p.name AS product_name,
+                            s.qty AS quantity,
+                            s.price_sale AS price_sale,
                             s.subtotal AS subtotal,
                             s.discount AS discount,
                             s.payment AS payment_method,
                             s.Balance AS balance,
                             s.date_sale AS sale_date
                         FROM sales s
-                        JOIN customers c ON s.cust_id = c.id 
+                        JOIN customers c ON s.cust_id = c.id
                         JOIN product_list p ON s.product_id = p.id
                         WHERE s.sale_id = %s
                     """
@@ -583,19 +584,19 @@ class SalesCRUD:
                     return sales if sales else None
                 else:
                     query = """
-                        SELECT 
-                            s.sale_id AS sale_id, 
-                            c.customer_name AS customer_name, 
-                            p.name AS product_name, 
-                            s.qty AS quantity, 
-                            s.price_sale AS price_sale, 
+                        SELECT
+                            s.sale_id AS sale_id,
+                            c.customer_name AS customer_name,
+                            p.name AS product_name,
+                            s.qty AS quantity,
+                            s.price_sale AS price_sale,
                             s.subtotal AS subtotal,
                             s.discount AS discount,
                             s.payment AS payment_method,
                             s.Balance AS balance,
                             s.date_sale AS sale_date
                         FROM sales s
-                        JOIN customers c ON s.cust_id = c.id 
+                        JOIN customers c ON s.cust_id = c.id
                         JOIN product_list p ON s.product_id = p.id
                     """
                     cursor.execute(query)
@@ -608,8 +609,8 @@ class SalesCRUD:
     def get_old_quantity(self, sale_id):
         try:
             query = """
-                SELECT qty 
-                FROM sales 
+                SELECT qty
+                FROM sales
                 WHERE sale_id = %s
             """
             with self.mydb.cursor() as cursor:
@@ -674,7 +675,7 @@ class SalesView:
         Get sales data filtered by customer ID, name, or telephone.
         """
         query = '''
-        SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
+        SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`,
                `Quantity`, `Price Sale`, `Subtotal`, `Paid Payment`, `Balance`
         FROM veiwcustomer
         WHERE 1=1
@@ -701,7 +702,7 @@ class SalesView:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
-  
+
     def customer_sales_report(self):
         """
         Generate a sales report for a customer based on query parameters.
@@ -726,8 +727,8 @@ class SalesView:
         Get sales data for a specific date range.
         """
         query = """
-             SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
-                    `Quantity`, `Price Sale`, `Subtotal`,  
+             SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`,
+                    `Quantity`, `Price Sale`, `Subtotal`,
                     `Paid Payment`, `Balance`
              FROM veiwcustomer
              WHERE `Sale Date` BETWEEN %s AND %s
@@ -743,14 +744,14 @@ class SalesView:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
-    
+
     def get_sales_by_month(self, month):
         """
         Get sales data for a specific month (format: YYYY-MM).
         """
         query = """
-            SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
-                   `Quantity`, `Price Sale`, `Subtotal`,  
+            SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`,
+                   `Quantity`, `Price Sale`, `Subtotal`,
                    `Paid Payment`, `Balance`
             FROM veiwcustomer
             WHERE DATE_FORMAT(`Sale Date`, '%Y-%m') = %s
@@ -766,7 +767,7 @@ class SalesView:
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
             return []
-     
+
     def sales_report(self, year):
         """
         Get sales data for a specific year.
@@ -779,8 +780,8 @@ class SalesView:
             return []
 
         query = '''
-        SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`, 
-               `Quantity`, `Price Sale`, `Subtotal`,  
+        SELECT `Sale ID`, `Sale Date`, `Customer Name`, `Telephone`, `Product Name`,
+               `Quantity`, `Price Sale`, `Subtotal`,
                `Paid Payment`, `Balance`
         FROM veiwcustomer
         WHERE YEAR(`Sale Date`) = %s
@@ -794,3 +795,107 @@ class SalesView:
         except mysql.connector.Error as err:
             print(f'An error occurred: {err}')
             return []
+
+
+
+
+class ViewTotals:
+    def __init__(self, mydb):
+        self.mydb = mydb  # Store the database connection
+
+    def get_total_sales_amount(self, month):
+        """
+        Get total sales amount for a specific month (format: YYYY-MM).
+        """
+        query = """
+            SELECT SUM(`Subtotal`) AS total_sales
+            FROM veiwcustomer
+            WHERE DATE_FORMAT(`Sale Date`, '%Y-%m') = %s
+        """
+        params = [month]
+
+        try:
+            cursor = self.mydb.cursor()
+            cursor.execute(query, params)
+            result = cursor.fetchone()
+            cursor.close()
+            total_sales_amount = result[0] if result[0] is not None else 0
+            return total_sales_amount
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return 0
+
+    def get_new_orders_count(self, month):
+        """
+        Get the count of new orders for a specific month (format: YYYY-MM).
+        """
+        query = """
+            SELECT COUNT(*) AS new_orders
+            FROM purchase
+            WHERE DATE_FORMAT(`date_order`, '%Y-%m') = %s
+        """
+        params = [month]
+
+        try:
+            cursor = self.mydb.cursor()
+            cursor.execute(query, params)
+            result = cursor.fetchone()
+            cursor.close()
+            new_orders_count = result[0] if result[0] is not None else 0
+            return new_orders_count
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return 0
+
+    def get_pending_orders_count(self):
+        """
+        Get the count of pending orders.
+        """
+        query = """
+            SELECT COUNT(*) AS pending_orders
+            FROM purchase
+            WHERE status = 'Pending'
+        """
+
+        try:
+            cursor = self.mydb.cursor()
+            cursor.execute(query)
+            result = cursor.fetchone()
+            cursor.close()
+            pending_orders_count = result[0] if result[0] is not None else 0
+            return pending_orders_count
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return 0
+    def get_sales_data_for_chart(self, month):
+        """
+        Get sales data for the chart for a specific month (format: YYYY-MM).
+        """
+        query = """
+            SELECT DATE_FORMAT(`Sale Date`, '%Y-%m-%d') AS sale_date, SUM(`Subtotal`) AS daily_sales
+            FROM veiwcustomer
+            WHERE DATE_FORMAT(`Sale Date`, '%Y-%m') = %s
+            GROUP BY DATE_FORMAT(`Sale Date`, '%Y-%m-%d')
+            ORDER BY `Sale Date`
+        """
+        params = [month]
+
+        try:
+            cursor = self.mydb.cursor()
+            cursor.execute(query, params)
+            result = cursor.fetchall()
+            cursor.close()
+
+            # Transform result into a format suitable for Chart.js
+            dates = [row[0] for row in result]
+            sales = [row[1] for row in result]
+
+            return {'dates': dates, 'sales': sales}
+        except mysql.connector.Error as err:
+            flash(f'An error occurred: {err}', 'danger')
+            return {'dates': [], 'sales': []}
+
+
+
+
+
