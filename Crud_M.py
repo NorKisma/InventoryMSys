@@ -830,8 +830,8 @@ class ViewTotals:
         Get the count of new orders for a specific month (format: YYYY-MM).
         """
         query = """
-            SELECT COUNT(*) AS new_orders
-            FROM purchase
+            SELECT product_id AS Low_inventory
+            FROM inventory
             WHERE DATE_FORMAT(`date_order`, '%Y-%m') = %s
         """
         params = [month]

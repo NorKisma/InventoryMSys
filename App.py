@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, session,current_app,jsonify  
-from werkzeug.security import check_password_hash, generate_password_hash
+
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import hashlib
 from functools import wraps
@@ -223,9 +224,9 @@ def settings():
 @app.route('/change_password/<int:id>', methods=['GET', 'POST'])
 def change_password(id):
     if request.method == 'POST':
-        current_password = request.form['current_password']
-        new_password = request.form['new_password']
-        confirm_password = request.form['confirm_password']
+        current_password = request.form['current_password'].strip()
+        new_password = request.form['new_password'].strip()
+        confirm_password = request.form['confirm_password'].strip()
 
         if new_password != confirm_password:
             flash('New passwords do not match.', 'danger')
@@ -239,34 +240,35 @@ def change_password(id):
         if user_id != id:
             flash('Unauthorized action.', 'danger')
             return redirect(url_for('change_password', id=id))
-        # Get user data
+
         try:
-            with mydb.cursor() as cursor:
-                cursor.execute('SELECT password FROM users WHERE id = %s', (id,))
-                user = cursor.fetchone()
+            cursor = mydb.cursor()
+            cursor.execute('SELECT password FROM users WHERE id = %s', (id,))
+            user = cursor.fetchone()
+            if user:
+                stored_password = user[0]
+                print(f"Stored password hash: {stored_password}")
+                print(f"Current password: {current_password}")
+               
+                if check_password_hash(stored_password, current_password):
+                    hashed_new_password = generate_password_hash(new_password)
+                    cursor.execute('UPDATE users SET password = %s WHERE id = %s', (hashed_new_password, id))
+                    mydb.commit()
+                    flash('Password updated successfully.', 'success')
+                else:
+                    flash('Current password is incorrect.', 'danger')
+            else:
+                flash('User not found.', 'danger')
         except mysql.connector.Error as err:
             flash(f'An error occurred: {err}', 'danger')
-            return redirect(url_for('change_password', id=id))
-
-        if user:
-            stored_password = user[0]
-            if check_password_hash(stored_password, current_password):
-                hashed_new_password = generate_password_hash(new_password)
-                try:
-                    with mydb.cursor() as cursor:
-                        cursor.execute('UPDATE users SET password = %s WHERE id = %s', (hashed_new_password, id))
-                        mydb.commit()
-                    flash('Password updated successfully.', 'success')
-                except mysql.connector.Error as err:
-                    flash(f'An error occurred: {err}', 'danger')
-            else:
-                flash('Current password is incorrect.', 'danger')
-        else:
-            flash('User not found.', 'danger')
 
         return redirect(url_for('change_password', id=id))
 
     return render_template('change_password.html', id=id)
+
+
+
+
 # End change_password
 
 
@@ -603,6 +605,31 @@ def sales_report():
     total_balance = sum(sale[9] for sale in sales)
     
     return render_template('sales_report.html', sales=sales, total_subtotal=total_subtotal, total_payment=total_payment, total_balance=total_balance)
+
+
+
+
+@app.route('/sales_by_month')
+def sales_by_month():
+    cursor = mydb.cursor()
+    # Query to get the sales data grouped by month
+    cursor.execute('''
+        SELECT 
+            DATE_FORMAT(date_order, '%Y-%m') AS month, 
+            SUM(subtotal) AS total_sales 
+        FROM sales 
+        GROUP BY month 
+        ORDER BY month
+    ''')
+    monthly_sales = cursor.fetchall()
+    cursor.close()
+
+    # Prepare data to pass to the front-end
+    months = [row[0] for row in monthly_sales]
+    sales = [float(row[1]) for row in monthly_sales]
+
+    return render_template('sales_chart.html', months=months, sales=sales)
+
 
 
 
